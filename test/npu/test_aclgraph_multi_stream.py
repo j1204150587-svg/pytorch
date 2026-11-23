@@ -27,6 +27,21 @@ class TestAclgraphMultiStream(TestCase):
     """
 
     @SupportedDevices(['Ascend910B', 'Ascend910_93'])
+    def test_single_buffer_replay_updates_input(self):
+        from torch_npu.npu.graphs import _make_graphed_buffer_callable
+
+        example = torch.ones(16, device="npu:0", dtype=torch.bfloat16)
+        replay = _make_graphed_buffer_callable(lambda value: value.square().sum().float(), example)
+        for multiplier in (2, 5):
+            actual = replay(example * multiplier)
+            self.assertEqual(actual.cpu(), torch.tensor(16.0 * multiplier**2))
+        with self.assertRaisesRegex(ValueError, "metadata changed"):
+            replay(example[:8])
+        with torch.npu.stream(torch.npu.Stream(device=example.device)):
+            with self.assertRaisesRegex(RuntimeError, "original stream"):
+                replay(example)
+
+    @SupportedDevices(['Ascend910B', 'Ascend910_93'])
     def test_shared_expert_stream_capture_replay(self):
         device = torch.device("npu:0")
         torch.npu.set_device(device)
