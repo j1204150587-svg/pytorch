@@ -1,0 +1,82 @@
+diff --git a/pta_wrapper.py b/pta_wrapper.py
+--- a/pta_wrapper.py
++++ b/pta_wrapper.py
+@@ -43,6 +43,13 @@
+     graph_mode = os.environ.get("RECSYS_PTA_REPLAY", "1") == "1"
+     fast = _wrapper() if graph_mode else None
+     scope = os.environ.get("RECSYS_PTA_SCOPE", "both")
++    local_statistics = os.environ.get("RECSYS_PTA_LOCAL_STATISTICS", "0")
++    if local_statistics not in ("0", "1"):
++        raise ValueError("RECSYS_PTA_LOCAL_STATISTICS must be 0 or 1")
++    rank_one_stats = local_statistics == "1"
++    if rank_one_stats and (not graph_mode or scope != "both" or not zero.partition_gradients
++                           or zero.cpu_offload or (zero.model_parallel_group is not None and zero.model_parallel_world_size != 1) or stage.dist.get_world_size(group=zero.dp_process_group) != 1):
++        raise RuntimeError("local statistics require single-rank ZeRO-2 and both PTA statistic graphs")
+ 
+     def norm_square(flat):
+         norms = []
+@@ -55,6 +62,17 @@
+             else:
+                 norms.append(torch.linalg.vector_norm(chunk.view(count, width).double(), ord=2, dim=1))
+         return torch.cat(norms).square().sum().float()
++
++    def finish_norm(total):
++        total = total.pow(0.5)
++        stage.mask_nan_or_inf_with_val_inplace(total, device=zero.device)
++        return total
++
++    invalid_norm = torch.full((), -1.0, device=zero.device, dtype=torch.float32) if rank_one_stats else None
++
++    def norm_value(flat):
++        total = norm_square(flat).pow(0.5)
++        return torch.where(torch.isfinite(total), total, invalid_norm)
+ 
+     def nonfinite(flat):
+         return zero._has_inf_or_nan(flat).bool().reshape(1)
+@@ -73,9 +91,9 @@
+ 
+         return eager
+ 
+-    run_norm = wrap(norm_square) if scope in ("norm", "both") else None
++    run_norm = wrap(norm_value if rank_one_stats else norm_square) if scope in ("norm", "both") else None
+     run_overflow = wrap(nonfinite) if scope in ("overflow", "both") else None
+-    counts = dict(scope=scope, graph=graph_mode, norm=0, overflow=0)
++    counts = dict(scope=scope, graph=graph_mode, norm=0, overflow=0, rank_one_stats=rank_one_stats)
+     def flat(shards):
+         current_shards, tensor = zero._recsys_local_flat_gradients[0]
+         if (shards is not current_shards or tensor.shape != source.shape or tensor.dtype != source.dtype
+@@ -89,10 +107,10 @@
+             if params is not group or norm_type != 2:
+                 raise RuntimeError("unexpected norm group")
+             total = run_norm(flat(gradients))
+-            stage.dist.all_reduce(total, op=stage.dist.ReduceOp.SUM, group=self.dp_process_group)
+-            self._model_parallel_all_reduce(tensor=total, op=stage.dist.ReduceOp.SUM)
+-            total = total.pow(0.5)
+-            stage.mask_nan_or_inf_with_val_inplace(total, device=self.device)
++            if not rank_one_stats:
++                stage.dist.all_reduce(total, op=stage.dist.ReduceOp.SUM, group=self.dp_process_group)
++                self._model_parallel_all_reduce(tensor=total, op=stage.dist.ReduceOp.SUM)
++                total = finish_norm(total)
+             counts["norm"] += 1
+             norm_stats.calls += 1
+             norm_stats.batched_calls += 1
+@@ -121,6 +139,19 @@
+ 
+         zero.has_overflow_partitioned_grads_serial = MethodType(check_overflow, zero)
+ 
++    if rank_one_stats:
++        from local_step import _verify_method
++        from overflow import PINNED_METHODS
++
++        original_has_overflow = _verify_method(zero, "has_overflow", PINNED_METHODS["has_overflow"])
++
++        def has_overflow(self, partition_gradients=True):
++            if not partition_gradients:
++                return original_has_overflow(partition_gradients=partition_gradients)
++            return bool(self.has_overflow_partitioned_grads_serial()[0].item())
++
++        zero.has_overflow = MethodType(has_overflow, zero)
++
+     local_step_mode = os.environ.get("RECSYS_ZERO2_LOCAL_STEP")
+     finish_local_step = None
+     if local_step_mode:

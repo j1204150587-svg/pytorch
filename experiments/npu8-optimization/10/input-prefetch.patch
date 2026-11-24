@@ -1,0 +1,67 @@
+diff --git a/train_deepspeed.py b/train_deepspeed.py
+--- a/train_deepspeed.py
++++ b/train_deepspeed.py
+@@ -136,6 +136,24 @@
+     # Keep data generation on CPU so NPU RNG support is not required. Each table
+     # participates in the model; no disconnected/dummy parameters are added.
+     generator = torch.Generator(device="cpu").manual_seed(args.seed + rank)
++
++    from input_prefetch import cpu_input_batches
++
++    prefetch_inputs = os.environ.get("RECSYS_CPU_INPUT_PREFETCH", "0")
++    if prefetch_inputs not in ("0", "1"):
++        raise ValueError("RECSYS_CPU_INPUT_PREFETCH must be 0 or 1")
++
++    def make_cpu_inputs():
++        tokens = torch.randint(1, config.vocab_size,
++                               (args.micro_batch_size, config.seq_len + 1), generator=generator)
++        yield tokens[:, :-1].contiguous()
++        yield tokens[:, 1:].contiguous()
++        yield torch.randint(0, config.num_user_groups,
++                            (args.micro_batch_size,), generator=generator)
++        yield torch.randint(0, config.table_rows,
++                            (args.micro_batch_size, config.seq_len,
++                             config.num_tables, config.features_per_table), generator=generator)
++
+     profiler_context = nullcontext(None)
+     if args.profile:
+         # One host annotation per native ZeRO norm pass. Keep the installed implementation.
+@@ -163,23 +181,19 @@
+     torch.npu.synchronize()
+     start = time.perf_counter()
+     try:
+-        with profiler_context as profiler:
++        with (
++            profiler_context as profiler,
++            cpu_input_batches(make_cpu_inputs, args.steps, prefetch_inputs == "1") as input_batches,
++        ):
+             for step in range(args.steps):
+                 if steady and step == args.steady_warmup_steps:
+                     torch.npu.synchronize()
+                     steady_start = time.perf_counter()
+                 step_start = time.perf_counter()
+                 with record_function("input_generation_and_h2d"):
+-                    tokens = torch.randint(1, config.vocab_size,
+-                                           (args.micro_batch_size, config.seq_len + 1), generator=generator)
+-                    items = tokens[:, :-1].contiguous().to(device)
+-                    targets = tokens[:, 1:].contiguous().to(device)
+-                    groups = torch.randint(0, config.num_user_groups,
+-                                           (args.micro_batch_size,), generator=generator).to(device)
+-                    features = torch.randint(0, config.table_rows,
+-                                             (args.micro_batch_size, config.seq_len,
+-                                              config.num_tables, config.features_per_table),
+-                                             generator=generator).to(device)
++                    items, targets, groups, features = (
++                        tensor.to(device) for tensor in next(input_batches)
++                    )
+                 with record_function("hstu_forward_and_loss"):
+                     logits = engine(items, groups, features)
+                     loss = functional.cross_entropy(logits.float().reshape(-1, config.vocab_size),
+@@ -209,6 +223,7 @@
+                   "elapsed_s_synchronized": elapsed, "profile_enabled": args.profile,
+                   "samples_per_s": args.steps * args.micro_batch_size * world_size / elapsed,
+                   "profiled_elapsed_includes_profiler_overhead": args.profile}
++        result["cpu_input_prefetch"] = prefetch_inputs == "1"
+         if steady:
+             steady_elapsed = end - steady_start
+             samples = args.steady_measure_steps * args.micro_batch_size * world_size

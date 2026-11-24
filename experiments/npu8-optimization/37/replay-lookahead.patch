@@ -1,0 +1,126 @@
+--- a/graphed_hstu.py
++++ b/graphed_hstu.py
+@@ -164,6 +164,28 @@
+                                     torch.npu.current_stream(device), offsets)
+     replay_counts = {"forward": 0, "backward": 0}
+ 
++    hook_lookahead = None
++    if os.environ.get("RECSYS_HSTU_FAST_GUARDS") == "1":
++        if direct is None:
++            raise RuntimeError("replay lookahead requires 26 direct gradients")
++        from graph_guards import HookLookahead
++        from torch.optim import optimizer as torch_optimizer
++
++        # This fixed-input study owns the model and all changes to its hook
++        # registries. Reject arbitrary optimizer callbacks in the interval.
++        local_optimizer = engine.optimizer.optimizer
++        def require_fixed_optimizer():
++            if (engine.optimizer.optimizer is not local_optimizer
++                    or type(local_optimizer) is not torch.optim.AdamW
++                    or local_optimizer._optimizer_step_pre_hooks
++                    or local_optimizer._optimizer_step_post_hooks
++                    or torch_optimizer._global_optimizer_pre_hooks
++                    or torch_optimizer._global_optimizer_post_hooks):
++                raise RuntimeError("replay lookahead requires the fixed AdamW callback path")
++
++        hook_lookahead = HookLookahead(lambda: check_backward_hooks(original, parameters), require_fixed_optimizer)
++        original._recsys_prepare_replay = lambda: hook_lookahead.prepare(direct.generation + 1)
++
+     class Replay(torch.autograd.Function):
+         @staticmethod
+         def forward(context, items, groups, features, *weights):
+@@ -203,7 +225,10 @@
+         if direct is not None:
+             if not torch.is_grad_enabled() or any(parameter.grad is not None for parameter in parameters):
+                 raise RuntimeError("direct graph gradients require grad mode and empty parameter .grad slots")
+-            check_backward_hooks(original, parameters)
++            if hook_lookahead is None:
++                check_backward_hooks(original, parameters)
++            else:
++                hook_lookahead.consume(direct.generation + 1)
+             return Replay.apply(items, groups, features, anchor)
+         return Replay.apply(items, groups, features, *parameters)
+ 
+@@ -218,6 +243,9 @@
+                   "expected_steps": expected, "sidepack": sidepack == "1",
+                   "direct_gradient": direct is not None,
+                   "direct_gradient_hits": direct.hits if direct is not None else 0}
++        record["fast_guards"] = hook_lookahead is not None
++        if hook_lookahead is not None:
++            record["hook_lookahead"] = hook_lookahead.finish(expected)
+         (Path(rank_dir) / "hstu_graph.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+         if any(value != expected for value in replay_counts.values()):
+             raise RuntimeError(f"incomplete training replay: {record}")
+--- a/train_deepspeed.py
++++ b/train_deepspeed.py
+@@ -180,6 +180,7 @@
+     torch.npu.synchronize()
+     start = time.perf_counter()
+     drained = False
++    prepare_replay = getattr(engine.module, "_recsys_prepare_replay", None)
+     try:
+         with profiler_context as profiler:
+             for step in range(args.steps):
+@@ -225,6 +226,8 @@
+                         # Keep the first measured batch on the timed side of the warmup fence.
+                         if next_step < args.steps and not (steady and next_step == args.steady_warmup_steps):
+                             overlap_input.submit(next_step, input_audit)
++                            if prepare_replay is not None:
++                                prepare_replay()
+                 with record_function("optimizer_step_including_native_deepspeed_norm"):
+                     engine.step()
+                 metric = {"step": step, "host_step_ms": (time.perf_counter() - step_start) * 1000}
+--- /dev/null
++++ b/graph_guards.py
+@@ -0,0 +1,51 @@
++"""Overlap backward-hook validation with an isolated training step's update."""
++
++from concurrent.futures import ThreadPoolExecutor
++from time import perf_counter_ns
++
++
++class HookLookahead:
++    def __init__(self, check, require_fixed_optimizer):
++        self.check = check
++        self.require_fixed_optimizer = require_fixed_optimizer
++        self.worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix="hstu-replay-prep")
++        self.worker.submit(lambda: None).result()
++        self.pending = None
++        self.submitted = self.consumed = self.ready = self.synchronous = 0
++        self.worker_ns = self.wait_ns = 0
++
++    def _check(self):
++        begin = perf_counter_ns()
++        self.check()
++        return perf_counter_ns() - begin
++
++    def prepare(self, generation):
++        if self.pending is not None:
++            raise RuntimeError("unconsumed replay preparation")
++        self.require_fixed_optimizer()
++        self.pending = generation, self.worker.submit(self._check)
++        self.submitted += 1
++
++    def consume(self, generation):
++        if self.pending is None:
++            self.check()
++            self.synchronous += 1
++            return
++        expected, future = self.pending
++        if expected != generation:
++            raise RuntimeError("replay preparation does not match the next generation")
++        self.require_fixed_optimizer()
++        self.ready += future.done()
++        begin = perf_counter_ns()
++        self.worker_ns += future.result()
++        self.wait_ns += perf_counter_ns() - begin
++        self.pending = None
++        self.consumed += 1
++
++    def finish(self, expected):
++        self.worker.shutdown()
++        if self.pending is not None or self.submitted != self.consumed or self.consumed + self.synchronous != expected:
++            raise RuntimeError("incomplete replay preparation")
++        return {key: getattr(self, key) for key in (
++            "submitted", "consumed", "ready", "synchronous", "worker_ns", "wait_ns",
++        )}

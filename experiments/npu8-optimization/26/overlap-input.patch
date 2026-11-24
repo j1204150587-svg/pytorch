@@ -1,0 +1,124 @@
+diff --git a/train_deepspeed.py b/train_deepspeed.py
+--- a/train_deepspeed.py
++++ b/train_deepspeed.py
+@@ -136,6 +136,23 @@
+     # Keep data generation on CPU so NPU RNG support is not required. Each table
+     # participates in the model; no disconnected/dummy parameters are added.
+     generator = torch.Generator(device="cpu").manual_seed(args.seed + rank)
++    overlap_mode = os.environ.get("RECSYS_OVERLAP_INPUT", "0")
++    audit_mode = os.environ.get("RECSYS_OVERLAP_INPUT_AUDIT", "0")
++    if overlap_mode not in ("0", "1") or audit_mode not in ("0", "1"):
++        raise ValueError("input overlap and audit switches must be 0 or 1")
++    overlap_input = None
++    input_audit = [] if audit_mode == "1" else None
++    device_input_audit = [] if input_audit is not None else None
++    if input_audit is not None:
++        from overlap_input import tensor_digest
++    if overlap_mode == "1":
++        direct = getattr(engine.optimizer, "_recsys_direct_gradient", None)
++        if (world_size != 1 or accumulation != 1 or direct is None or not direct.epilogue_installed
++                or direct.stream != torch.npu.current_stream(device)):
++            raise RuntimeError("input overlap requires the original single-rank 13 training stream")
++        from overlap_input import OverlapInput
++
++        overlap_input = OverlapInput(torch.npu, device, config, args.micro_batch_size, generator)
+     profiler_context = nullcontext(None)
+     if args.profile:
+         # One host annotation per native ZeRO norm pass. Keep the installed implementation.
+@@ -162,6 +179,7 @@
+     dist.barrier()
+     torch.npu.synchronize()
+     start = time.perf_counter()
++    drained = False
+     try:
+         with profiler_context as profiler:
+             for step in range(args.steps):
+@@ -170,22 +188,43 @@
+                     steady_start = time.perf_counter()
+                 step_start = time.perf_counter()
+                 with record_function("input_generation_and_h2d"):
+-                    tokens = torch.randint(1, config.vocab_size,
+-                                           (args.micro_batch_size, config.seq_len + 1), generator=generator)
+-                    items = tokens[:, :-1].contiguous().to(device)
+-                    targets = tokens[:, 1:].contiguous().to(device)
+-                    groups = torch.randint(0, config.num_user_groups,
+-                                           (args.micro_batch_size,), generator=generator).to(device)
+-                    features = torch.randint(0, config.table_rows,
+-                                             (args.micro_batch_size, config.seq_len,
+-                                              config.num_tables, config.features_per_table),
+-                                             generator=generator).to(device)
++                    inputs = overlap_input.take(step) if overlap_input is not None else None
++                    if inputs is None:
++                        tokens = torch.randint(1, config.vocab_size,
++                                               (args.micro_batch_size, config.seq_len + 1), generator=generator)
++                        cpu_items = tokens[:, :-1].contiguous()
++                        items = cpu_items.to(device)
++                        cpu_targets = tokens[:, 1:].contiguous()
++                        targets = cpu_targets.to(device)
++                        cpu_groups = torch.randint(0, config.num_user_groups,
++                                                   (args.micro_batch_size,), generator=generator)
++                        groups = cpu_groups.to(device)
++                        cpu_features = torch.randint(0, config.table_rows,
++                                                     (args.micro_batch_size, config.seq_len,
++                                                      config.num_tables, config.features_per_table),
++                                                     generator=generator)
++                        features = cpu_features.to(device)
++                        if input_audit is not None:
++                            input_audit.append(tensor_digest((cpu_items, cpu_targets, cpu_groups, cpu_features)))
++                        del cpu_items, cpu_targets, cpu_groups, cpu_features
++                    else:
++                        items, targets, groups, features = inputs
++                    if device_input_audit is not None:
++                        device_input_audit.append(tensor_digest(tuple(
++                            value.detach().cpu() for value in (items, targets, groups, features))))
+                 with record_function("hstu_forward_and_loss"):
+                     logits = engine(items, groups, features)
+                     loss = functional.cross_entropy(logits.float().reshape(-1, config.vocab_size),
+                                                     targets.reshape(-1))
+                 with record_function("deepspeed_backward"):
+                     engine.backward(loss)
++                if overlap_input is not None:
++                    with record_function("input_overlap_after_backward"):
++                        overlap_input.release()
++                        next_step = step + 1
++                        # Keep the first measured batch on the timed side of the warmup fence.
++                        if next_step < args.steps and not (steady and next_step == args.steady_warmup_steps):
++                            overlap_input.submit(next_step, input_audit)
+                 with record_function("optimizer_step_including_native_deepspeed_norm"):
+                     engine.step()
+                 metric = {"step": step, "host_step_ms": (time.perf_counter() - step_start) * 1000}
+@@ -204,11 +243,25 @@
+                     profiler.step()
+         torch.npu.synchronize()
+         end = time.perf_counter()
++        drained = True
+         elapsed = end - start
+         result = {"status": "completed", "rank": rank, "steps": args.steps,
+                   "elapsed_s_synchronized": elapsed, "profile_enabled": args.profile,
+                   "samples_per_s": args.steps * args.micro_batch_size * world_size / elapsed,
+                   "profiled_elapsed_includes_profiler_overhead": args.profile}
++        result["overlap_input"] = overlap_input is not None
++        result["overlap_input_hits"] = overlap_input.consumed if overlap_input is not None else 0
++        if overlap_input is not None:
++            overlap_input.verify_finished(args.steps - 1 - int(steady))
++        if input_audit is not None:
++            if len(input_audit) != args.steps:
++                raise RuntimeError("input audit did not record every batch")
++            if device_input_audit != input_audit:
++                raise RuntimeError("device input differs from the CPU generator output")
++            (rank_dir / "overlap_input_audit.json").write_text(json.dumps({
++                "input_sha256": input_audit, "device_input_sha256": device_input_audit,
++                "final_rng_sha256": tensor_digest((generator.get_state(),)),
++            }, indent=2) + "\n", encoding="utf-8")
+         if steady:
+             steady_elapsed = end - steady_start
+             samples = args.steady_measure_steps * args.micro_batch_size * world_size
+@@ -239,6 +292,8 @@
+         print(json.dumps(result), flush=True)
+     finally:
+         try:
++            if overlap_input is not None and not drained:
++                overlap_input.drain_after_failure()
+             if overflow_stats is not None:
+                 from overflow import finish_run
+ 

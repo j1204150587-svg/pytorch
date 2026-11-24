@@ -1,0 +1,98 @@
+diff --git a/model.py b/model.py
+--- a/model.py
++++ b/model.py
+@@ -145,6 +145,13 @@
+         self.output = nn.Linear(config.embedding_dim, config.vocab_size, bias=False)
+         self.output.weight = self.item_embedding.weight
+ 
++    def _side_feature_sum(self, feature_ids: torch.Tensor) -> torch.Tensor:
++        side = None
++        for table_index, table in enumerate(self.side_embeddings):
++            table_features = table(feature_ids[:, :, table_index, :]).mean(dim=-2)
++            side = table_features if side is None else side + table_features
++        return side
++
+     def forward(
+         self,
+         item_ids: torch.Tensor,
+@@ -170,10 +177,7 @@
+         positions = torch.arange(seq_len, device=item_ids.device).unsqueeze(0)
+         x = self.item_embedding(item_ids) + self.position_embedding(positions)
+         x = x + self.user_embedding(user_group).unsqueeze(1)
+-        side = None
+-        for table_index, table in enumerate(self.side_embeddings):
+-            table_features = table(feature_ids[:, :, table_index, :]).mean(dim=-2)
+-            side = table_features if side is None else side + table_features
++        side = self._side_feature_sum(feature_ids)
+         x = x + side / math.sqrt(self.config.num_tables)
+         for block in self.blocks:
+             x = block(x)
+diff --git a/graphed_hstu.py b/graphed_hstu.py
+--- a/graphed_hstu.py
++++ b/graphed_hstu.py
+@@ -1,6 +1,7 @@
+ """Replay HSTU tensor work while leaving external ZeRO gradient hooks eager."""
+ 
+ import json
++import os
+ from types import MethodType
+ from pathlib import Path
+ 
+@@ -93,6 +94,14 @@
+     if pointers != tuple(weight.data_ptr() for weight in aliases):
+         raise RuntimeError("graph parameters must alias ZeRO's live BF16 weights")
+ 
++    sidepack = os.environ.get("RECSYS_HSTU_GRAPH_SIDEPACK", "0")
++    if sidepack not in ("0", "1"):
++        raise ValueError("RECSYS_HSTU_GRAPH_SIDEPACK must be 0 or 1")
++    if sidepack == "1":
++        from graph_sidepack import GradientLifetime, configure_shadow
++
++        offsets = configure_shadow(shadow, engine.optimizer, parameters, batch_size, device)
++
+     shape = (batch_size, config.seq_len)
+     static_args = (torch.ones(shape, dtype=torch.long, device=device),
+                    torch.zeros(batch_size, dtype=torch.long, device=device),
+@@ -113,11 +122,17 @@
+         static_gradients = torch.autograd.grad(static_output, aliases, grad_outputs=static_gradient)
+     torch.npu.synchronize()
+ 
++    lifetime = None
++    if sidepack == "1":
++        lifetime = GradientLifetime(engine.optimizer, parameters, static_gradients,
++                                    torch.npu.current_stream(device), offsets)
+     replay_counts = {"forward": 0, "backward": 0}
+ 
+     class Replay(torch.autograd.Function):
+         @staticmethod
+         def forward(context, items, groups, features, *weights):
++            if lifetime is not None:
++                context.sidepack_generation = lifetime.begin_forward(torch.npu.current_stream(device))
+             for target, source in zip(static_args, (items, groups, features), strict=True):
+                 if target.shape != source.shape or target.device != source.device or target.dtype != source.dtype:
+                     raise RuntimeError("dynamic input incompatible with captured training graph")
+@@ -129,8 +144,12 @@
+         @staticmethod
+         @torch.autograd.function.once_differentiable
+         def backward(context, gradient):
++            if lifetime is not None:
++                lifetime.require_backward(context.sidepack_generation, torch.npu.current_stream(device))
+             static_gradient.copy_(gradient)
+             backward_graph.replay()
++            if lifetime is not None:
++                lifetime.backward_done = True
+             replay_counts["backward"] += 1
+             return (None, None, None, *(value.detach() for value in static_gradients))
+ 
+@@ -141,7 +160,10 @@
+         return Replay.apply(items, groups, features, *parameters)
+ 
+     def finish(expected):
+-        record = {"parameter_aliases": len(pointers), "counts": replay_counts, "expected_steps": expected}
++        if lifetime is not None:
++            lifetime.require_consumed()
++        record = {"parameter_aliases": len(pointers), "counts": replay_counts,
++                  "expected_steps": expected, "sidepack": sidepack == "1"}
+         (Path(rank_dir) / "hstu_graph.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+         if any(value != expected for value in replay_counts.values()):
+             raise RuntimeError(f"incomplete training replay: {record}")

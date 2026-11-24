@@ -1,0 +1,41 @@
+diff --git a/train_deepspeed.py b/train_deepspeed.py
+--- a/train_deepspeed.py
++++ b/train_deepspeed.py
+@@ -107,6 +107,22 @@
+         from overflow import install
+ 
+         overflow_stats = install(engine.optimizer)
++    finish_graph = None
++    fast_partition = None
++    norm_stats = None
++    finish_pta = None
++    if os.environ.get("RECSYS_HSTU_COMBINED") == "1":
++        from graphed_hstu import install as install_graph, install_single_rank_partition
++        from zero2_batch_norm import finish_run as finish_norm_run, install as install_norm
++
++        os.environ["RECSYS_ZERO2_BATCH_NORM"] = "1"
++        norm_stats = install_norm(engine.optimizer)
++        finish_graph = install_graph(engine, config, args.micro_batch_size, device, rank_dir)
++        fast_partition = install_single_rank_partition(engine, device)
++        if os.environ.get("RECSYS_PTA_WRAPPER") == "1":
++            from pta_wrapper import install as install_pta
++            finish_pta = install_pta(engine, rank_dir, norm_stats)
++
+     (rank_dir / "model_summary.json").write_text(json.dumps(summary, indent=2))
+     (rank_dir / "effective_deepspeed_config.json").write_text(json.dumps(ds_config, indent=2))
+     (rank_dir / "run_arguments.json").write_text(json.dumps(vars(args), indent=2))
+@@ -207,6 +223,14 @@
+             for metric, logged_loss in deferred_logs:
+                 metric["loss"] = logged_loss.float().cpu().item()
+                 print(json.dumps(metric), flush=True)
++        if finish_graph is not None:
++            finish_graph(args.steps)
++            if fast_partition["partition"] != args.steps:
++                raise RuntimeError(f"unexpected partition count: {fast_partition}")
++            (rank_dir / "fast_partition.json").write_text(json.dumps(fast_partition))
++            finish_norm_run(norm_stats, rank_dir, args.steps, True)
++            if finish_pta is not None:
++                finish_pta()
+         (rank_dir / "metrics.json").write_text(json.dumps({"summary": result, "steps": metrics}, indent=2))
+         if args.save_checkpoint:
+             engine.save_checkpoint(str(output_dir / "checkpoint"), tag="final")
