@@ -42,7 +42,7 @@ def summarize(folder, mode):
     for index, pair in enumerate(read(folder / "result.json"), 1):
         order = pair["order"]
         name = f"{index:02d}-{'-'.join(order)}"
-        trial = {"pair": name, "order": order, "status": pair["status"]}
+        trial = {"pair": f"{folder.name}/{name}", "order": order, "status": pair["status"]}
         if pair["status"] == "matched":
             values = [load_leg(leg, folder / name / f"{pos}-{variant}", mode)
                       for pos, (leg, variant) in enumerate(zip(pair["legs"], order, strict=True), 1)]
@@ -61,7 +61,10 @@ def summarize(folder, mode):
 def main():
     root = Path(sys.argv[1])
     steady = summarize(root / sys.argv[2], "steady")
-    profile_data = summarize(root / sys.argv[3], "level0")
+    profile_data = defaultdict(list)
+    for directory in sys.argv[3:]:
+        for variant, pairs in summarize(root / directory, "level0").items():
+            profile_data[variant].extend(pairs)
     result = {"steady": steady, "level0": profile_data}
     medians = {}
     for variant, pairs in steady.items():

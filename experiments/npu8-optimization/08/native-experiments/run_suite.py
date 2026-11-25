@@ -150,11 +150,14 @@ def performance(control, out, variant, mode):
             "window": evidence["window"], "sampled_loss": [row["loss"] for row in rows if "loss" in row]}
 
 
-def measure(control, out, variants, mode):
+def measure(control, out, variants, mode, order_filter):
     pairs = []
-    schedule = [("reference", "reference")] if mode == "steady" else []
+    schedule = [("reference", "reference")] if mode == "steady" and order_filter == "both" else []
     for variant in variants:
-        schedule.extend([("reference", variant), (variant, "reference")])
+        if order_filter in ("both", "ab"):
+            schedule.append(("reference", variant))
+        if order_filter in ("both", "ba"):
+            schedule.append((variant, "reference"))
     for index, order in enumerate(schedule, 1):
         pair = out / f"{index:02d}-{'-'.join(order)}"
         pair.mkdir()
@@ -180,6 +183,7 @@ def main():
     parser.add_argument("name")
     parser.add_argument("variants", nargs="*")
     parser.add_argument("--package", default="package")
+    parser.add_argument("--order", choices=("both", "ab", "ba"), default="both")
     args = parser.parse_args()
     assert "/" not in args.name and args.name not in ("", ".", "..")
     assert all(variant in ("queued", "flat", "combined") for variant in args.variants)
@@ -194,7 +198,7 @@ def main():
         elif args.stage == "gates":
             correctness(control, out, args.variants)
         else:
-            measure(control, out, args.variants, args.stage)
+            measure(control, out, args.variants, args.stage, args.order)
 
 
 if __name__ == "__main__":
