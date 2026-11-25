@@ -1,0 +1,202 @@
+--- a/torch_npu/csrc/core/npu/NPUGraph.h
++++ b/torch_npu/csrc/core/npu/NPUGraph.h
+@@ -1,4 +1,6 @@
+ #pragma once
++
++#include <optional>
+ 
+ #include <ATen/Tensor.h>
+ #include <c10/core/Device.h>
+@@ -82,6 +84,7 @@
+ 		bool report_shape = true);
+     void capture_end();
+     void replay();
++    bool try_replay_with_copy(const at::Tensor& dst, const at::Tensor& src);
+     void reset();
+     MempoolId_t pool();
+     void enable_debug_mode();
+@@ -121,6 +124,10 @@
+     // captures if needed.
+     int capture_dev_;
+ 
++    // The private copy/replay path uses at most one replay stream.
++    std::optional<NPUStream> queued_replay_stream_;
++    void finish_queued_replays();
++
+     ska::flat_hash_map<c10::intrusive_ptr<at_npu::NPUGeneratorState>, uint64_t> captured_generator_states_;
+ };
+ 
+--- a/torch_npu/csrc/core/npu/NPUGraph.cpp
++++ b/torch_npu/csrc/core/npu/NPUGraph.cpp
+@@ -1,6 +1,9 @@
+ #include "torch_npu/csrc/core/npu/NPUGraph.h"
+ #include "torch_npu/csrc/core/npu/NPUCachingAllocator.h"
+ #include "torch_npu/csrc/core/npu/NPUFunctions.h"
++#include "torch_npu/csrc/core/NPUBridge.h"
++#include "torch_npu/csrc/core/NPUStorageImpl.h"
++#include "torch_npu/csrc/framework/OpCommand.h"
+ #include "torch_npu/csrc/core/npu/NPUStreamUtils.h"
+ #include "torch_npu/csrc/aten/NPUGeneratorImpl.h"
+ #include "torch_npu/csrc/core/npu/register/OptionRegister.h"
+@@ -285,6 +288,68 @@
+     }
+ }
+ 
++bool NPUGraph::try_replay_with_copy(const at::Tensor& dst, const at::Tensor& src)
++{
++    TORCH_CHECK(has_graph_exec_, "Caught copy/replay before successful graph capture.");
++    if (!dst.defined() || !src.defined() || dst.device() != capture_stream_.device() ||
++        src.device() != dst.device() || dst.sizes() != src.sizes() || dst.scalar_type() != src.scalar_type() ||
++        !dst.is_contiguous() || !src.is_contiguous() || dst.storage_offset() != 0 || src.storage_offset() != 0 ||
++        dst.is_conj() || dst.is_neg() || src.is_conj() || src.is_neg() || src.numel() == 0) {
++        return false;
++    }
++    const auto* allocator = NPUCachingAllocator::get();
++    const auto dst_storage = dst.storage();
++    const auto src_storage = src.storage();
++    if (dst_storage.allocator() != allocator || src_storage.allocator() != allocator ||
++        dst_storage.unsafeGetStorageImpl() == src_storage.unsafeGetStorageImpl() ||
++        torch_npu::NPUBridge::GetNpuStorageImpl(dst)->npu_desc_.npu_format_ != ACL_FORMAT_ND ||
++        torch_npu::NPUBridge::GetNpuStorageImpl(src)->npu_desc_.npu_format_ != ACL_FORMAT_ND) {
++        return false;
++    }
++    if (option::OptionsManager::GetTaskQueueEnable() != 1 || option::OptionsManager::GetPerStreamQueue()) {
++        return false;
++    }
++    c10::OptionalDeviceGuard guard{capture_stream_.device()};
++    auto stream = c10_npu::getCurrentNPUStream();
++    if (c10_npu::detail::isExternalStream(stream) || stream.isSyncLaunchStream() ||
++        (queued_replay_stream_ && *queued_replay_stream_ != stream) ||
++        currentStreamCaptureStatusMayInitCtx() != CaptureStatus::None) {
++        return false;
++    }
++    for (const auto& captured_generator : captured_generator_states_) {
++        if (captured_generator.second != 0) {
++            return false;
++        }
++    }
++
++    const size_t bytes = src.nbytes();
++    const void* source = src.const_data_ptr();
++    void* target = dst.mutable_data_ptr();
++    const auto model = model_ri_;
++    const auto raw_stream = stream.stream(false);
++    NPUCachingAllocator::recordStream(src_storage.data_ptr(), stream);
++    NPUCachingAllocator::recordStream(dst_storage.data_ptr(), stream);
++    queued_replay_stream_ = stream;
++    at_npu::native::OpCommand::RunOpApiV3(
++        "NPUGraphCopyReplay", [source, target, bytes, model, raw_stream]() -> int {
++            auto ret = aclrtMemcpyAsync(target, bytes, source, bytes, ACL_MEMCPY_DEVICE_TO_DEVICE, raw_stream);
++            if (ret != ACL_ERROR_NONE) {
++                return ret;
++            }
++            return c10_npu::acl::AclmdlRIExecuteAsync(model, raw_stream);
++        }, false, &stream);
++    return true;
++}
++
++void NPUGraph::finish_queued_replays()
++{
++    if (queued_replay_stream_) {
++        // Synchronize both the PTA queue and its device stream before releasing the graph or its pool.
++        queued_replay_stream_->synchronize();
++        queued_replay_stream_.reset();
++    }
++}
++
+ void NPUGraph::enable_debug_mode()
+ {
+     _npu_graphs_debug = true;
+@@ -303,6 +368,7 @@
+ 
+ void NPUGraph::super_kernel_optimize(const aclskOptions *options)
+ {
++    finish_queued_replays();
+     TORCH_CHECK(has_graph_exec_,
+                 "Called NPUGraph::super_kernel_optimize without a preceding successful capture.");
+     NPU_CHECK_ERROR(c10_npu::skapi::AclskOptimize(model_ri_, options));
+@@ -310,6 +376,7 @@
+ 
+ void NPUGraph::reset()
+ {
++    finish_queued_replays();
+     // I'd prefer these checks throw exceptions, not print warnings,
+     // but the destructor calls reset(), and at least one CI build
+     // refuses to compile with a throwing destructor.
+@@ -356,6 +423,12 @@
+     for (auto& [generator_state, wholegraph_increments] : captured_generator_states_) {
+         generator_state->unregister_graph(this);
+     }
++    try {
++        finish_queued_replays();
++    } catch (const std::exception& error) {
++        TORCH_WARN("Unable to safely release a queued NPU graph: ", error.what());
++        return;
++    }
+     reset();
+ }
+ 
+--- a/torch_npu/csrc/npu/Graph.cpp
++++ b/torch_npu/csrc/npu/Graph.cpp
+@@ -782,6 +782,9 @@
+             "replay",
+             torch::wrap_pybind_function_no_gil(&c10_npu::NPUGraph::replay))
+         .def(
++            "_try_replay_with_copy",
++            torch::wrap_pybind_function_no_gil(&c10_npu::NPUGraph::try_replay_with_copy))
++        .def(
+             "reset",
+             torch::wrap_pybind_function_no_gil(&c10_npu::NPUGraph::reset))
+         .def(
+--- a/torch_npu/csrc/aten/ops/FlattenDenseTensorsKernelNpu.cpp
++++ b/torch_npu/csrc/aten/ops/FlattenDenseTensorsKernelNpu.cpp
+@@ -1,5 +1,9 @@
+ #include "torch_npu/csrc/framework/utils/OpAdapter.h"
+ #include "torch_npu/csrc/aten/NPUNativeFunctions.h"
++
++#include <cstdlib>
++#include <cstring>
++#include <ATen/record_function.h>
+ 
+ namespace at_npu {
+ namespace native {
+@@ -15,6 +19,39 @@
+     if (tensors.size() == 1) {
+         return flatten(tensors[0]);
+     }
++    static const bool enable_storage_copy = [] {
++        const char* value = std::getenv("NPU_EXPERIMENT_FLAT_ND");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    if (enable_storage_copy && tensors.size() > 1) {
++        const auto& first = tensors[0];
++        const auto storage = first.storage();
++        const auto* storage_impl = storage.unsafeGetStorageImpl();
++        const auto& desc = torch_npu::NPUBridge::GetNpuStorageImpl(first)->npu_desc_;
++        if (desc.npu_format_ == ACL_FORMAT_ND && desc.origin_format_ == ACL_FORMAT_ND) {
++            const auto start = first.storage_offset();
++            const auto capacity = storage.nbytes() / first.element_size();
++            auto end = start;
++            bool adjacent = start >= 0 && static_cast<size_t>(start) <= capacity;
++            for (const auto& tensor : tensors) {
++                if (!adjacent || !tensor.defined() || !tensor.has_storage() || tensor.device() != first.device() ||
++                    tensor.scalar_type() != first.scalar_type() || tensor.requires_grad() || tensor._fw_grad(0).defined() ||
++                    tensor.is_conj() || tensor.is_neg() || tensor.has_names() || tensor.is_quantized() ||
++                    !tensor.is_contiguous() || tensor.storage().unsafeGetStorageImpl() != storage_impl ||
++                    tensor.storage_offset() != end || tensor.numel() == 0 ||
++                    static_cast<size_t>(tensor.numel()) > capacity - static_cast<size_t>(end)) {
++                    adjacent = false;
++                    break;
++                }
++                end += tensor.numel();
++            }
++            if (adjacent) {
++                RECORD_FUNCTION("NPUDenseFlattenStorageCopy", std::vector<c10::IValue>());
++                // Match cat's fresh storage, while avoiding one dispatch per chunk.
++                return first.as_strided({end - start}, {1}, start).clone(at::MemoryFormat::Contiguous);
++            }
++        }
++    }
+     return at::cat(c10::fmap(tensors, flatten));
+ }
+ 
