@@ -80,7 +80,8 @@ def main():
         target["unprofiled_e2e_faster_both_orders"]=all(v[1]<v[0] for v in orders.values())
         target["absolute_Free_time_lower_both_orders"]=all(v[5]<v[3] for v in orders.values())
         target["paired_measurements_meet_free_and_e2e_target"]=(target["weighted_B_Free_share_below_0.70_both_orders"]
-                                                               and target["unprofiled_e2e_faster_both_orders"])
+                                                               and target["unprofiled_e2e_faster_both_orders"]
+                                                               and target["absolute_Free_time_lower_both_orders"])
     output=args.output or work/"report"
     output.mkdir(parents=True,exist_ok=True)
     write_tables(output,pairs)

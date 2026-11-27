@@ -180,6 +180,10 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 在已校验的 driver 上，v4 把逻辑 grid 和当前硬件允许的物理 block 数分别传入。独立 fold 门在 [1,19]、[2,14]、[2,22]、[4,31] 及另一 stream 的 [2,14] 全部逐位通过，5 次均进入并返回 C++，注入 profiler 时回退一次。此前因物理 cap 回退的两个代表形状均已命中。[1,19] 普通 Triton、完整适配器和仅已准备参数提交的 Host p50 依次为 47.412、12.011、2.910 μs。四个混合形状同步窗口依次为 122.926→121.075、122.902→121.547、122.120→121.018、123.082→120.930 μs/调用。这里的结果仅覆盖独立 fold。[原始分项、形状及逐次计时](../pr42634/verified-control/dynamic-free70/pr-cap-v4-probe-1795772222098099850/micro.json) · [注册与守卫实现](fold_grid_cap)
 
+### RMS 查表前向与显式计划提交的独立微测
+
+在 [1,19]、[2,14]、[2,22]、[4,31] 四种实际形状上比较原生六次 ATen 前向（N）、普通 Triton 查表（S）和相同查表内核的 C++ 计划提交（P）。原生和普通查表的 Level1 已确认六次设备工作降至一次，但首轮普通查表的前端准备延长了时间。v2 在已验证的 driver 上识别两个 launcher 入口的物理 grid cap，544 次真实计划提交全部返回，其中 272 次使用 cap。四轮完整前向的同步均摊范围为 N 62.561–63.085、S 124.294–126.100、P 60.852–62.165 μs/次；预先分配输出和中间张量后，仅一次相同查表内核的同步均摊为 S 56.960–58.496、P 16.641–17.022 μs。对应的 12 对 Level1 范围均为物理流 47 上的单个同名 `lut_forward`。这些窗口分别隔离了查表融合与单次下发的变化。[两组原始记数、命令和 Level1](../pr42634/lut-forward-raw) · [查表普通/计划路的逐物理流核对](rms_lut/forward-level1-plan.json) · [逐次计时与语义门](rms_lut/forward-plan-npu.json)
+
 ## 尝试无优化路径
 
 ### 将四个输入字段打包成一次 H2D
@@ -207,6 +211,8 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 - **侧表反向分组。** 按 16、64、256、1,024 张表分组，在四种形状下检查梯度一致。Level0 三个形状对应的 1,024 表整组均快于 256 表分组；[4,31] 上两者为 1.348、1.308 ms。[分组微测](working/diagnostics/tiling-micro/micro.json)
 
+- **Addmm 描述符基址按 512 字节规范化。** Direct B 的 [1,19]、[2,14] 每步八次 `aclnnAddmmGetWorkspaceSize`，与相应 Cast/MatMul 前全流空档的交集为 0.543、0.569 ms。实机布局重建显示，每层权重和偏置具有不同的 mod 512 余数。在 60 个 shape、480 次调用上，该规范化前后投影几何均为 416 种，无法增加此处几何键的复用。此实现止于逐步 trace 和布局证明。[调用、物理任务与 60 个形状的几何](addmm_alignment/README.md)
+
 ## 仍需训练窗口验证的 Host 开销
 
 C++ eager HSTUBlock 调度与直接发布配置的侧表 native guard 均已通过独立的 8 步训练门，含三个非有限值跳步、五次权重更新和每步 1,052 个梯度对照。[HSTUBlock 训练门](receipts-1732/gates/host-block-v1/gate-attempt-ab5lxx_8/comparison.json) · [直接发布侧表 guard 训练门](receipts-1732/gates/direct-native-slab-guard/gate-attempt-23tk9rom/comparison.json)
@@ -218,6 +224,8 @@ flat_stats.eligible 对每个 1,052 片梯度重新核对视图根、真实 stor
 ## 代码、原始回执与复算
 
 每项代码和实机索引按本轮独立分支归档，早期动态 D01–D05 位于上一层台账。当前快照含 3,738 个原始条目的 SHA-256，涵盖 workspace、runner、设备前后检查、同步窗口、官方 CSV、归因摘要和数值门。[代码分支](https://github.com/j1204150587-svg/pytorch/tree/codex/npu8-dynamic-eager-pr42634-20261127) · [实现与原始证据提交](https://github.com/j1204150587-svg/pytorch/commit/ecae80312b4c5cc84615807637bf0c870237ea6a) · [收据清单](working/receipt-sha256.json) · [宿主 trace 清单](working/trace-index.json) · [32 份原始 profiler trace](../pr42634/raw-traces) · [89,258,711 字节逐文件 SHA-256 和 gzip CRC 核验清单](../pr42634/raw-traces.csv) · [独立核验脚本](../pr42634/verify_trace_archive.py)
+
+本轮分批保存实现、原始输入和结果。分支上的固定提交可直接复现对应观察。[E01/E02、原始配方及运行结果](https://github.com/j1204150587-svg/pytorch/commit/10b006372cfea4a616cd55b17df20cc56e8f274f) · [eager fold v3 双序与设备归因](https://github.com/j1204150587-svg/pytorch/commit/930c7f055804801478d87c6b4685436bd368951c) · [原版开关双序和适配器分段微测](https://github.com/j1204150587-svg/pytorch/commit/19ae451124c34de27060763cbfb6a18310963263) · [输入搬运、IPG 区间复制、RMS v2 与原始 01 端点](https://github.com/j1204150587-svg/pytorch/commit/18ce2679c63b925b711165c1c8c5fd8958346e9f) · [生成 wrapper 正控、物理网格和 GMM](https://github.com/j1204150587-svg/pytorch/commit/83b3c8deb3f532960830678eb8c4859ba34e8be0)
 
 17:32 实机快照另含 1,981 条带 SHA-256 的原收据，16 份原始 Level0/Level1 trace 合计 51,868,063 字节。[新增原始回执与注册表](receipts-1732) · [新增 trace 逐文件核验](receipts-1732/raw-traces.csv)
 
