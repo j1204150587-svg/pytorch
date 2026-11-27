@@ -1,0 +1,5103 @@
+{
+  "trace": "trace_view.json.gz",
+  "phases": {
+    "X": 18248,
+    "f": 4001,
+    "s": 3993,
+    "M": 51,
+    "C": 4
+  },
+  "duration_event_tracks": [
+    {
+      "pid": 94129,
+      "process": "Python",
+      "category": "cpu_op",
+      "count": 6357
+    },
+    {
+      "pid": 96388351,
+      "process": "CANN",
+      "category": "",
+      "count": 6040
+    },
+    {
+      "pid": 96389088,
+      "process": "Overlap Analysis",
+      "category": "",
+      "count": 2473
+    },
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "category": "",
+      "count": 1296
+    },
+    {
+      "pid": 94129,
+      "process": "Python",
+      "category": "dequeue",
+      "count": 1035
+    },
+    {
+      "pid": 94129,
+      "process": "Python",
+      "category": "enqueue",
+      "count": 1035
+    },
+    {
+      "pid": 96388608,
+      "process": "Communication",
+      "category": "",
+      "count": 12
+    }
+  ],
+  "task_type_inventory": [
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "type": "AI_VECTOR_CORE",
+      "count": 958
+    },
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "type": "MIX_AIV",
+      "count": 171
+    },
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "type": "AI_CORE",
+      "count": 102
+    },
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "type": "SDMA_SQE",
+      "count": 42
+    },
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "type": "EVENT_RECORD",
+      "count": 14
+    },
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "type": "EVENT_WAIT",
+      "count": 8
+    },
+    {
+      "pid": 96388544,
+      "process": "Ascend Hardware",
+      "type": "PROFILING_DISABLE",
+      "count": 1
+    }
+  ],
+  "device_compute_types": [
+    "AIC",
+    "AICORE",
+    "AIV",
+    "AI_CORE",
+    "AI_CORE_MIX",
+    "AI_VECTOR_CORE",
+    "KERNEL_AICORE",
+    "KERNEL_AIVEC",
+    "KERNEL_MIX_AIC",
+    "KERNEL_MIX_AIV",
+    "MIX_AIC",
+    "MIX_AICORE",
+    "MIX_AIC_AIV",
+    "MIX_AIV",
+    "MIX_AIV_AIC",
+    "MIX_VECTOR_CORE",
+    "VECTOR_CORE"
+  ],
+  "raw_task_count": 1294,
+  "compute_task_count": 1231,
+  "flow_matched_compute_count": {
+    "torch": 1231
+  },
+  "cann_dispatch_flow_matched_compute_count": 1231,
+  "cann_source_later_than_device_kernel_start": 839,
+  "ambiguous_flow_ids": 4,
+  "method": "Chrome microseconds. Union per hardware PID across streams. Uncovered means no observed selected task. All-raw coverage may include waits. Flow attribution requires an exact hardware start and a source on the CPU marker thread. Norm-call attribution uses ATen norm intervals. Other work can fill a subset gap; all_compute_during_span checks this. dispatch_evidence splits at the CANN HostToDevice source timestamp, which may lack a visible API interval or precede/follow the physical launch because of clock alignment. Pairs with a source after the device start are omitted. same_host_clock_queue uses matched enqueue/dequeue IDs, attributing by enqueue time and thread. Gaps are between globally adjacent worker dequeues with both enqueues in the same marker. Host and device gaps can overlap.",
+  "steps": [
+    {
+      "name": "ProfilerStep#4",
+      "start_us": "1795769206313305.61",
+      "wall_ms": 26.41147,
+      "device_compute_in_host_window": {
+        "96388544": {
+          "window_ms": 26.41147,
+          "covered_ms": 3.25604,
+          "uncovered_ms": 23.15543,
+          "uncovered_pct": 87.672,
+          "gaps": {
+            "count": 616,
+            "sum_ms": 23.15543,
+            "median_ms": 0.02272,
+            "p90_ms": 0.08412,
+            "p99_ms": 0.2163,
+            "max_ms": 1.82364
+          },
+          "largest_gaps_ms_from_window_start": [
+            [
+              1.28786,
+              3.1115
+            ],
+            [
+              0.0,
+              1.00266
+            ],
+            [
+              26.12728,
+              26.41147
+            ],
+            [
+              24.71152,
+              24.99244
+            ],
+            [
+              21.06992,
+              21.3457
+            ]
+          ]
+        }
+      },
+      "compute_aicpu_dma_in_host_window": {
+        "96388544": {
+          "window_ms": 26.41147,
+          "covered_ms": 3.27244,
+          "uncovered_ms": 23.13903,
+          "uncovered_pct": 87.61,
+          "gaps": {
+            "count": 637,
+            "sum_ms": 23.13903,
+            "median_ms": 0.0224,
+            "p90_ms": 0.07684,
+            "p99_ms": 0.21306,
+            "max_ms": 1.82364
+          },
+          "largest_gaps_ms_from_window_start": [
+            [
+              1.28786,
+              3.1115
+            ],
+            [
+              0.0,
+              1.00266
+            ],
+            [
+              26.12728,
+              26.41147
+            ],
+            [
+              21.06992,
+              21.3457
+            ],
+            [
+              25.32156,
+              25.5392
+            ]
+          ]
+        }
+      },
+      "all_raw_device_tasks_in_host_window": {
+        "96388544": {
+          "window_ms": 26.41147,
+          "covered_ms": 3.27978,
+          "uncovered_ms": 23.13169,
+          "uncovered_pct": 87.582,
+          "gaps": {
+            "count": 645,
+            "sum_ms": 23.13169,
+            "median_ms": 0.02234,
+            "p90_ms": 0.07614,
+            "p99_ms": 0.2084,
+            "max_ms": 1.82364
+          },
+          "largest_gaps_ms_from_window_start": [
+            [
+              1.28786,
+              3.1115
+            ],
+            [
+              0.0,
+              1.00266
+            ],
+            [
+              26.12728,
+              26.41147
+            ],
+            [
+              21.06992,
+              21.3457
+            ],
+            [
+              25.32156,
+              25.5392
+            ]
+          ]
+        }
+      },
+      "cpu_norm_op_counts": {
+        "aten::linalg_vector_norm": 41
+      },
+      "vector_norm_host_start_spacing": {
+        "count": 40,
+        "sum_ms": 3.04509,
+        "median_ms": 0.06102,
+        "p90_ms": 0.07346,
+        "p99_ms": 0.62707,
+        "max_ms": 0.62707
+      },
+      "vector_norm_host_call_duration": {
+        "count": 41,
+        "sum_ms": 0.65968,
+        "median_ms": 0.01511,
+        "p90_ms": 0.01885,
+        "p99_ms": 0.02764,
+        "max_ms": 0.02764
+      },
+      "same_host_clock_queue": {
+        "paired_requests": 279,
+        "matched_worker_spans_ms": {
+          "(94129, 94154)": 25.08576
+        },
+        "dequeue_service": {
+          "count": 279,
+          "sum_ms": 4.86364,
+          "median_ms": 0.01105,
+          "p90_ms": 0.03283,
+          "p99_ms": 0.10565,
+          "max_ms": 0.14655
+        },
+        "adjacent_worker_gaps": {
+          "count": 277,
+          "sum_ms": 9.12829,
+          "median_ms": 0.01495,
+          "p90_ms": 0.0574,
+          "p99_ms": 0.19403,
+          "max_ms": 1.79656
+        },
+        "worker_gap_before_next_enqueue_start": {
+          "count": 277,
+          "sum_ms": 7.47007,
+          "median_ms": 0.00787,
+          "p90_ms": 0.04939,
+          "p99_ms": 0.18048,
+          "max_ms": 1.78413
+        },
+        "enqueue_start_to_dequeue_start": {
+          "count": 279,
+          "sum_ms": 4.24449,
+          "median_ms": 0.00702,
+          "p90_ms": 0.01967,
+          "p99_ms": 0.13728,
+          "max_ms": 0.14196
+        },
+        "vector_norm_dequeue_start_spacing": {
+          "count": 40,
+          "sum_ms": 3.04325,
+          "median_ms": 0.06092,
+          "p90_ms": 0.07464,
+          "p99_ms": 0.62002,
+          "max_ms": 0.62002
+        },
+        "vector_norm_dequeue_service": {
+          "count": 41,
+          "sum_ms": 0.46696,
+          "median_ms": 0.01118,
+          "p90_ms": 0.01189,
+          "p99_ms": 0.0146,
+          "max_ms": 0.0146
+        }
+      },
+      "runtime_launch_event_counts_all_threads": {
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 614
+      },
+      "runtime_launch_spacing_within_thread": {
+        "count": 613,
+        "sum_ms": 25.0576,
+        "median_ms": 0.02453,
+        "p90_ms": 0.08508,
+        "p99_ms": 0.21759,
+        "max_ms": 1.82351
+      },
+      "flow_correlated_compute": {
+        "96388544": {
+          "count": 306,
+          "names": [
+            [
+              "aclnnInplaceCopy_CastAiCore_Cast",
+              45
+            ],
+            [
+              "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+              41
+            ],
+            [
+              "aclnnMul_MulAiCore_Mul",
+              22
+            ],
+            [
+              "aclnnMatmul_SliceAiCore_Slice",
+              12
+            ],
+            [
+              "aclnnMatmul_TransposeAiCore_Transpose",
+              12
+            ],
+            [
+              "aclnnPowTensorScalar_PowsAiCore_Pows",
+              11
+            ],
+            [
+              "aclnnAdds_AddAiCore_Add",
+              11
+            ],
+            [
+              "aclnnMean_ReduceMeanAiCore_ReduceMean",
+              10
+            ],
+            [
+              "aclnnDivs_RealDivAiCore_RealDiv",
+              10
+            ],
+            [
+              "aclnnRsqrt_RsqrtAiCore_Rsqrt",
+              9
+            ],
+            [
+              "aclnnAdd_AddAiCore_Add",
+              8
+            ],
+            [
+              "aclnnAddmm_CastAiCore_Cast",
+              8
+            ]
+          ],
+          "span": {
+            "window_ms": 25.12462,
+            "covered_ms": 1.70726,
+            "uncovered_ms": 23.41736,
+            "uncovered_pct": 93.205,
+            "gaps": {
+              "count": 305,
+              "sum_ms": 23.41736,
+              "median_ms": 0.02498,
+              "p90_ms": 0.07376,
+              "p99_ms": 0.21764,
+              "max_ms": 11.10436
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                9.23868,
+                20.34304
+              ],
+              [
+                0.2852,
+                2.10884
+              ],
+              [
+                23.70886,
+                23.98978
+              ],
+              [
+                24.3189,
+                24.53654
+              ],
+              [
+                20.93384,
+                21.15014
+              ]
+            ]
+          },
+          "task_duration": {
+            "count": 306,
+            "sum_ms": 1.70726,
+            "median_ms": 0.00236,
+            "p90_ms": 0.0135,
+            "p99_ms": 0.05626,
+            "max_ms": 0.07434
+          },
+          "device_start_spacing_within_stream": {
+            "count": 304,
+            "sum_ms": 25.26466,
+            "median_ms": 0.02816,
+            "p90_ms": 0.07494,
+            "p99_ms": 0.28556,
+            "max_ms": 11.10528
+          },
+          "all_compute_during_span": {
+            "window_ms": 25.12462,
+            "covered_ms": 3.25604,
+            "uncovered_ms": 21.86858,
+            "uncovered_pct": 87.04,
+            "gaps": {
+              "count": 614,
+              "sum_ms": 21.86858,
+              "median_ms": 0.0226,
+              "p90_ms": 0.07794,
+              "p99_ms": 0.2084,
+              "max_ms": 1.82364
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                0.2852,
+                2.10884
+              ],
+              [
+                23.70886,
+                23.98978
+              ],
+              [
+                20.06726,
+                20.34304
+              ],
+              [
+                24.3189,
+                24.53654
+              ],
+              [
+                20.93384,
+                21.15014
+              ]
+            ]
+          },
+          "dispatch_evidence": {
+            "global_internal_gaps_before_attributed_kernel": {
+              "count": 305,
+              "sum_ms": 12.58878,
+              "median_ms": 0.02498,
+              "p90_ms": 0.07376,
+              "p99_ms": 0.21764,
+              "max_ms": 1.82364
+            },
+            "gaps_with_cann_launch": {
+              "count": 60,
+              "sum_ms": 3.8154,
+              "median_ms": 0.02504,
+              "p90_ms": 0.07684,
+              "p99_ms": 0.27578,
+              "max_ms": 1.82364
+            },
+            "gap_before_host_dispatch_start": {
+              "count": 60,
+              "sum_ms": 3.72708,
+              "median_ms": 0.02362,
+              "p90_ms": 0.07496,
+              "p99_ms": 0.2755,
+              "max_ms": 1.81905
+            },
+            "gap_after_host_dispatch_start": {
+              "count": 60,
+              "sum_ms": 0.08832,
+              "median_ms": 0.00099,
+              "p90_ms": 0.00313,
+              "p99_ms": 0.00766,
+              "max_ms": 0.00863
+            }
+          }
+        }
+      },
+      "flow_correlated_compute_from_norm_calls": {
+        "96388544": {
+          "count": 41,
+          "names": [
+            [
+              "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+              41
+            ]
+          ],
+          "span": {
+            "window_ms": 3.04234,
+            "covered_ms": 0.161,
+            "uncovered_ms": 2.88134,
+            "uncovered_pct": 94.708,
+            "gaps": {
+              "count": 40,
+              "sum_ms": 2.88134,
+              "median_ms": 0.05736,
+              "p90_ms": 0.0706,
+              "p99_ms": 0.61554,
+              "max_ms": 0.61554
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                2.42568,
+                3.04122
+              ],
+              [
+                2.33946,
+                2.42372
+              ],
+              [
+                0.93238,
+                1.00566
+              ],
+              [
+                0.0725,
+                0.1452
+              ],
+              [
+                2.26494,
+                2.33554
+              ]
+            ]
+          },
+          "task_duration": {
+            "count": 41,
+            "sum_ms": 0.161,
+            "median_ms": 0.00426,
+            "p90_ms": 0.00486,
+            "p99_ms": 0.01552,
+            "max_ms": 0.01552
+          },
+          "device_start_spacing_within_stream": {
+            "count": 40,
+            "sum_ms": 3.04122,
+            "median_ms": 0.06082,
+            "p90_ms": 0.07512,
+            "p99_ms": 0.6175,
+            "max_ms": 0.6175
+          },
+          "all_compute_during_span": {
+            "window_ms": 3.04234,
+            "covered_ms": 0.25966,
+            "uncovered_ms": 2.78268,
+            "uncovered_pct": 91.465,
+            "gaps": {
+              "count": 91,
+              "sum_ms": 2.78268,
+              "median_ms": 0.02576,
+              "p90_ms": 0.04224,
+              "p99_ms": 0.09986,
+              "max_ms": 0.28092
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                2.53262,
+                2.81354
+              ],
+              [
+                2.8545,
+                2.95436
+              ],
+              [
+                2.95578,
+                3.02458
+              ],
+              [
+                2.33946,
+                2.39722
+              ],
+              [
+                0.93238,
+                0.97622
+              ]
+            ]
+          },
+          "dispatch_evidence": {
+            "global_internal_gaps_before_attributed_kernel": {
+              "count": 40,
+              "sum_ms": 0.9403,
+              "median_ms": 0.02454,
+              "p90_ms": 0.02736,
+              "p99_ms": 0.03714,
+              "max_ms": 0.03714
+            },
+            "gaps_with_cann_launch": {
+              "count": 6,
+              "sum_ms": 0.17782,
+              "median_ms": 0.02504,
+              "p90_ms": 0.03448,
+              "p99_ms": 0.03714,
+              "max_ms": 0.03714
+            },
+            "gap_before_host_dispatch_start": {
+              "count": 6,
+              "sum_ms": 0.16983,
+              "median_ms": 0.02482,
+              "p90_ms": 0.03201,
+              "p99_ms": 0.03455,
+              "max_ms": 0.03455
+            },
+            "gap_after_host_dispatch_start": {
+              "count": 6,
+              "sum_ms": 0.00799,
+              "median_ms": 0.00099,
+              "p90_ms": 0.00247,
+              "p99_ms": 0.00259,
+              "max_ms": 0.00259
+            }
+          }
+        }
+      },
+      "stages": [
+        {
+          "name": "input",
+          "start_us": "1795769206313367.93",
+          "wall_ms": 0.67175,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 0.67175,
+              "covered_ms": 0.0,
+              "uncovered_ms": 0.67175,
+              "uncovered_pct": 100.0,
+              "gaps": {
+                "count": 1,
+                "sum_ms": 0.67175,
+                "median_ms": 0.67175,
+                "p90_ms": 0.67175,
+                "p99_ms": 0.67175,
+                "max_ms": 0.67175
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.0,
+                  0.67175
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 0.67175,
+              "covered_ms": 0.0,
+              "uncovered_ms": 0.67175,
+              "uncovered_pct": 100.0,
+              "gaps": {
+                "count": 1,
+                "sum_ms": 0.67175,
+                "median_ms": 0.67175,
+                "p90_ms": 0.67175,
+                "p99_ms": 0.67175,
+                "max_ms": 0.67175
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.0,
+                  0.67175
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 0.67175,
+              "covered_ms": 0.0,
+              "uncovered_ms": 0.67175,
+              "uncovered_pct": 100.0,
+              "gaps": {
+                "count": 1,
+                "sum_ms": 0.67175,
+                "median_ms": 0.67175,
+                "p90_ms": 0.67175,
+                "p99_ms": 0.67175,
+                "max_ms": 0.67175
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.0,
+                  0.67175
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {},
+          "vector_norm_host_start_spacing": {
+            "count": 0
+          },
+          "vector_norm_host_call_duration": {
+            "count": 0
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 0,
+            "matched_worker_spans_ms": {},
+            "dequeue_service": {
+              "count": 0
+            },
+            "adjacent_worker_gaps": {
+              "count": 0
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 0
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 0
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 0
+            },
+            "vector_norm_dequeue_service": {
+              "count": 0
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {},
+          "runtime_launch_spacing_within_thread": {
+            "count": 0
+          },
+          "flow_correlated_compute": {},
+          "flow_correlated_compute_from_norm_calls": {}
+        },
+        {
+          "name": "forward",
+          "start_us": "1795769206314052.77",
+          "wall_ms": 9.30556,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 9.30556,
+              "covered_ms": 0.98888,
+              "uncovered_ms": 8.31668,
+              "uncovered_pct": 89.373,
+              "gaps": {
+                "count": 185,
+                "sum_ms": 8.31668,
+                "median_ms": 0.02442,
+                "p90_ms": 0.08076,
+                "p99_ms": 0.21306,
+                "max_ms": 1.82364
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.5407,
+                  2.36434
+                ],
+                [
+                  0.0,
+                  0.2555
+                ],
+                [
+                  3.60076,
+                  3.81382
+                ],
+                [
+                  6.38734,
+                  6.57328
+                ],
+                [
+                  3.40714,
+                  3.5826
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 9.30556,
+              "covered_ms": 0.99252,
+              "uncovered_ms": 8.31304,
+              "uncovered_pct": 89.334,
+              "gaps": {
+                "count": 189,
+                "sum_ms": 8.31304,
+                "median_ms": 0.02428,
+                "p90_ms": 0.07856,
+                "p99_ms": 0.21306,
+                "max_ms": 1.82364
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.5407,
+                  2.36434
+                ],
+                [
+                  0.0,
+                  0.2555
+                ],
+                [
+                  3.60076,
+                  3.81382
+                ],
+                [
+                  6.38734,
+                  6.57328
+                ],
+                [
+                  3.40714,
+                  3.5826
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 9.30556,
+              "covered_ms": 0.99252,
+              "uncovered_ms": 8.31304,
+              "uncovered_pct": 89.334,
+              "gaps": {
+                "count": 189,
+                "sum_ms": 8.31304,
+                "median_ms": 0.02428,
+                "p90_ms": 0.07856,
+                "p99_ms": 0.21306,
+                "max_ms": 1.82364
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.5407,
+                  2.36434
+                ],
+                [
+                  0.0,
+                  0.2555
+                ],
+                [
+                  3.60076,
+                  3.81382
+                ],
+                [
+                  6.38734,
+                  6.57328
+                ],
+                [
+                  3.40714,
+                  3.5826
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {},
+          "vector_norm_host_start_spacing": {
+            "count": 0
+          },
+          "vector_norm_host_call_duration": {
+            "count": 0
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 144,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 8.99184
+            },
+            "dequeue_service": {
+              "count": 144,
+              "sum_ms": 3.19451,
+              "median_ms": 0.01348,
+              "p90_ms": 0.04289,
+              "p99_ms": 0.10565,
+              "max_ms": 0.14655
+            },
+            "adjacent_worker_gaps": {
+              "count": 143,
+              "sum_ms": 5.79733,
+              "median_ms": 0.01493,
+              "p90_ms": 0.09369,
+              "p99_ms": 0.19403,
+              "max_ms": 1.79656
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 143,
+              "sum_ms": 4.93914,
+              "median_ms": 0.00755,
+              "p90_ms": 0.08492,
+              "p99_ms": 0.18048,
+              "max_ms": 1.78413
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 144,
+              "sum_ms": 1.70644,
+              "median_ms": 0.00746,
+              "p90_ms": 0.01746,
+              "p99_ms": 0.08786,
+              "max_ms": 0.094
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 0
+            },
+            "vector_norm_dequeue_service": {
+              "count": 0
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 183
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 182,
+            "sum_ms": 8.95162,
+            "median_ms": 0.02591,
+            "p90_ms": 0.07875,
+            "p99_ms": 0.21401,
+            "max_ms": 1.82351
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 184,
+              "names": [
+                [
+                  "aclnnMul_MulAiCore_Mul",
+                  22
+                ],
+                [
+                  "aclnnMatmul_SliceAiCore_Slice",
+                  12
+                ],
+                [
+                  "aclnnMatmul_TransposeAiCore_Transpose",
+                  12
+                ],
+                [
+                  "aclnnMean_ReduceMeanAiCore_ReduceMean",
+                  10
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  9
+                ],
+                [
+                  "aclnnAdds_AddAiCore_Add",
+                  9
+                ],
+                [
+                  "aclnnRsqrt_RsqrtAiCore_Rsqrt",
+                  9
+                ],
+                [
+                  "aclnnAdd_AddAiCore_Add",
+                  8
+                ],
+                [
+                  "aclnnAddmm_CastAiCore_Cast",
+                  8
+                ],
+                [
+                  "aclnnAddmm_MatMulCommon_MatMulV2",
+                  8
+                ],
+                [
+                  "aclnnMatmul_BatchMatMulNd_BatchMatMulV2",
+                  8
+                ],
+                [
+                  "aclnnSilu_SiluAiCore_Swish",
+                  8
+                ]
+              ],
+              "span": {
+                "window_ms": 8.9693,
+                "covered_ms": 0.98888,
+                "uncovered_ms": 7.98042,
+                "uncovered_pct": 88.975,
+                "gaps": {
+                  "count": 183,
+                  "sum_ms": 7.98042,
+                  "median_ms": 0.02428,
+                  "p90_ms": 0.07786,
+                  "p99_ms": 0.18594,
+                  "max_ms": 1.82364
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    0.2852,
+                    2.10884
+                  ],
+                  [
+                    3.34526,
+                    3.55832
+                  ],
+                  [
+                    6.13184,
+                    6.31778
+                  ],
+                  [
+                    3.15164,
+                    3.3271
+                  ],
+                  [
+                    2.50806,
+                    2.67428
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 184,
+                "sum_ms": 0.98888,
+                "median_ms": 0.0024,
+                "p90_ms": 0.01328,
+                "p99_ms": 0.0301,
+                "max_ms": 0.07168
+              },
+              "device_start_spacing_within_stream": {
+                "count": 183,
+                "sum_ms": 8.95926,
+                "median_ms": 0.0285,
+                "p90_ms": 0.0858,
+                "p99_ms": 0.21354,
+                "max_ms": 1.8305
+              },
+              "all_compute_during_span": {
+                "window_ms": 8.9693,
+                "covered_ms": 0.98888,
+                "uncovered_ms": 7.98042,
+                "uncovered_pct": 88.975,
+                "gaps": {
+                  "count": 183,
+                  "sum_ms": 7.98042,
+                  "median_ms": 0.02428,
+                  "p90_ms": 0.07786,
+                  "p99_ms": 0.18594,
+                  "max_ms": 1.82364
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    0.2852,
+                    2.10884
+                  ],
+                  [
+                    3.34526,
+                    3.55832
+                  ],
+                  [
+                    6.13184,
+                    6.31778
+                  ],
+                  [
+                    3.15164,
+                    3.3271
+                  ],
+                  [
+                    2.50806,
+                    2.67428
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 183,
+                  "sum_ms": 7.98042,
+                  "median_ms": 0.02428,
+                  "p90_ms": 0.07786,
+                  "p99_ms": 0.18594,
+                  "max_ms": 1.82364
+                },
+                "gaps_with_cann_launch": {
+                  "count": 37,
+                  "sum_ms": 2.68412,
+                  "median_ms": 0.02596,
+                  "p90_ms": 0.0415,
+                  "p99_ms": 1.82364,
+                  "max_ms": 1.82364
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 37,
+                  "sum_ms": 2.61685,
+                  "median_ms": 0.02061,
+                  "p90_ms": 0.04027,
+                  "p99_ms": 1.81905,
+                  "max_ms": 1.81905
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 37,
+                  "sum_ms": 0.06727,
+                  "median_ms": 0.00123,
+                  "p90_ms": 0.00491,
+                  "p99_ms": 0.00863,
+                  "max_ms": 0.00863
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {}
+        },
+        {
+          "name": "backward",
+          "start_us": "1795769206323373.49",
+          "wall_ms": 11.42118,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 11.42118,
+              "covered_ms": 1.59962,
+              "uncovered_ms": 9.82156,
+              "uncovered_pct": 85.994,
+              "gaps": {
+                "count": 314,
+                "sum_ms": 9.82156,
+                "median_ms": 0.0148,
+                "p90_ms": 0.09174,
+                "p99_ms": 0.15338,
+                "max_ms": 0.27578
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  11.00204,
+                  11.27782
+                ],
+                [
+                  2.82396,
+                  2.99716
+                ],
+                [
+                  2.01926,
+                  2.1901
+                ],
+                [
+                  0.68284,
+                  0.83622
+                ],
+                [
+                  1.67564,
+                  1.82736
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 11.42118,
+              "covered_ms": 1.60962,
+              "uncovered_ms": 9.81156,
+              "uncovered_pct": 85.907,
+              "gaps": {
+                "count": 327,
+                "sum_ms": 9.81156,
+                "median_ms": 0.01438,
+                "p90_ms": 0.08788,
+                "p99_ms": 0.15338,
+                "max_ms": 0.27578
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  11.00204,
+                  11.27782
+                ],
+                [
+                  2.82396,
+                  2.99716
+                ],
+                [
+                  2.01926,
+                  2.1901
+                ],
+                [
+                  0.68284,
+                  0.83622
+                ],
+                [
+                  1.67564,
+                  1.82736
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 11.42118,
+              "covered_ms": 1.60962,
+              "uncovered_ms": 9.81156,
+              "uncovered_pct": 85.907,
+              "gaps": {
+                "count": 327,
+                "sum_ms": 9.81156,
+                "median_ms": 0.01438,
+                "p90_ms": 0.08788,
+                "p99_ms": 0.15338,
+                "max_ms": 0.27578
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  11.00204,
+                  11.27782
+                ],
+                [
+                  2.82396,
+                  2.99716
+                ],
+                [
+                  2.01926,
+                  2.1901
+                ],
+                [
+                  0.68284,
+                  0.83622
+                ],
+                [
+                  1.67564,
+                  1.82736
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {},
+          "vector_norm_host_start_spacing": {
+            "count": 0
+          },
+          "vector_norm_host_call_duration": {
+            "count": 0
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 4,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 11.20988
+            },
+            "dequeue_service": {
+              "count": 4,
+              "sum_ms": 0.05111,
+              "median_ms": 0.01362,
+              "p90_ms": 0.01646,
+              "p99_ms": 0.01646,
+              "max_ms": 0.01646
+            },
+            "adjacent_worker_gaps": {
+              "count": 2,
+              "sum_ms": 0.06494,
+              "median_ms": 0.01406,
+              "p90_ms": 0.05088,
+              "p99_ms": 0.05088,
+              "max_ms": 0.05088
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 2,
+              "sum_ms": 0.05036,
+              "median_ms": 0.00694,
+              "p90_ms": 0.04342,
+              "p99_ms": 0.04342,
+              "max_ms": 0.04342
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 4,
+              "sum_ms": 0.03719,
+              "median_ms": 0.01083,
+              "p90_ms": 0.01178,
+              "p99_ms": 0.01178,
+              "max_ms": 0.01178
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 0
+            },
+            "vector_norm_dequeue_service": {
+              "count": 0
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 313
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 312,
+            "sum_ms": 11.19207,
+            "median_ms": 0.02127,
+            "p90_ms": 0.0953,
+            "p99_ms": 0.15929,
+            "max_ms": 0.27847
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 4,
+              "names": [
+                [
+                  "aclnnDivs_RealDivAiCore_RealDiv",
+                  1
+                ],
+                [
+                  "aclnnMuls_MulAiCore_Mul",
+                  1
+                ],
+                [
+                  "aclnnInplaceFillScalar_FillAiCore_Fill",
+                  1
+                ],
+                [
+                  "aclnnCat_ConcatD_ConcatD",
+                  1
+                ]
+              ],
+              "span": {
+                "window_ms": 11.23716,
+                "covered_ms": 0.05084,
+                "uncovered_ms": 11.18632,
+                "uncovered_pct": 99.548,
+                "gaps": {
+                  "count": 3,
+                  "sum_ms": 11.18632,
+                  "median_ms": 0.0672,
+                  "p90_ms": 11.10436,
+                  "p99_ms": 11.10436,
+                  "max_ms": 11.10436
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    0.08522,
+                    11.18958
+                  ],
+                  [
+                    0.0171,
+                    0.0843
+                  ],
+                  [
+                    0.00114,
+                    0.0159
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 4,
+                "sum_ms": 0.05084,
+                "median_ms": 0.0012,
+                "p90_ms": 0.04758,
+                "p99_ms": 0.04758,
+                "max_ms": 0.04758
+              },
+              "device_start_spacing_within_stream": {
+                "count": 3,
+                "sum_ms": 11.18958,
+                "median_ms": 0.0684,
+                "p90_ms": 11.10528,
+                "p99_ms": 11.10528,
+                "max_ms": 11.10528
+              },
+              "all_compute_during_span": {
+                "window_ms": 11.23716,
+                "covered_ms": 1.59962,
+                "uncovered_ms": 9.63754,
+                "uncovered_pct": 85.765,
+                "gaps": {
+                  "count": 312,
+                  "sum_ms": 9.63754,
+                  "median_ms": 0.0148,
+                  "p90_ms": 0.08824,
+                  "p99_ms": 0.15338,
+                  "max_ms": 0.27578
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    10.9138,
+                    11.18958
+                  ],
+                  [
+                    2.73572,
+                    2.90892
+                  ],
+                  [
+                    1.93102,
+                    2.10186
+                  ],
+                  [
+                    0.5946,
+                    0.74798
+                  ],
+                  [
+                    1.5874,
+                    1.73912
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 3,
+                  "sum_ms": 0.35774,
+                  "median_ms": 0.0672,
+                  "p90_ms": 0.27578,
+                  "p99_ms": 0.27578,
+                  "max_ms": 0.27578
+                },
+                "gaps_with_cann_launch": {
+                  "count": 2,
+                  "sum_ms": 0.34298,
+                  "median_ms": 0.0672,
+                  "p90_ms": 0.27578,
+                  "p99_ms": 0.27578,
+                  "max_ms": 0.27578
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 2,
+                  "sum_ms": 0.34145,
+                  "median_ms": 0.06595,
+                  "p90_ms": 0.2755,
+                  "p99_ms": 0.2755,
+                  "max_ms": 0.2755
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 2,
+                  "sum_ms": 0.00153,
+                  "median_ms": 0.00028,
+                  "p90_ms": 0.00125,
+                  "p99_ms": 0.00125,
+                  "max_ms": 0.00125
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {},
+          "autograd_worker_flow_count": 309,
+          "flow_compute_including_autograd_workers": {
+            "96388544": {
+              "count": 313,
+              "names": [
+                [
+                  "aclnnMul_MulAiCore_Mul",
+                  62
+                ],
+                [
+                  "aclnnReduceSum_ReduceSumOpAiCore_ReduceSum",
+                  27
+                ],
+                [
+                  "aclnnMuls_Muls_Muls",
+                  22
+                ],
+                [
+                  "aclnnAdd_AddAiCore_Add",
+                  22
+                ],
+                [
+                  "aclnnMatmul_TransposeAiCore_Transpose",
+                  20
+                ],
+                [
+                  "aclnnDivs_RealDivAiCore_RealDiv",
+                  17
+                ],
+                [
+                  "aclnnMm_MatMulCommon_MatMulV2",
+                  16
+                ],
+                [
+                  "aclnnMatmul_BatchMatMulNd_BatchMatMulV2",
+                  16
+                ],
+                [
+                  "aclnnMatmul_SliceAiCore_Slice",
+                  12
+                ],
+                [
+                  "aclnnEmbeddingDenseBackward_CastAiCore_Cast",
+                  12
+                ],
+                [
+                  "aclnnDivs_BroadcastToAiCore_BroadcastTo",
+                  10
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  9
+                ]
+              ],
+              "span": {
+                "window_ms": 11.23716,
+                "covered_ms": 1.59962,
+                "uncovered_ms": 9.63754,
+                "uncovered_pct": 85.765,
+                "gaps": {
+                  "count": 312,
+                  "sum_ms": 9.63754,
+                  "median_ms": 0.0148,
+                  "p90_ms": 0.08824,
+                  "p99_ms": 0.15338,
+                  "max_ms": 0.27578
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    10.9138,
+                    11.18958
+                  ],
+                  [
+                    2.73572,
+                    2.90892
+                  ],
+                  [
+                    1.93102,
+                    2.10186
+                  ],
+                  [
+                    0.5946,
+                    0.74798
+                  ],
+                  [
+                    1.5874,
+                    1.73912
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 313,
+                "sum_ms": 1.59962,
+                "median_ms": 0.00234,
+                "p90_ms": 0.01186,
+                "p99_ms": 0.0183,
+                "max_ms": 0.30058
+              },
+              "device_start_spacing_within_stream": {
+                "count": 312,
+                "sum_ms": 11.18958,
+                "median_ms": 0.01844,
+                "p90_ms": 0.09528,
+                "p99_ms": 0.17452,
+                "max_ms": 0.30174
+              },
+              "all_compute_during_span": {
+                "window_ms": 11.23716,
+                "covered_ms": 1.59962,
+                "uncovered_ms": 9.63754,
+                "uncovered_pct": 85.765,
+                "gaps": {
+                  "count": 312,
+                  "sum_ms": 9.63754,
+                  "median_ms": 0.0148,
+                  "p90_ms": 0.08824,
+                  "p99_ms": 0.15338,
+                  "max_ms": 0.27578
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    10.9138,
+                    11.18958
+                  ],
+                  [
+                    2.73572,
+                    2.90892
+                  ],
+                  [
+                    1.93102,
+                    2.10186
+                  ],
+                  [
+                    0.5946,
+                    0.74798
+                  ],
+                  [
+                    1.5874,
+                    1.73912
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 312,
+                  "sum_ms": 9.63754,
+                  "median_ms": 0.0148,
+                  "p90_ms": 0.08824,
+                  "p99_ms": 0.15338,
+                  "max_ms": 0.27578
+                },
+                "gaps_with_cann_launch": {
+                  "count": 112,
+                  "sum_ms": 6.20724,
+                  "median_ms": 0.04586,
+                  "p90_ms": 0.12886,
+                  "p99_ms": 0.1732,
+                  "max_ms": 0.27578
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 112,
+                  "sum_ms": 5.98396,
+                  "median_ms": 0.04416,
+                  "p90_ms": 0.12613,
+                  "p99_ms": 0.16883,
+                  "max_ms": 0.2755
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 112,
+                  "sum_ms": 0.22328,
+                  "median_ms": 0.00151,
+                  "p90_ms": 0.00526,
+                  "p99_ms": 0.00773,
+                  "max_ms": 0.00896
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "optimizer",
+          "start_us": "1795769206334803.71",
+          "wall_ms": 4.8942,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 4.8942,
+              "covered_ms": 0.66754,
+              "uncovered_ms": 4.22666,
+              "uncovered_pct": 86.361,
+              "gaps": {
+                "count": 119,
+                "sum_ms": 4.22666,
+                "median_ms": 0.02504,
+                "p90_ms": 0.04384,
+                "p99_ms": 0.26502,
+                "max_ms": 0.28092
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  3.21342,
+                  3.49434
+                ],
+                [
+                  4.62918,
+                  4.8942
+                ],
+                [
+                  3.82346,
+                  4.0411
+                ],
+                [
+                  0.4384,
+                  0.6547
+                ],
+                [
+                  0.28534,
+                  0.43662
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 4.8942,
+              "covered_ms": 0.6703,
+              "uncovered_ms": 4.2239,
+              "uncovered_pct": 86.304,
+              "gaps": {
+                "count": 123,
+                "sum_ms": 4.2239,
+                "median_ms": 0.02516,
+                "p90_ms": 0.05776,
+                "p99_ms": 0.21764,
+                "max_ms": 0.26502
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  4.62918,
+                  4.8942
+                ],
+                [
+                  3.82346,
+                  4.0411
+                ],
+                [
+                  0.4384,
+                  0.6547
+                ],
+                [
+                  3.21342,
+                  3.40316
+                ],
+                [
+                  4.19548,
+                  4.31024
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 4.8942,
+              "covered_ms": 0.67764,
+              "uncovered_ms": 4.21656,
+              "uncovered_pct": 86.154,
+              "gaps": {
+                "count": 131,
+                "sum_ms": 4.21656,
+                "median_ms": 0.02504,
+                "p90_ms": 0.04988,
+                "p99_ms": 0.21764,
+                "max_ms": 0.26502
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  4.62918,
+                  4.8942
+                ],
+                [
+                  3.82346,
+                  4.0411
+                ],
+                [
+                  0.4604,
+                  0.6547
+                ],
+                [
+                  3.21342,
+                  3.33622
+                ],
+                [
+                  4.19548,
+                  4.31024
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {
+            "aten::linalg_vector_norm": 41
+          },
+          "vector_norm_host_start_spacing": {
+            "count": 40,
+            "sum_ms": 3.04509,
+            "median_ms": 0.06102,
+            "p90_ms": 0.07346,
+            "p99_ms": 0.62707,
+            "max_ms": 0.62707
+          },
+          "vector_norm_host_call_duration": {
+            "count": 41,
+            "sum_ms": 0.65968,
+            "median_ms": 0.01511,
+            "p90_ms": 0.01885,
+            "p99_ms": 0.02764,
+            "max_ms": 0.02764
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 131,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 4.47426
+            },
+            "dequeue_service": {
+              "count": 131,
+              "sum_ms": 1.61802,
+              "median_ms": 0.01015,
+              "p90_ms": 0.0123,
+              "p99_ms": 0.11128,
+              "max_ms": 0.13642
+            },
+            "adjacent_worker_gaps": {
+              "count": 130,
+              "sum_ms": 2.85624,
+              "median_ms": 0.01452,
+              "p90_ms": 0.03527,
+              "p99_ms": 0.17265,
+              "max_ms": 0.22581
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 130,
+              "sum_ms": 2.09197,
+              "median_ms": 0.00773,
+              "p90_ms": 0.02913,
+              "p99_ms": 0.16256,
+              "max_ms": 0.21809
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 131,
+              "sum_ms": 2.50086,
+              "median_ms": 0.00673,
+              "p90_ms": 0.07832,
+              "p99_ms": 0.14014,
+              "max_ms": 0.14196
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 40,
+              "sum_ms": 3.04325,
+              "median_ms": 0.06092,
+              "p90_ms": 0.07464,
+              "p99_ms": 0.62002,
+              "max_ms": 0.62002
+            },
+            "vector_norm_dequeue_service": {
+              "count": 41,
+              "sum_ms": 0.46696,
+              "median_ms": 0.01118,
+              "p90_ms": 0.01189,
+              "p99_ms": 0.0146,
+              "max_ms": 0.0146
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 118
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 117,
+            "sum_ms": 4.46328,
+            "median_ms": 0.0296,
+            "p90_ms": 0.04825,
+            "p99_ms": 0.23377,
+            "max_ms": 0.2789
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 118,
+              "names": [
+                [
+                  "aclnnInplaceCopy_CastAiCore_Cast",
+                  44
+                ],
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  41
+                ],
+                [
+                  "aclnnDivs_RealDivAiCore_RealDiv",
+                  4
+                ],
+                [
+                  "aclnnCat_ConcatD_ConcatD",
+                  3
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  2
+                ],
+                [
+                  "aclnnAdds_AddAiCore_Add",
+                  2
+                ],
+                [
+                  "aclnnMuls_MulAiCore_Mul",
+                  2
+                ],
+                [
+                  "aclnnInplaceMuls_MulAiCore_Mul",
+                  2
+                ],
+                [
+                  "aclnnIsFinite_IsFiniteAiCore_IsFinite",
+                  1
+                ],
+                [
+                  "aclnnAll_ReduceAll_ReduceAll",
+                  1
+                ],
+                [
+                  "aclnnLogicalNot_LogicalNotAiCore_LogicalNot",
+                  1
+                ],
+                [
+                  "aclnnCast_CastAiCore_Cast",
+                  1
+                ]
+              ],
+              "span": {
+                "window_ms": 4.5256,
+                "covered_ms": 0.66754,
+                "uncovered_ms": 3.85806,
+                "uncovered_pct": 85.25,
+                "gaps": {
+                  "count": 117,
+                  "sum_ms": 3.85806,
+                  "median_ms": 0.02504,
+                  "p90_ms": 0.04256,
+                  "p99_ms": 0.21764,
+                  "max_ms": 0.28092
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    3.10984,
+                    3.39076
+                  ],
+                  [
+                    3.71988,
+                    3.93752
+                  ],
+                  [
+                    0.33482,
+                    0.55112
+                  ],
+                  [
+                    0.18176,
+                    0.33304
+                  ],
+                  [
+                    4.0919,
+                    4.20666
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 118,
+                "sum_ms": 0.66754,
+                "median_ms": 0.00236,
+                "p90_ms": 0.0138,
+                "p99_ms": 0.06322,
+                "max_ms": 0.07434
+              },
+              "device_start_spacing_within_stream": {
+                "count": 116,
+                "sum_ms": 4.66564,
+                "median_ms": 0.02742,
+                "p90_ms": 0.0563,
+                "p99_ms": 0.28556,
+                "max_ms": 0.48612
+              },
+              "all_compute_during_span": {
+                "window_ms": 4.5256,
+                "covered_ms": 0.66754,
+                "uncovered_ms": 3.85806,
+                "uncovered_pct": 85.25,
+                "gaps": {
+                  "count": 117,
+                  "sum_ms": 3.85806,
+                  "median_ms": 0.02504,
+                  "p90_ms": 0.04256,
+                  "p99_ms": 0.21764,
+                  "max_ms": 0.28092
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    3.10984,
+                    3.39076
+                  ],
+                  [
+                    3.71988,
+                    3.93752
+                  ],
+                  [
+                    0.33482,
+                    0.55112
+                  ],
+                  [
+                    0.18176,
+                    0.33304
+                  ],
+                  [
+                    4.0919,
+                    4.20666
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 117,
+                  "sum_ms": 3.85806,
+                  "median_ms": 0.02504,
+                  "p90_ms": 0.04256,
+                  "p99_ms": 0.21764,
+                  "max_ms": 0.28092
+                },
+                "gaps_with_cann_launch": {
+                  "count": 19,
+                  "sum_ms": 0.39574,
+                  "median_ms": 0.02472,
+                  "p90_ms": 0.03714,
+                  "p99_ms": 0.09986,
+                  "max_ms": 0.09986
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 19,
+                  "sum_ms": 0.37906,
+                  "median_ms": 0.0232,
+                  "p90_ms": 0.03455,
+                  "p99_ms": 0.09746,
+                  "max_ms": 0.09746
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 19,
+                  "sum_ms": 0.01668,
+                  "median_ms": 0.00019,
+                  "p90_ms": 0.00247,
+                  "p99_ms": 0.0031,
+                  "max_ms": 0.0031
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {
+            "96388544": {
+              "count": 41,
+              "names": [
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  41
+                ]
+              ],
+              "span": {
+                "window_ms": 3.04234,
+                "covered_ms": 0.161,
+                "uncovered_ms": 2.88134,
+                "uncovered_pct": 94.708,
+                "gaps": {
+                  "count": 40,
+                  "sum_ms": 2.88134,
+                  "median_ms": 0.05736,
+                  "p90_ms": 0.0706,
+                  "p99_ms": 0.61554,
+                  "max_ms": 0.61554
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.42568,
+                    3.04122
+                  ],
+                  [
+                    2.33946,
+                    2.42372
+                  ],
+                  [
+                    0.93238,
+                    1.00566
+                  ],
+                  [
+                    0.0725,
+                    0.1452
+                  ],
+                  [
+                    2.26494,
+                    2.33554
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 41,
+                "sum_ms": 0.161,
+                "median_ms": 0.00426,
+                "p90_ms": 0.00486,
+                "p99_ms": 0.01552,
+                "max_ms": 0.01552
+              },
+              "device_start_spacing_within_stream": {
+                "count": 40,
+                "sum_ms": 3.04122,
+                "median_ms": 0.06082,
+                "p90_ms": 0.07512,
+                "p99_ms": 0.6175,
+                "max_ms": 0.6175
+              },
+              "all_compute_during_span": {
+                "window_ms": 3.04234,
+                "covered_ms": 0.25966,
+                "uncovered_ms": 2.78268,
+                "uncovered_pct": 91.465,
+                "gaps": {
+                  "count": 91,
+                  "sum_ms": 2.78268,
+                  "median_ms": 0.02576,
+                  "p90_ms": 0.04224,
+                  "p99_ms": 0.09986,
+                  "max_ms": 0.28092
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.53262,
+                    2.81354
+                  ],
+                  [
+                    2.8545,
+                    2.95436
+                  ],
+                  [
+                    2.95578,
+                    3.02458
+                  ],
+                  [
+                    2.33946,
+                    2.39722
+                  ],
+                  [
+                    0.93238,
+                    0.97622
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 40,
+                  "sum_ms": 0.9403,
+                  "median_ms": 0.02454,
+                  "p90_ms": 0.02736,
+                  "p99_ms": 0.03714,
+                  "max_ms": 0.03714
+                },
+                "gaps_with_cann_launch": {
+                  "count": 6,
+                  "sum_ms": 0.17782,
+                  "median_ms": 0.02504,
+                  "p90_ms": 0.03448,
+                  "p99_ms": 0.03714,
+                  "max_ms": 0.03714
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 6,
+                  "sum_ms": 0.16983,
+                  "median_ms": 0.02482,
+                  "p90_ms": 0.03201,
+                  "p99_ms": 0.03455,
+                  "max_ms": 0.03455
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 6,
+                  "sum_ms": 0.00799,
+                  "median_ms": 0.00099,
+                  "p90_ms": 0.00247,
+                  "p99_ms": 0.00259,
+                  "max_ms": 0.00259
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "native_norm",
+          "start_us": "1795769206335358.91",
+          "wall_ms": 3.11547,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 3.11547,
+              "covered_ms": 0.2636,
+              "uncovered_ms": 2.85187,
+              "uncovered_pct": 91.539,
+              "gaps": {
+                "count": 92,
+                "sum_ms": 2.85187,
+                "median_ms": 0.02582,
+                "p90_ms": 0.04224,
+                "p99_ms": 0.09986,
+                "max_ms": 0.28092
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  2.65822,
+                  2.93914
+                ],
+                [
+                  2.9801,
+                  3.07996
+                ],
+                [
+                  0.0,
+                  0.0995
+                ],
+                [
+                  2.46506,
+                  2.52282
+                ],
+                [
+                  1.05798,
+                  1.10182
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 3.11547,
+              "covered_ms": 0.26496,
+              "uncovered_ms": 2.85051,
+              "uncovered_pct": 91.495,
+              "gaps": {
+                "count": 94,
+                "sum_ms": 2.85051,
+                "median_ms": 0.02576,
+                "p90_ms": 0.04232,
+                "p99_ms": 0.09986,
+                "max_ms": 0.18974
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  2.65822,
+                  2.84796
+                ],
+                [
+                  2.9801,
+                  3.07996
+                ],
+                [
+                  0.0,
+                  0.0995
+                ],
+                [
+                  2.87474,
+                  2.93914
+                ],
+                [
+                  2.46506,
+                  2.52282
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 3.11547,
+              "covered_ms": 0.26866,
+              "uncovered_ms": 2.84681,
+              "uncovered_pct": 91.377,
+              "gaps": {
+                "count": 98,
+                "sum_ms": 2.84681,
+                "median_ms": 0.02542,
+                "p90_ms": 0.04224,
+                "p99_ms": 0.09986,
+                "max_ms": 0.1228
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  2.65822,
+                  2.78102
+                ],
+                [
+                  2.9801,
+                  3.07996
+                ],
+                [
+                  0.0,
+                  0.0995
+                ],
+                [
+                  2.78466,
+                  2.84796
+                ],
+                [
+                  2.46506,
+                  2.52282
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {
+            "aten::linalg_vector_norm": 40
+          },
+          "vector_norm_host_start_spacing": {
+            "count": 39,
+            "sum_ms": 2.41802,
+            "median_ms": 0.06089,
+            "p90_ms": 0.07296,
+            "p99_ms": 0.08201,
+            "max_ms": 0.08201
+          },
+          "vector_norm_host_call_duration": {
+            "count": 40,
+            "sum_ms": 0.64301,
+            "median_ms": 0.01511,
+            "p90_ms": 0.01885,
+            "p99_ms": 0.02764,
+            "max_ms": 0.02764
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 96,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 2.98939
+            },
+            "dequeue_service": {
+              "count": 96,
+              "sum_ms": 1.08716,
+              "median_ms": 0.0108,
+              "p90_ms": 0.01206,
+              "p99_ms": 0.02356,
+              "max_ms": 0.11128
+            },
+            "adjacent_worker_gaps": {
+              "count": 95,
+              "sum_ms": 1.90223,
+              "median_ms": 0.01891,
+              "p90_ms": 0.03227,
+              "p99_ms": 0.07889,
+              "max_ms": 0.10712
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 95,
+              "sum_ms": 1.32816,
+              "median_ms": 0.01264,
+              "p90_ms": 0.02527,
+              "p99_ms": 0.0705,
+              "max_ms": 0.09876
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 96,
+              "sum_ms": 1.4076,
+              "median_ms": 0.00644,
+              "p90_ms": 0.01175,
+              "p99_ms": 0.10938,
+              "max_ms": 0.10955
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 39,
+              "sum_ms": 2.42323,
+              "median_ms": 0.06052,
+              "p90_ms": 0.07425,
+              "p99_ms": 0.08431,
+              "max_ms": 0.08431
+            },
+            "vector_norm_dequeue_service": {
+              "count": 40,
+              "sum_ms": 0.45341,
+              "median_ms": 0.01118,
+              "p90_ms": 0.01184,
+              "p99_ms": 0.0146,
+              "max_ms": 0.0146
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 91
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 90,
+            "sum_ms": 2.97786,
+            "median_ms": 0.03041,
+            "p90_ms": 0.04516,
+            "p99_ms": 0.09041,
+            "max_ms": 0.2789
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 91,
+              "names": [
+                [
+                  "aclnnInplaceCopy_CastAiCore_Cast",
+                  40
+                ],
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  40
+                ],
+                [
+                  "aclnnCat_ConcatD_ConcatD",
+                  3
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  2
+                ],
+                [
+                  "aclnnReduceSum_ReduceSumOpAiCore_ReduceSum",
+                  1
+                ],
+                [
+                  "aclnnAbs_AbsAiCore_Abs",
+                  1
+                ],
+                [
+                  "aclnnEqScalar_EqualAiCore_Equal",
+                  1
+                ],
+                [
+                  "aclnnNeTensor_NotEqualAiCore_NotEqual",
+                  1
+                ],
+                [
+                  "aclnnLogicalOr_LogicalOrAiCore_LogicalOr",
+                  1
+                ],
+                [
+                  "aclnnInplaceMaskedFillTensor_MaskedFillAiCore_MaskedFill",
+                  1
+                ]
+              ],
+              "span": {
+                "window_ms": 2.98188,
+                "covered_ms": 0.2636,
+                "uncovered_ms": 2.71828,
+                "uncovered_pct": 91.16,
+                "gaps": {
+                  "count": 90,
+                  "sum_ms": 2.71828,
+                  "median_ms": 0.0253,
+                  "p90_ms": 0.04206,
+                  "p99_ms": 0.09986,
+                  "max_ms": 0.28092
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.55872,
+                    2.83964
+                  ],
+                  [
+                    2.8806,
+                    2.98046
+                  ],
+                  [
+                    2.36556,
+                    2.42332
+                  ],
+                  [
+                    0.95848,
+                    1.00232
+                  ],
+                  [
+                    2.29104,
+                    2.33406
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 91,
+                "sum_ms": 0.2636,
+                "median_ms": 0.00236,
+                "p90_ms": 0.00478,
+                "p99_ms": 0.01236,
+                "max_ms": 0.01552
+              },
+              "device_start_spacing_within_stream": {
+                "count": 90,
+                "sum_ms": 2.98046,
+                "median_ms": 0.0271,
+                "p90_ms": 0.0445,
+                "p99_ms": 0.10098,
+                "max_ms": 0.28556
+              },
+              "all_compute_during_span": {
+                "window_ms": 2.98188,
+                "covered_ms": 0.2636,
+                "uncovered_ms": 2.71828,
+                "uncovered_pct": 91.16,
+                "gaps": {
+                  "count": 90,
+                  "sum_ms": 2.71828,
+                  "median_ms": 0.0253,
+                  "p90_ms": 0.04206,
+                  "p99_ms": 0.09986,
+                  "max_ms": 0.28092
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.55872,
+                    2.83964
+                  ],
+                  [
+                    2.8806,
+                    2.98046
+                  ],
+                  [
+                    2.36556,
+                    2.42332
+                  ],
+                  [
+                    0.95848,
+                    1.00232
+                  ],
+                  [
+                    2.29104,
+                    2.33406
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 90,
+                  "sum_ms": 2.71828,
+                  "median_ms": 0.0253,
+                  "p90_ms": 0.04206,
+                  "p99_ms": 0.09986,
+                  "max_ms": 0.28092
+                },
+                "gaps_with_cann_launch": {
+                  "count": 10,
+                  "sum_ms": 0.39436,
+                  "median_ms": 0.03146,
+                  "p90_ms": 0.05776,
+                  "p99_ms": 0.09986,
+                  "max_ms": 0.09986
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 10,
+                  "sum_ms": 0.37906,
+                  "median_ms": 0.03047,
+                  "p90_ms": 0.05466,
+                  "p99_ms": 0.09746,
+                  "max_ms": 0.09746
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 10,
+                  "sum_ms": 0.0153,
+                  "median_ms": 0.00142,
+                  "p90_ms": 0.00259,
+                  "p99_ms": 0.0031,
+                  "max_ms": 0.0031
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {
+            "96388544": {
+              "count": 40,
+              "names": [
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  40
+                ]
+              ],
+              "span": {
+                "window_ms": 2.42568,
+                "covered_ms": 0.15988,
+                "uncovered_ms": 2.2658,
+                "uncovered_pct": 93.409,
+                "gaps": {
+                  "count": 39,
+                  "sum_ms": 2.2658,
+                  "median_ms": 0.05658,
+                  "p90_ms": 0.07046,
+                  "p99_ms": 0.08426,
+                  "max_ms": 0.08426
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.33946,
+                    2.42372
+                  ],
+                  [
+                    0.93238,
+                    1.00566
+                  ],
+                  [
+                    0.0725,
+                    0.1452
+                  ],
+                  [
+                    2.26494,
+                    2.33554
+                  ],
+                  [
+                    2.193,
+                    2.26346
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 40,
+                "sum_ms": 0.15988,
+                "median_ms": 0.00428,
+                "p90_ms": 0.00486,
+                "p99_ms": 0.01552,
+                "max_ms": 0.01552
+              },
+              "device_start_spacing_within_stream": {
+                "count": 39,
+                "sum_ms": 2.42372,
+                "median_ms": 0.06076,
+                "p90_ms": 0.0727,
+                "p99_ms": 0.08818,
+                "max_ms": 0.08818
+              },
+              "all_compute_during_span": {
+                "window_ms": 2.42568,
+                "covered_ms": 0.22468,
+                "uncovered_ms": 2.201,
+                "uncovered_pct": 90.737,
+                "gaps": {
+                  "count": 78,
+                  "sum_ms": 2.201,
+                  "median_ms": 0.0262,
+                  "p90_ms": 0.03986,
+                  "p99_ms": 0.04384,
+                  "max_ms": 0.05776
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.33946,
+                    2.39722
+                  ],
+                  [
+                    0.93238,
+                    0.97622
+                  ],
+                  [
+                    2.26494,
+                    2.30796
+                  ],
+                  [
+                    1.143,
+                    1.18554
+                  ],
+                  [
+                    1.93908,
+                    1.9814
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 39,
+                  "sum_ms": 0.9246,
+                  "median_ms": 0.02454,
+                  "p90_ms": 0.02736,
+                  "p99_ms": 0.03714,
+                  "max_ms": 0.03714
+                },
+                "gaps_with_cann_launch": {
+                  "count": 6,
+                  "sum_ms": 0.17782,
+                  "median_ms": 0.02504,
+                  "p90_ms": 0.03448,
+                  "p99_ms": 0.03714,
+                  "max_ms": 0.03714
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 6,
+                  "sum_ms": 0.16983,
+                  "median_ms": 0.02482,
+                  "p90_ms": 0.03201,
+                  "p99_ms": 0.03455,
+                  "max_ms": 0.03455
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 6,
+                  "sum_ms": 0.00799,
+                  "median_ms": 0.00099,
+                  "p90_ms": 0.00247,
+                  "p99_ms": 0.00259,
+                  "max_ms": 0.00259
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ProfilerStep#5",
+      "start_us": "1795769206339736.39",
+      "wall_ms": 25.72545,
+      "device_compute_in_host_window": {
+        "96388544": {
+          "window_ms": 25.72545,
+          "covered_ms": 3.405,
+          "uncovered_ms": 22.32045,
+          "uncovered_pct": 86.764,
+          "gaps": {
+            "count": 617,
+            "sum_ms": 22.32045,
+            "median_ms": 0.0214,
+            "p90_ms": 0.0754,
+            "p99_ms": 0.22218,
+            "max_ms": 1.81356
+          },
+          "largest_gaps_ms_from_window_start": [
+            [
+              1.43438,
+              3.24794
+            ],
+            [
+              0.0,
+              1.196
+            ],
+            [
+              25.44518,
+              25.72545
+            ],
+            [
+              20.51948,
+              20.78226
+            ],
+            [
+              24.60972,
+              24.85598
+            ]
+          ]
+        }
+      },
+      "compute_aicpu_dma_in_host_window": {
+        "96388544": {
+          "window_ms": 25.72545,
+          "covered_ms": 3.41802,
+          "uncovered_ms": 22.30743,
+          "uncovered_pct": 86.713,
+          "gaps": {
+            "count": 638,
+            "sum_ms": 22.30743,
+            "median_ms": 0.02056,
+            "p90_ms": 0.0724,
+            "p99_ms": 0.21624,
+            "max_ms": 1.81356
+          },
+          "largest_gaps_ms_from_window_start": [
+            [
+              1.43438,
+              3.24794
+            ],
+            [
+              0.0,
+              1.196
+            ],
+            [
+              25.44518,
+              25.72545
+            ],
+            [
+              20.51948,
+              20.78226
+            ],
+            [
+              24.60972,
+              24.85598
+            ]
+          ]
+        }
+      },
+      "all_raw_device_tasks_in_host_window": {
+        "96388544": {
+          "window_ms": 25.72545,
+          "covered_ms": 3.42278,
+          "uncovered_ms": 22.30267,
+          "uncovered_pct": 86.695,
+          "gaps": {
+            "count": 646,
+            "sum_ms": 22.30267,
+            "median_ms": 0.01996,
+            "p90_ms": 0.06972,
+            "p99_ms": 0.20396,
+            "max_ms": 1.81356
+          },
+          "largest_gaps_ms_from_window_start": [
+            [
+              1.43438,
+              3.24794
+            ],
+            [
+              0.0,
+              1.196
+            ],
+            [
+              25.44518,
+              25.72545
+            ],
+            [
+              20.51948,
+              20.78226
+            ],
+            [
+              24.60972,
+              24.85598
+            ]
+          ]
+        }
+      },
+      "cpu_norm_op_counts": {
+        "aten::linalg_vector_norm": 41
+      },
+      "vector_norm_host_start_spacing": {
+        "count": 40,
+        "sum_ms": 2.94219,
+        "median_ms": 0.06019,
+        "p90_ms": 0.07434,
+        "p99_ms": 0.55511,
+        "max_ms": 0.55511
+      },
+      "vector_norm_host_call_duration": {
+        "count": 41,
+        "sum_ms": 0.67772,
+        "median_ms": 0.01526,
+        "p90_ms": 0.01992,
+        "p99_ms": 0.03443,
+        "max_ms": 0.03443
+      },
+      "same_host_clock_queue": {
+        "paired_requests": 279,
+        "matched_worker_spans_ms": {
+          "(94129, 94154)": 24.2054
+        },
+        "dequeue_service": {
+          "count": 279,
+          "sum_ms": 4.87069,
+          "median_ms": 0.01084,
+          "p90_ms": 0.03335,
+          "p99_ms": 0.10422,
+          "max_ms": 0.17486
+        },
+        "adjacent_worker_gaps": {
+          "count": 277,
+          "sum_ms": 8.613,
+          "median_ms": 0.01417,
+          "p90_ms": 0.05564,
+          "p99_ms": 0.17816,
+          "max_ms": 1.77075
+        },
+        "worker_gap_before_next_enqueue_start": {
+          "count": 277,
+          "sum_ms": 6.98711,
+          "median_ms": 0.00768,
+          "p90_ms": 0.04711,
+          "p99_ms": 0.16781,
+          "max_ms": 1.75913
+        },
+        "enqueue_start_to_dequeue_start": {
+          "count": 279,
+          "sum_ms": 4.47461,
+          "median_ms": 0.00696,
+          "p90_ms": 0.02746,
+          "p99_ms": 0.13172,
+          "max_ms": 0.13668
+        },
+        "vector_norm_dequeue_start_spacing": {
+          "count": 40,
+          "sum_ms": 2.94047,
+          "median_ms": 0.06031,
+          "p90_ms": 0.07397,
+          "p99_ms": 0.55725,
+          "max_ms": 0.55725
+        },
+        "vector_norm_dequeue_service": {
+          "count": 41,
+          "sum_ms": 0.46313,
+          "median_ms": 0.01102,
+          "p90_ms": 0.01157,
+          "p99_ms": 0.01596,
+          "max_ms": 0.01596
+        }
+      },
+      "runtime_launch_event_counts_all_threads": {
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 615
+      },
+      "runtime_launch_spacing_within_thread": {
+        "count": 614,
+        "sum_ms": 24.17872,
+        "median_ms": 0.02418,
+        "p90_ms": 0.07547,
+        "p99_ms": 0.21783,
+        "max_ms": 1.80159
+      },
+      "flow_correlated_compute": {
+        "96388544": {
+          "count": 306,
+          "names": [
+            [
+              "aclnnInplaceCopy_CastAiCore_Cast",
+              45
+            ],
+            [
+              "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+              41
+            ],
+            [
+              "aclnnMul_MulAiCore_Mul",
+              22
+            ],
+            [
+              "aclnnMatmul_SliceAiCore_Slice",
+              12
+            ],
+            [
+              "aclnnMatmul_TransposeAiCore_Transpose",
+              12
+            ],
+            [
+              "aclnnPowTensorScalar_PowsAiCore_Pows",
+              11
+            ],
+            [
+              "aclnnAdds_AddAiCore_Add",
+              11
+            ],
+            [
+              "aclnnMean_ReduceMeanAiCore_ReduceMean",
+              10
+            ],
+            [
+              "aclnnDivs_RealDivAiCore_RealDiv",
+              10
+            ],
+            [
+              "aclnnRsqrt_RsqrtAiCore_Rsqrt",
+              9
+            ],
+            [
+              "aclnnAdd_AddAiCore_Add",
+              8
+            ],
+            [
+              "aclnnAddmm_CastAiCore_Cast",
+              8
+            ]
+          ],
+          "span": {
+            "window_ms": 24.24918,
+            "covered_ms": 1.73348,
+            "uncovered_ms": 22.5157,
+            "uncovered_pct": 92.851,
+            "gaps": {
+              "count": 305,
+              "sum_ms": 22.5157,
+              "median_ms": 0.0239,
+              "p90_ms": 0.0724,
+              "p99_ms": 0.2446,
+              "max_ms": 10.7337
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                8.85256,
+                19.58626
+              ],
+              [
+                0.23838,
+                2.05194
+              ],
+              [
+                23.41372,
+                23.65998
+              ],
+              [
+                22.85472,
+                23.09932
+              ],
+              [
+                20.13798,
+                20.36016
+              ]
+            ]
+          },
+          "task_duration": {
+            "count": 306,
+            "sum_ms": 1.73348,
+            "median_ms": 0.00236,
+            "p90_ms": 0.01384,
+            "p99_ms": 0.05362,
+            "max_ms": 0.08248
+          },
+          "device_start_spacing_within_stream": {
+            "count": 304,
+            "sum_ms": 24.37088,
+            "median_ms": 0.0288,
+            "p90_ms": 0.07712,
+            "p99_ms": 0.2574,
+            "max_ms": 10.73472
+          },
+          "all_compute_during_span": {
+            "window_ms": 24.24918,
+            "covered_ms": 3.405,
+            "uncovered_ms": 20.84418,
+            "uncovered_pct": 85.958,
+            "gaps": {
+              "count": 615,
+              "sum_ms": 20.84418,
+              "median_ms": 0.02134,
+              "p90_ms": 0.07422,
+              "p99_ms": 0.20396,
+              "max_ms": 1.81356
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                0.23838,
+                2.05194
+              ],
+              [
+                19.32348,
+                19.58626
+              ],
+              [
+                23.41372,
+                23.65998
+              ],
+              [
+                22.85472,
+                23.09932
+              ],
+              [
+                20.13798,
+                20.36016
+              ]
+            ]
+          },
+          "dispatch_evidence": {
+            "global_internal_gaps_before_attributed_kernel": {
+              "count": 305,
+              "sum_ms": 12.04478,
+              "median_ms": 0.0239,
+              "p90_ms": 0.0724,
+              "p99_ms": 0.2446,
+              "max_ms": 1.81356
+            },
+            "gaps_with_cann_launch": {
+              "count": 109,
+              "sum_ms": 7.08548,
+              "median_ms": 0.03168,
+              "p90_ms": 0.12246,
+              "p99_ms": 0.24626,
+              "max_ms": 1.81356
+            },
+            "gap_before_host_dispatch_start": {
+              "count": 109,
+              "sum_ms": 6.86597,
+              "median_ms": 0.03014,
+              "p90_ms": 0.12204,
+              "p99_ms": 0.24381,
+              "max_ms": 1.80306
+            },
+            "gap_after_host_dispatch_start": {
+              "count": 109,
+              "sum_ms": 0.21951,
+              "median_ms": 0.00195,
+              "p90_ms": 0.00363,
+              "p99_ms": 0.00928,
+              "max_ms": 0.0105
+            }
+          }
+        }
+      },
+      "flow_correlated_compute_from_norm_calls": {
+        "96388544": {
+          "count": 41,
+          "names": [
+            [
+              "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+              41
+            ]
+          ],
+          "span": {
+            "window_ms": 2.93688,
+            "covered_ms": 0.1668,
+            "uncovered_ms": 2.77008,
+            "uncovered_pct": 94.321,
+            "gaps": {
+              "count": 40,
+              "sum_ms": 2.77008,
+              "median_ms": 0.05616,
+              "p90_ms": 0.07346,
+              "p99_ms": 0.55474,
+              "max_ms": 0.55474
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                2.38048,
+                2.93522
+              ],
+              [
+                1.68174,
+                1.77474
+              ],
+              [
+                1.53688,
+                1.61284
+              ],
+              [
+                1.46044,
+                1.5355
+              ],
+              [
+                1.38274,
+                1.4562
+              ]
+            ]
+          },
+          "task_duration": {
+            "count": 41,
+            "sum_ms": 0.1668,
+            "median_ms": 0.0042,
+            "p90_ms": 0.00672,
+            "p99_ms": 0.01462,
+            "max_ms": 0.01462
+          },
+          "device_start_spacing_within_stream": {
+            "count": 40,
+            "sum_ms": 2.93522,
+            "median_ms": 0.06078,
+            "p90_ms": 0.07498,
+            "p99_ms": 0.55676,
+            "max_ms": 0.55676
+          },
+          "all_compute_during_span": {
+            "window_ms": 2.93688,
+            "covered_ms": 0.27352,
+            "uncovered_ms": 2.66336,
+            "uncovered_pct": 90.687,
+            "gaps": {
+              "count": 91,
+              "sum_ms": 2.66336,
+              "median_ms": 0.02642,
+              "p90_ms": 0.04442,
+              "p99_ms": 0.09208,
+              "max_ms": 0.2446
+            },
+            "largest_gaps_ms_from_window_start": [
+              [
+                2.4618,
+                2.7064
+              ],
+              [
+                2.75602,
+                2.8481
+              ],
+              [
+                2.84976,
+                2.92014
+              ],
+              [
+                1.38274,
+                1.43566
+              ],
+              [
+                1.90144,
+                1.95004
+              ]
+            ]
+          },
+          "dispatch_evidence": {
+            "global_internal_gaps_before_attributed_kernel": {
+              "count": 40,
+              "sum_ms": 1.02604,
+              "median_ms": 0.02686,
+              "p90_ms": 0.03162,
+              "p99_ms": 0.04488,
+              "max_ms": 0.04488
+            },
+            "gaps_with_cann_launch": {
+              "count": 13,
+              "sum_ms": 0.40242,
+              "median_ms": 0.02968,
+              "p90_ms": 0.03668,
+              "p99_ms": 0.04488,
+              "max_ms": 0.04488
+            },
+            "gap_before_host_dispatch_start": {
+              "count": 13,
+              "sum_ms": 0.36897,
+              "median_ms": 0.02683,
+              "p90_ms": 0.03379,
+              "p99_ms": 0.04147,
+              "max_ms": 0.04147
+            },
+            "gap_after_host_dispatch_start": {
+              "count": 13,
+              "sum_ms": 0.03345,
+              "median_ms": 0.00283,
+              "p90_ms": 0.00517,
+              "p99_ms": 0.00527,
+              "max_ms": 0.00527
+            }
+          }
+        }
+      },
+      "stages": [
+        {
+          "name": "input",
+          "start_us": "1795769206339788.02",
+          "wall_ms": 0.88554,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 0.88554,
+              "covered_ms": 0.0,
+              "uncovered_ms": 0.88554,
+              "uncovered_pct": 100.0,
+              "gaps": {
+                "count": 1,
+                "sum_ms": 0.88554,
+                "median_ms": 0.88554,
+                "p90_ms": 0.88554,
+                "p99_ms": 0.88554,
+                "max_ms": 0.88554
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.0,
+                  0.88554
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 0.88554,
+              "covered_ms": 0.0,
+              "uncovered_ms": 0.88554,
+              "uncovered_pct": 100.0,
+              "gaps": {
+                "count": 1,
+                "sum_ms": 0.88554,
+                "median_ms": 0.88554,
+                "p90_ms": 0.88554,
+                "p99_ms": 0.88554,
+                "max_ms": 0.88554
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.0,
+                  0.88554
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 0.88554,
+              "covered_ms": 0.0,
+              "uncovered_ms": 0.88554,
+              "uncovered_pct": 100.0,
+              "gaps": {
+                "count": 1,
+                "sum_ms": 0.88554,
+                "median_ms": 0.88554,
+                "p90_ms": 0.88554,
+                "p99_ms": 0.88554,
+                "max_ms": 0.88554
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.0,
+                  0.88554
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {},
+          "vector_norm_host_start_spacing": {
+            "count": 0
+          },
+          "vector_norm_host_call_duration": {
+            "count": 0
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 0,
+            "matched_worker_spans_ms": {},
+            "dequeue_service": {
+              "count": 0
+            },
+            "adjacent_worker_gaps": {
+              "count": 0
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 0
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 0
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 0
+            },
+            "vector_norm_dequeue_service": {
+              "count": 0
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {},
+          "runtime_launch_spacing_within_thread": {
+            "count": 0
+          },
+          "flow_correlated_compute": {},
+          "flow_correlated_compute_from_norm_calls": {}
+        },
+        {
+          "name": "forward",
+          "start_us": "1795769206340686.08",
+          "wall_ms": 8.9277,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 8.9277,
+              "covered_ms": 1.00518,
+              "uncovered_ms": 7.92252,
+              "uncovered_pct": 88.741,
+              "gaps": {
+                "count": 185,
+                "sum_ms": 7.92252,
+                "median_ms": 0.02232,
+                "p90_ms": 0.08618,
+                "p99_ms": 0.21624,
+                "max_ms": 1.81356
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.48469,
+                  2.29825
+                ],
+                [
+                  0.0,
+                  0.24631
+                ],
+                [
+                  3.48519,
+                  3.70143
+                ],
+                [
+                  3.28659,
+                  3.46553
+                ],
+                [
+                  8.37333,
+                  8.52501
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 8.9277,
+              "covered_ms": 1.00752,
+              "uncovered_ms": 7.92018,
+              "uncovered_pct": 88.715,
+              "gaps": {
+                "count": 189,
+                "sum_ms": 7.92018,
+                "median_ms": 0.02114,
+                "p90_ms": 0.07903,
+                "p99_ms": 0.21624,
+                "max_ms": 1.81356
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.48469,
+                  2.29825
+                ],
+                [
+                  0.0,
+                  0.24631
+                ],
+                [
+                  3.48519,
+                  3.70143
+                ],
+                [
+                  3.28659,
+                  3.46553
+                ],
+                [
+                  8.37333,
+                  8.52501
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 8.9277,
+              "covered_ms": 1.00752,
+              "uncovered_ms": 7.92018,
+              "uncovered_pct": 88.715,
+              "gaps": {
+                "count": 189,
+                "sum_ms": 7.92018,
+                "median_ms": 0.02114,
+                "p90_ms": 0.07903,
+                "p99_ms": 0.21624,
+                "max_ms": 1.81356
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  0.48469,
+                  2.29825
+                ],
+                [
+                  0.0,
+                  0.24631
+                ],
+                [
+                  3.48519,
+                  3.70143
+                ],
+                [
+                  3.28659,
+                  3.46553
+                ],
+                [
+                  8.37333,
+                  8.52501
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {},
+          "vector_norm_host_start_spacing": {
+            "count": 0
+          },
+          "vector_norm_host_call_duration": {
+            "count": 0
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 144,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 8.63094
+            },
+            "dequeue_service": {
+              "count": 144,
+              "sum_ms": 3.24342,
+              "median_ms": 0.01376,
+              "p90_ms": 0.04175,
+              "p99_ms": 0.10422,
+              "max_ms": 0.17486
+            },
+            "adjacent_worker_gaps": {
+              "count": 143,
+              "sum_ms": 5.38752,
+              "median_ms": 0.01325,
+              "p90_ms": 0.0805,
+              "p99_ms": 0.17816,
+              "max_ms": 1.77075
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 143,
+              "sum_ms": 4.54391,
+              "median_ms": 0.00681,
+              "p90_ms": 0.07283,
+              "p99_ms": 0.16781,
+              "max_ms": 1.75913
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 144,
+              "sum_ms": 1.99712,
+              "median_ms": 0.00738,
+              "p90_ms": 0.02434,
+              "p99_ms": 0.11683,
+              "max_ms": 0.12345
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 0
+            },
+            "vector_norm_dequeue_service": {
+              "count": 0
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 183
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 182,
+            "sum_ms": 8.58741,
+            "median_ms": 0.02503,
+            "p90_ms": 0.08196,
+            "p99_ms": 0.21067,
+            "max_ms": 1.80159
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 184,
+              "names": [
+                [
+                  "aclnnMul_MulAiCore_Mul",
+                  22
+                ],
+                [
+                  "aclnnMatmul_SliceAiCore_Slice",
+                  12
+                ],
+                [
+                  "aclnnMatmul_TransposeAiCore_Transpose",
+                  12
+                ],
+                [
+                  "aclnnMean_ReduceMeanAiCore_ReduceMean",
+                  10
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  9
+                ],
+                [
+                  "aclnnAdds_AddAiCore_Add",
+                  9
+                ],
+                [
+                  "aclnnRsqrt_RsqrtAiCore_Rsqrt",
+                  9
+                ],
+                [
+                  "aclnnAdd_AddAiCore_Add",
+                  8
+                ],
+                [
+                  "aclnnAddmm_CastAiCore_Cast",
+                  8
+                ],
+                [
+                  "aclnnAddmm_MatMulCommon_MatMulV2",
+                  8
+                ],
+                [
+                  "aclnnMatmul_BatchMatMulNd_BatchMatMulV2",
+                  8
+                ],
+                [
+                  "aclnnSilu_SiluAiCore_Swish",
+                  8
+                ]
+              ],
+              "span": {
+                "window_ms": 8.60236,
+                "covered_ms": 1.00518,
+                "uncovered_ms": 7.59718,
+                "uncovered_pct": 88.315,
+                "gaps": {
+                  "count": 183,
+                  "sum_ms": 7.59718,
+                  "median_ms": 0.02114,
+                  "p90_ms": 0.07898,
+                  "p99_ms": 0.17894,
+                  "max_ms": 1.81356
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    0.23838,
+                    2.05194
+                  ],
+                  [
+                    3.23888,
+                    3.45512
+                  ],
+                  [
+                    3.04028,
+                    3.21922
+                  ],
+                  [
+                    8.12702,
+                    8.2787
+                  ],
+                  [
+                    6.56244,
+                    6.70684
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 184,
+                "sum_ms": 1.00518,
+                "median_ms": 0.00236,
+                "p90_ms": 0.01352,
+                "p99_ms": 0.03588,
+                "max_ms": 0.0715
+              },
+              "device_start_spacing_within_stream": {
+                "count": 183,
+                "sum_ms": 8.5928,
+                "median_ms": 0.02564,
+                "p90_ms": 0.08732,
+                "p99_ms": 0.2037,
+                "max_ms": 1.81948
+              },
+              "all_compute_during_span": {
+                "window_ms": 8.60236,
+                "covered_ms": 1.00518,
+                "uncovered_ms": 7.59718,
+                "uncovered_pct": 88.315,
+                "gaps": {
+                  "count": 183,
+                  "sum_ms": 7.59718,
+                  "median_ms": 0.02114,
+                  "p90_ms": 0.07898,
+                  "p99_ms": 0.17894,
+                  "max_ms": 1.81356
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    0.23838,
+                    2.05194
+                  ],
+                  [
+                    3.23888,
+                    3.45512
+                  ],
+                  [
+                    3.04028,
+                    3.21922
+                  ],
+                  [
+                    8.12702,
+                    8.2787
+                  ],
+                  [
+                    6.56244,
+                    6.70684
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 183,
+                  "sum_ms": 7.59718,
+                  "median_ms": 0.02114,
+                  "p90_ms": 0.07898,
+                  "p99_ms": 0.17894,
+                  "max_ms": 1.81356
+                },
+                "gaps_with_cann_launch": {
+                  "count": 76,
+                  "sum_ms": 5.7407,
+                  "median_ms": 0.04156,
+                  "p90_ms": 0.13182,
+                  "p99_ms": 0.21624,
+                  "max_ms": 1.81356
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 76,
+                  "sum_ms": 5.57219,
+                  "median_ms": 0.03608,
+                  "p90_ms": 0.13045,
+                  "p99_ms": 0.20714,
+                  "max_ms": 1.80306
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 76,
+                  "sum_ms": 0.16851,
+                  "median_ms": 0.00197,
+                  "p90_ms": 0.00507,
+                  "p99_ms": 0.00928,
+                  "max_ms": 0.0105
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {}
+        },
+        {
+          "name": "backward",
+          "start_us": "1795769206349627.44",
+          "wall_ms": 11.03952,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 11.03952,
+              "covered_ms": 1.7264,
+              "uncovered_ms": 9.31312,
+              "uncovered_pct": 84.362,
+              "gaps": {
+                "count": 315,
+                "sum_ms": 9.31312,
+                "median_ms": 0.01778,
+                "p90_ms": 0.08562,
+                "p99_ms": 0.14248,
+                "max_ms": 0.26278
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  10.62843,
+                  10.89121
+                ],
+                [
+                  1.83993,
+                  2.00631
+                ],
+                [
+                  2.59799,
+                  2.75837
+                ],
+                [
+                  0.61561,
+                  0.75809
+                ],
+                [
+                  1.53973,
+                  1.67665
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 11.03952,
+              "covered_ms": 1.73414,
+              "uncovered_ms": 9.30538,
+              "uncovered_pct": 84.292,
+              "gaps": {
+                "count": 328,
+                "sum_ms": 9.30538,
+                "median_ms": 0.01722,
+                "p90_ms": 0.0754,
+                "p99_ms": 0.14248,
+                "max_ms": 0.26278
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  10.62843,
+                  10.89121
+                ],
+                [
+                  1.83993,
+                  2.00631
+                ],
+                [
+                  2.59799,
+                  2.75837
+                ],
+                [
+                  0.61561,
+                  0.75809
+                ],
+                [
+                  1.53973,
+                  1.67665
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 11.03952,
+              "covered_ms": 1.73414,
+              "uncovered_ms": 9.30538,
+              "uncovered_pct": 84.292,
+              "gaps": {
+                "count": 328,
+                "sum_ms": 9.30538,
+                "median_ms": 0.01722,
+                "p90_ms": 0.0754,
+                "p99_ms": 0.14248,
+                "max_ms": 0.26278
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  10.62843,
+                  10.89121
+                ],
+                [
+                  1.83993,
+                  2.00631
+                ],
+                [
+                  2.59799,
+                  2.75837
+                ],
+                [
+                  0.61561,
+                  0.75809
+                ],
+                [
+                  1.53973,
+                  1.67665
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {},
+          "vector_norm_host_start_spacing": {
+            "count": 0
+          },
+          "vector_norm_host_call_duration": {
+            "count": 0
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 4,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 10.83361
+            },
+            "dequeue_service": {
+              "count": 4,
+              "sum_ms": 0.04548,
+              "median_ms": 0.01175,
+              "p90_ms": 0.01393,
+              "p99_ms": 0.01393,
+              "max_ms": 0.01393
+            },
+            "adjacent_worker_gaps": {
+              "count": 2,
+              "sum_ms": 0.06642,
+              "median_ms": 0.02205,
+              "p90_ms": 0.04437,
+              "p99_ms": 0.04437,
+              "max_ms": 0.04437
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 2,
+              "sum_ms": 0.05153,
+              "median_ms": 0.01437,
+              "p90_ms": 0.03716,
+              "p99_ms": 0.03716,
+              "max_ms": 0.03716
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 4,
+              "sum_ms": 0.03503,
+              "median_ms": 0.00968,
+              "p90_ms": 0.01046,
+              "p99_ms": 0.01046,
+              "max_ms": 0.01046
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 0
+            },
+            "vector_norm_dequeue_service": {
+              "count": 0
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 314
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 313,
+            "sum_ms": 10.81972,
+            "median_ms": 0.02112,
+            "p90_ms": 0.07707,
+            "p99_ms": 0.14426,
+            "max_ms": 0.27618
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 4,
+              "names": [
+                [
+                  "aclnnDivs_RealDivAiCore_RealDiv",
+                  1
+                ],
+                [
+                  "aclnnMuls_MulAiCore_Mul",
+                  1
+                ],
+                [
+                  "aclnnInplaceFillScalar_FillAiCore_Fill",
+                  1
+                ],
+                [
+                  "aclnnCat_ConcatD_ConcatD",
+                  1
+                ]
+              ],
+              "span": {
+                "window_ms": 10.86606,
+                "covered_ms": 0.05488,
+                "uncovered_ms": 10.81118,
+                "uncovered_pct": 99.495,
+                "gaps": {
+                  "count": 3,
+                  "sum_ms": 10.81118,
+                  "median_ms": 0.05386,
+                  "p90_ms": 10.7337,
+                  "p99_ms": 10.7337,
+                  "max_ms": 10.7337
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    0.08084,
+                    10.81454
+                  ],
+                  [
+                    0.02596,
+                    0.07982
+                  ],
+                  [
+                    0.00118,
+                    0.0248
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 4,
+                "sum_ms": 0.05488,
+                "median_ms": 0.00118,
+                "p90_ms": 0.05152,
+                "p99_ms": 0.05152,
+                "max_ms": 0.05152
+              },
+              "device_start_spacing_within_stream": {
+                "count": 3,
+                "sum_ms": 10.81454,
+                "median_ms": 0.05502,
+                "p90_ms": 10.73472,
+                "p99_ms": 10.73472,
+                "max_ms": 10.73472
+              },
+              "all_compute_during_span": {
+                "window_ms": 10.86606,
+                "covered_ms": 1.7264,
+                "uncovered_ms": 9.13966,
+                "uncovered_pct": 84.112,
+                "gaps": {
+                  "count": 313,
+                  "sum_ms": 9.13966,
+                  "median_ms": 0.0175,
+                  "p90_ms": 0.0754,
+                  "p99_ms": 0.14248,
+                  "max_ms": 0.26278
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    10.55176,
+                    10.81454
+                  ],
+                  [
+                    1.76326,
+                    1.92964
+                  ],
+                  [
+                    2.52132,
+                    2.6817
+                  ],
+                  [
+                    0.53894,
+                    0.68142
+                  ],
+                  [
+                    1.46306,
+                    1.59998
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 3,
+                  "sum_ms": 0.34026,
+                  "median_ms": 0.05386,
+                  "p90_ms": 0.26278,
+                  "p99_ms": 0.26278,
+                  "max_ms": 0.26278
+                },
+                "gaps_with_cann_launch": {
+                  "count": 0
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 0
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 0
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {},
+          "autograd_worker_flow_count": 310,
+          "flow_compute_including_autograd_workers": {
+            "96388544": {
+              "count": 314,
+              "names": [
+                [
+                  "aclnnMul_MulAiCore_Mul",
+                  62
+                ],
+                [
+                  "aclnnReduceSum_ReduceSumOpAiCore_ReduceSum",
+                  28
+                ],
+                [
+                  "aclnnMuls_Muls_Muls",
+                  22
+                ],
+                [
+                  "aclnnAdd_AddAiCore_Add",
+                  22
+                ],
+                [
+                  "aclnnMatmul_TransposeAiCore_Transpose",
+                  20
+                ],
+                [
+                  "aclnnDivs_RealDivAiCore_RealDiv",
+                  17
+                ],
+                [
+                  "aclnnMm_MatMulCommon_MatMulV2",
+                  16
+                ],
+                [
+                  "aclnnMatmul_BatchMatMulNd_BatchMatMulV2",
+                  16
+                ],
+                [
+                  "aclnnMatmul_SliceAiCore_Slice",
+                  12
+                ],
+                [
+                  "aclnnEmbeddingDenseBackward_CastAiCore_Cast",
+                  12
+                ],
+                [
+                  "aclnnDivs_BroadcastToAiCore_BroadcastTo",
+                  10
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  9
+                ]
+              ],
+              "span": {
+                "window_ms": 10.86606,
+                "covered_ms": 1.7264,
+                "uncovered_ms": 9.13966,
+                "uncovered_pct": 84.112,
+                "gaps": {
+                  "count": 313,
+                  "sum_ms": 9.13966,
+                  "median_ms": 0.0175,
+                  "p90_ms": 0.0754,
+                  "p99_ms": 0.14248,
+                  "max_ms": 0.26278
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    10.55176,
+                    10.81454
+                  ],
+                  [
+                    1.76326,
+                    1.92964
+                  ],
+                  [
+                    2.52132,
+                    2.6817
+                  ],
+                  [
+                    0.53894,
+                    0.68142
+                  ],
+                  [
+                    1.46306,
+                    1.59998
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 314,
+                "sum_ms": 1.7264,
+                "median_ms": 0.0024,
+                "p90_ms": 0.0122,
+                "p99_ms": 0.01916,
+                "max_ms": 0.37552
+              },
+              "device_start_spacing_within_stream": {
+                "count": 313,
+                "sum_ms": 10.81454,
+                "median_ms": 0.0205,
+                "p90_ms": 0.0903,
+                "p99_ms": 0.16174,
+                "max_ms": 0.37622
+              },
+              "all_compute_during_span": {
+                "window_ms": 10.86606,
+                "covered_ms": 1.7264,
+                "uncovered_ms": 9.13966,
+                "uncovered_pct": 84.112,
+                "gaps": {
+                  "count": 313,
+                  "sum_ms": 9.13966,
+                  "median_ms": 0.0175,
+                  "p90_ms": 0.0754,
+                  "p99_ms": 0.14248,
+                  "max_ms": 0.26278
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    10.55176,
+                    10.81454
+                  ],
+                  [
+                    1.76326,
+                    1.92964
+                  ],
+                  [
+                    2.52132,
+                    2.6817
+                  ],
+                  [
+                    0.53894,
+                    0.68142
+                  ],
+                  [
+                    1.46306,
+                    1.59998
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 313,
+                  "sum_ms": 9.13966,
+                  "median_ms": 0.0175,
+                  "p90_ms": 0.0754,
+                  "p99_ms": 0.14248,
+                  "max_ms": 0.26278
+                },
+                "gaps_with_cann_launch": {
+                  "count": 112,
+                  "sum_ms": 3.63372,
+                  "median_ms": 0.02472,
+                  "p90_ms": 0.08894,
+                  "p99_ms": 0.16038,
+                  "max_ms": 0.16638
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 112,
+                  "sum_ms": 3.37991,
+                  "median_ms": 0.02086,
+                  "p90_ms": 0.08714,
+                  "p99_ms": 0.14996,
+                  "max_ms": 0.16419
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 112,
+                  "sum_ms": 0.25381,
+                  "median_ms": 0.0018,
+                  "p90_ms": 0.0059,
+                  "p99_ms": 0.0085,
+                  "max_ms": 0.01042
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "optimizer",
+          "start_us": "1795769206360676.01",
+          "wall_ms": 4.76634,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 4.76634,
+              "covered_ms": 0.67342,
+              "uncovered_ms": 4.09292,
+              "uncovered_pct": 85.871,
+              "gaps": {
+                "count": 119,
+                "sum_ms": 4.09292,
+                "median_ms": 0.02634,
+                "p90_ms": 0.04728,
+                "p99_ms": 0.24626,
+                "max_ms": 0.26078
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  4.50556,
+                  4.76634
+                ],
+                [
+                  3.6701,
+                  3.91636
+                ],
+                [
+                  3.1111,
+                  3.3557
+                ],
+                [
+                  0.39436,
+                  0.61654
+                ],
+                [
+                  0.25848,
+                  0.39278
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 4.76634,
+              "covered_ms": 0.67636,
+              "uncovered_ms": 4.08998,
+              "uncovered_pct": 85.81,
+              "gaps": {
+                "count": 123,
+                "sum_ms": 4.08998,
+                "median_ms": 0.02642,
+                "p90_ms": 0.0486,
+                "p99_ms": 0.24626,
+                "max_ms": 0.26078
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  4.50556,
+                  4.76634
+                ],
+                [
+                  3.6701,
+                  3.91636
+                ],
+                [
+                  0.39436,
+                  0.61654
+                ],
+                [
+                  3.1111,
+                  3.27742
+                ],
+                [
+                  4.06494,
+                  4.1874
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 4.76634,
+              "covered_ms": 0.68112,
+              "uncovered_ms": 4.08522,
+              "uncovered_pct": 85.71,
+              "gaps": {
+                "count": 131,
+                "sum_ms": 4.08522,
+                "median_ms": 0.02626,
+                "p90_ms": 0.04728,
+                "p99_ms": 0.24626,
+                "max_ms": 0.26078
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  4.50556,
+                  4.76634
+                ],
+                [
+                  3.6701,
+                  3.91636
+                ],
+                [
+                  0.42696,
+                  0.61654
+                ],
+                [
+                  4.06494,
+                  4.1874
+                ],
+                [
+                  3.1111,
+                  3.2124
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {
+            "aten::linalg_vector_norm": 41
+          },
+          "vector_norm_host_start_spacing": {
+            "count": 40,
+            "sum_ms": 2.94219,
+            "median_ms": 0.06019,
+            "p90_ms": 0.07434,
+            "p99_ms": 0.55511,
+            "max_ms": 0.55511
+          },
+          "vector_norm_host_call_duration": {
+            "count": 41,
+            "sum_ms": 0.67772,
+            "median_ms": 0.01526,
+            "p90_ms": 0.01992,
+            "p99_ms": 0.03443,
+            "max_ms": 0.03443
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 131,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 4.34251
+            },
+            "dequeue_service": {
+              "count": 131,
+              "sum_ms": 1.58179,
+              "median_ms": 0.00993,
+              "p90_ms": 0.01217,
+              "p99_ms": 0.1068,
+              "max_ms": 0.12457
+            },
+            "adjacent_worker_gaps": {
+              "count": 130,
+              "sum_ms": 2.76072,
+              "median_ms": 0.01446,
+              "p90_ms": 0.0337,
+              "p99_ms": 0.17422,
+              "max_ms": 0.23338
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 130,
+              "sum_ms": 2.01306,
+              "median_ms": 0.00785,
+              "p90_ms": 0.02629,
+              "p99_ms": 0.16412,
+              "max_ms": 0.22572
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 131,
+              "sum_ms": 2.44246,
+              "median_ms": 0.00671,
+              "p90_ms": 0.07336,
+              "p99_ms": 0.135,
+              "max_ms": 0.13668
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 40,
+              "sum_ms": 2.94047,
+              "median_ms": 0.06031,
+              "p90_ms": 0.07397,
+              "p99_ms": 0.55725,
+              "max_ms": 0.55725
+            },
+            "vector_norm_dequeue_service": {
+              "count": 41,
+              "sum_ms": 0.46313,
+              "median_ms": 0.01102,
+              "p90_ms": 0.01157,
+              "p99_ms": 0.01596,
+              "max_ms": 0.01596
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 118
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 117,
+            "sum_ms": 4.33216,
+            "median_ms": 0.02703,
+            "p90_ms": 0.04792,
+            "p99_ms": 0.2433,
+            "max_ms": 0.25278
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 118,
+              "names": [
+                [
+                  "aclnnInplaceCopy_CastAiCore_Cast",
+                  44
+                ],
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  41
+                ],
+                [
+                  "aclnnDivs_RealDivAiCore_RealDiv",
+                  4
+                ],
+                [
+                  "aclnnCat_ConcatD_ConcatD",
+                  3
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  2
+                ],
+                [
+                  "aclnnAdds_AddAiCore_Add",
+                  2
+                ],
+                [
+                  "aclnnMuls_MulAiCore_Mul",
+                  2
+                ],
+                [
+                  "aclnnInplaceMuls_MulAiCore_Mul",
+                  2
+                ],
+                [
+                  "aclnnIsFinite_IsFiniteAiCore_IsFinite",
+                  1
+                ],
+                [
+                  "aclnnAll_ReduceAll_ReduceAll",
+                  1
+                ],
+                [
+                  "aclnnLogicalNot_LogicalNotAiCore_LogicalNot",
+                  1
+                ],
+                [
+                  "aclnnCast_CastAiCore_Cast",
+                  1
+                ]
+              ],
+              "span": {
+                "window_ms": 4.40744,
+                "covered_ms": 0.67342,
+                "uncovered_ms": 3.73402,
+                "uncovered_pct": 84.721,
+                "gaps": {
+                  "count": 117,
+                  "sum_ms": 3.73402,
+                  "median_ms": 0.02626,
+                  "p90_ms": 0.04488,
+                  "p99_ms": 0.2446,
+                  "max_ms": 0.24626
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    3.57198,
+                    3.81824
+                  ],
+                  [
+                    3.01298,
+                    3.25758
+                  ],
+                  [
+                    0.29624,
+                    0.51842
+                  ],
+                  [
+                    0.16036,
+                    0.29466
+                  ],
+                  [
+                    3.96682,
+                    4.08928
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 118,
+                "sum_ms": 0.67342,
+                "median_ms": 0.00232,
+                "p90_ms": 0.01388,
+                "p99_ms": 0.05362,
+                "max_ms": 0.08248
+              },
+              "device_start_spacing_within_stream": {
+                "count": 116,
+                "sum_ms": 4.52914,
+                "median_ms": 0.02978,
+                "p90_ms": 0.0513,
+                "p99_ms": 0.2574,
+                "max_ms": 0.44856
+              },
+              "all_compute_during_span": {
+                "window_ms": 4.40744,
+                "covered_ms": 0.67342,
+                "uncovered_ms": 3.73402,
+                "uncovered_pct": 84.721,
+                "gaps": {
+                  "count": 117,
+                  "sum_ms": 3.73402,
+                  "median_ms": 0.02626,
+                  "p90_ms": 0.04488,
+                  "p99_ms": 0.2446,
+                  "max_ms": 0.24626
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    3.57198,
+                    3.81824
+                  ],
+                  [
+                    3.01298,
+                    3.25758
+                  ],
+                  [
+                    0.29624,
+                    0.51842
+                  ],
+                  [
+                    0.16036,
+                    0.29466
+                  ],
+                  [
+                    3.96682,
+                    4.08928
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 117,
+                  "sum_ms": 3.73402,
+                  "median_ms": 0.02626,
+                  "p90_ms": 0.04488,
+                  "p99_ms": 0.2446,
+                  "max_ms": 0.24626
+                },
+                "gaps_with_cann_launch": {
+                  "count": 32,
+                  "sum_ms": 1.17542,
+                  "median_ms": 0.02968,
+                  "p90_ms": 0.07038,
+                  "p99_ms": 0.24626,
+                  "max_ms": 0.24626
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 32,
+                  "sum_ms": 1.12783,
+                  "median_ms": 0.02711,
+                  "p90_ms": 0.07037,
+                  "p99_ms": 0.24381,
+                  "max_ms": 0.24381
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 32,
+                  "sum_ms": 0.04759,
+                  "median_ms": 0.00121,
+                  "p90_ms": 0.00341,
+                  "p99_ms": 0.00527,
+                  "max_ms": 0.00527
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {
+            "96388544": {
+              "count": 41,
+              "names": [
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  41
+                ]
+              ],
+              "span": {
+                "window_ms": 2.93688,
+                "covered_ms": 0.1668,
+                "uncovered_ms": 2.77008,
+                "uncovered_pct": 94.321,
+                "gaps": {
+                  "count": 40,
+                  "sum_ms": 2.77008,
+                  "median_ms": 0.05616,
+                  "p90_ms": 0.07346,
+                  "p99_ms": 0.55474,
+                  "max_ms": 0.55474
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.38048,
+                    2.93522
+                  ],
+                  [
+                    1.68174,
+                    1.77474
+                  ],
+                  [
+                    1.53688,
+                    1.61284
+                  ],
+                  [
+                    1.46044,
+                    1.5355
+                  ],
+                  [
+                    1.38274,
+                    1.4562
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 41,
+                "sum_ms": 0.1668,
+                "median_ms": 0.0042,
+                "p90_ms": 0.00672,
+                "p99_ms": 0.01462,
+                "max_ms": 0.01462
+              },
+              "device_start_spacing_within_stream": {
+                "count": 40,
+                "sum_ms": 2.93522,
+                "median_ms": 0.06078,
+                "p90_ms": 0.07498,
+                "p99_ms": 0.55676,
+                "max_ms": 0.55676
+              },
+              "all_compute_during_span": {
+                "window_ms": 2.93688,
+                "covered_ms": 0.27352,
+                "uncovered_ms": 2.66336,
+                "uncovered_pct": 90.687,
+                "gaps": {
+                  "count": 91,
+                  "sum_ms": 2.66336,
+                  "median_ms": 0.02642,
+                  "p90_ms": 0.04442,
+                  "p99_ms": 0.09208,
+                  "max_ms": 0.2446
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.4618,
+                    2.7064
+                  ],
+                  [
+                    2.75602,
+                    2.8481
+                  ],
+                  [
+                    2.84976,
+                    2.92014
+                  ],
+                  [
+                    1.38274,
+                    1.43566
+                  ],
+                  [
+                    1.90144,
+                    1.95004
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 40,
+                  "sum_ms": 1.02604,
+                  "median_ms": 0.02686,
+                  "p90_ms": 0.03162,
+                  "p99_ms": 0.04488,
+                  "max_ms": 0.04488
+                },
+                "gaps_with_cann_launch": {
+                  "count": 13,
+                  "sum_ms": 0.40242,
+                  "median_ms": 0.02968,
+                  "p90_ms": 0.03668,
+                  "p99_ms": 0.04488,
+                  "max_ms": 0.04488
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 13,
+                  "sum_ms": 0.36897,
+                  "median_ms": 0.02683,
+                  "p90_ms": 0.03379,
+                  "p99_ms": 0.04147,
+                  "max_ms": 0.04147
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 13,
+                  "sum_ms": 0.03345,
+                  "median_ms": 0.00283,
+                  "p90_ms": 0.00517,
+                  "p99_ms": 0.00527,
+                  "max_ms": 0.00527
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "native_norm",
+          "start_us": "1795769206361196.28",
+          "wall_ms": 3.01277,
+          "device_compute_in_host_window": {
+            "96388544": {
+              "window_ms": 3.01277,
+              "covered_ms": 0.27684,
+              "uncovered_ms": 2.73593,
+              "uncovered_pct": 90.811,
+              "gaps": {
+                "count": 92,
+                "sum_ms": 2.73593,
+                "median_ms": 0.02662,
+                "p90_ms": 0.04442,
+                "p99_ms": 0.09627,
+                "max_ms": 0.2446
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  2.59083,
+                  2.83543
+                ],
+                [
+                  0.0,
+                  0.09627
+                ],
+                [
+                  2.88505,
+                  2.97713
+                ],
+                [
+                  1.51177,
+                  1.56469
+                ],
+                [
+                  2.03047,
+                  2.07907
+                ]
+              ]
+            }
+          },
+          "compute_aicpu_dma_in_host_window": {
+            "96388544": {
+              "window_ms": 3.01277,
+              "covered_ms": 0.27822,
+              "uncovered_ms": 2.73455,
+              "uncovered_pct": 90.765,
+              "gaps": {
+                "count": 94,
+                "sum_ms": 2.73455,
+                "median_ms": 0.02662,
+                "p90_ms": 0.04472,
+                "p99_ms": 0.09627,
+                "max_ms": 0.16632
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  2.59083,
+                  2.75715
+                ],
+                [
+                  0.0,
+                  0.09627
+                ],
+                [
+                  2.88505,
+                  2.97713
+                ],
+                [
+                  1.51177,
+                  1.56469
+                ],
+                [
+                  2.78561,
+                  2.83543
+                ]
+              ]
+            }
+          },
+          "all_raw_device_tasks_in_host_window": {
+            "96388544": {
+              "window_ms": 3.01277,
+              "covered_ms": 0.28286,
+              "uncovered_ms": 2.72991,
+              "uncovered_pct": 90.611,
+              "gaps": {
+                "count": 96,
+                "sum_ms": 2.72991,
+                "median_ms": 0.02678,
+                "p90_ms": 0.04472,
+                "p99_ms": 0.09627,
+                "max_ms": 0.1013
+              },
+              "largest_gaps_ms_from_window_start": [
+                [
+                  2.59083,
+                  2.69213
+                ],
+                [
+                  0.0,
+                  0.09627
+                ],
+                [
+                  2.88505,
+                  2.97713
+                ],
+                [
+                  2.69419,
+                  2.75715
+                ],
+                [
+                  1.51177,
+                  1.56469
+                ]
+              ]
+            }
+          },
+          "cpu_norm_op_counts": {
+            "aten::linalg_vector_norm": 40
+          },
+          "vector_norm_host_start_spacing": {
+            "count": 39,
+            "sum_ms": 2.38708,
+            "median_ms": 0.05979,
+            "p90_ms": 0.07329,
+            "p99_ms": 0.08138,
+            "max_ms": 0.08138
+          },
+          "vector_norm_host_call_duration": {
+            "count": 40,
+            "sum_ms": 0.66085,
+            "median_ms": 0.01526,
+            "p90_ms": 0.01992,
+            "p99_ms": 0.03443,
+            "max_ms": 0.03443
+          },
+          "same_host_clock_queue": {
+            "paired_requests": 96,
+            "matched_worker_spans_ms": {
+              "(94129, 94154)": 2.88693
+            },
+            "dequeue_service": {
+              "count": 96,
+              "sum_ms": 1.06567,
+              "median_ms": 0.01022,
+              "p90_ms": 0.01157,
+              "p99_ms": 0.02369,
+              "max_ms": 0.1068
+            },
+            "adjacent_worker_gaps": {
+              "count": 95,
+              "sum_ms": 1.82126,
+              "median_ms": 0.01603,
+              "p90_ms": 0.03166,
+              "p99_ms": 0.07747,
+              "max_ms": 0.08509
+            },
+            "worker_gap_before_next_enqueue_start": {
+              "count": 95,
+              "sum_ms": 1.25544,
+              "median_ms": 0.0103,
+              "p90_ms": 0.02454,
+              "p99_ms": 0.06967,
+              "max_ms": 0.07641
+            },
+            "enqueue_start_to_dequeue_start": {
+              "count": 96,
+              "sum_ms": 1.38228,
+              "median_ms": 0.00667,
+              "p90_ms": 0.01171,
+              "p99_ms": 0.10726,
+              "max_ms": 0.11168
+            },
+            "vector_norm_dequeue_start_spacing": {
+              "count": 39,
+              "sum_ms": 2.38322,
+              "median_ms": 0.0593,
+              "p90_ms": 0.07221,
+              "p99_ms": 0.08487,
+              "max_ms": 0.08487
+            },
+            "vector_norm_dequeue_service": {
+              "count": 40,
+              "sum_ms": 0.4494,
+              "median_ms": 0.01102,
+              "p90_ms": 0.01141,
+              "p99_ms": 0.01596,
+              "max_ms": 0.01596
+            }
+          },
+          "runtime_launch_event_counts_all_threads": {
+            "AscendCL@aclrtLaunchKernelWithHostArgs": 91
+          },
+          "runtime_launch_spacing_within_thread": {
+            "count": 90,
+            "sum_ms": 2.87589,
+            "median_ms": 0.02962,
+            "p90_ms": 0.04154,
+            "p99_ms": 0.08908,
+            "max_ms": 0.25278
+          },
+          "flow_correlated_compute": {
+            "96388544": {
+              "count": 91,
+              "names": [
+                [
+                  "aclnnInplaceCopy_CastAiCore_Cast",
+                  40
+                ],
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  40
+                ],
+                [
+                  "aclnnCat_ConcatD_ConcatD",
+                  3
+                ],
+                [
+                  "aclnnPowTensorScalar_PowsAiCore_Pows",
+                  2
+                ],
+                [
+                  "aclnnReduceSum_ReduceSumOpAiCore_ReduceSum",
+                  1
+                ],
+                [
+                  "aclnnAbs_AbsAiCore_Abs",
+                  1
+                ],
+                [
+                  "aclnnEqScalar_EqualAiCore_Equal",
+                  1
+                ],
+                [
+                  "aclnnNeTensor_NotEqualAiCore_NotEqual",
+                  1
+                ],
+                [
+                  "aclnnLogicalOr_LogicalOrAiCore_LogicalOr",
+                  1
+                ],
+                [
+                  "aclnnInplaceMaskedFillTensor_MaskedFillAiCore_MaskedFill",
+                  1
+                ]
+              ],
+              "span": {
+                "window_ms": 2.88252,
+                "covered_ms": 0.27684,
+                "uncovered_ms": 2.60568,
+                "uncovered_pct": 90.396,
+                "gaps": {
+                  "count": 90,
+                  "sum_ms": 2.60568,
+                  "median_ms": 0.02642,
+                  "p90_ms": 0.04254,
+                  "p99_ms": 0.09208,
+                  "max_ms": 0.2446
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.49456,
+                    2.73916
+                  ],
+                  [
+                    2.78878,
+                    2.88086
+                  ],
+                  [
+                    1.4155,
+                    1.46842
+                  ],
+                  [
+                    1.9342,
+                    1.9828
+                  ],
+                  [
+                    1.7145,
+                    1.76178
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 91,
+                "sum_ms": 0.27684,
+                "median_ms": 0.00246,
+                "p90_ms": 0.00522,
+                "p99_ms": 0.0143,
+                "max_ms": 0.01462
+              },
+              "device_start_spacing_within_stream": {
+                "count": 90,
+                "sum_ms": 2.88086,
+                "median_ms": 0.02968,
+                "p90_ms": 0.04572,
+                "p99_ms": 0.09348,
+                "max_ms": 0.25116
+              },
+              "all_compute_during_span": {
+                "window_ms": 2.88252,
+                "covered_ms": 0.27684,
+                "uncovered_ms": 2.60568,
+                "uncovered_pct": 90.396,
+                "gaps": {
+                  "count": 90,
+                  "sum_ms": 2.60568,
+                  "median_ms": 0.02642,
+                  "p90_ms": 0.04254,
+                  "p99_ms": 0.09208,
+                  "max_ms": 0.2446
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    2.49456,
+                    2.73916
+                  ],
+                  [
+                    2.78878,
+                    2.88086
+                  ],
+                  [
+                    1.4155,
+                    1.46842
+                  ],
+                  [
+                    1.9342,
+                    1.9828
+                  ],
+                  [
+                    1.7145,
+                    1.76178
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 90,
+                  "sum_ms": 2.60568,
+                  "median_ms": 0.02642,
+                  "p90_ms": 0.04254,
+                  "p99_ms": 0.09208,
+                  "max_ms": 0.2446
+                },
+                "gaps_with_cann_launch": {
+                  "count": 19,
+                  "sum_ms": 0.70166,
+                  "median_ms": 0.03098,
+                  "p90_ms": 0.04662,
+                  "p99_ms": 0.09208,
+                  "max_ms": 0.09208
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 19,
+                  "sum_ms": 0.65984,
+                  "median_ms": 0.03014,
+                  "p90_ms": 0.04467,
+                  "p99_ms": 0.09081,
+                  "max_ms": 0.09081
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 19,
+                  "sum_ms": 0.04182,
+                  "median_ms": 0.00243,
+                  "p90_ms": 0.00343,
+                  "p99_ms": 0.00527,
+                  "max_ms": 0.00527
+                }
+              }
+            }
+          },
+          "flow_correlated_compute_from_norm_calls": {
+            "96388544": {
+              "count": 40,
+              "names": [
+                [
+                  "aclnnLinalgVectorNorm_LpNormV2_LpNormV2",
+                  40
+                ]
+              ],
+              "span": {
+                "window_ms": 2.38048,
+                "covered_ms": 0.16514,
+                "uncovered_ms": 2.21534,
+                "uncovered_pct": 93.063,
+                "gaps": {
+                  "count": 39,
+                  "sum_ms": 2.21534,
+                  "median_ms": 0.05594,
+                  "p90_ms": 0.06826,
+                  "p99_ms": 0.093,
+                  "max_ms": 0.093
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    1.68174,
+                    1.77474
+                  ],
+                  [
+                    1.53688,
+                    1.61284
+                  ],
+                  [
+                    1.46044,
+                    1.5355
+                  ],
+                  [
+                    1.38274,
+                    1.4562
+                  ],
+                  [
+                    1.77684,
+                    1.8451
+                  ]
+                ]
+              },
+              "task_duration": {
+                "count": 40,
+                "sum_ms": 0.16514,
+                "median_ms": 0.00424,
+                "p90_ms": 0.00672,
+                "p99_ms": 0.01462,
+                "max_ms": 0.01462
+              },
+              "device_start_spacing_within_stream": {
+                "count": 39,
+                "sum_ms": 2.37846,
+                "median_ms": 0.06028,
+                "p90_ms": 0.07036,
+                "p99_ms": 0.09702,
+                "max_ms": 0.09702
+              },
+              "all_compute_during_span": {
+                "window_ms": 2.38048,
+                "covered_ms": 0.23166,
+                "uncovered_ms": 2.14882,
+                "uncovered_pct": 90.268,
+                "gaps": {
+                  "count": 78,
+                  "sum_ms": 2.14882,
+                  "median_ms": 0.02662,
+                  "p90_ms": 0.03926,
+                  "p99_ms": 0.0486,
+                  "max_ms": 0.05292
+                },
+                "largest_gaps_ms_from_window_start": [
+                  [
+                    1.38274,
+                    1.43566
+                  ],
+                  [
+                    1.90144,
+                    1.95004
+                  ],
+                  [
+                    1.68174,
+                    1.72902
+                  ],
+                  [
+                    2.25952,
+                    2.30614
+                  ],
+                  [
+                    1.72986,
+                    1.77474
+                  ]
+                ]
+              },
+              "dispatch_evidence": {
+                "global_internal_gaps_before_attributed_kernel": {
+                  "count": 39,
+                  "sum_ms": 1.01196,
+                  "median_ms": 0.02686,
+                  "p90_ms": 0.03162,
+                  "p99_ms": 0.04488,
+                  "max_ms": 0.04488
+                },
+                "gaps_with_cann_launch": {
+                  "count": 13,
+                  "sum_ms": 0.40242,
+                  "median_ms": 0.02968,
+                  "p90_ms": 0.03668,
+                  "p99_ms": 0.04488,
+                  "max_ms": 0.04488
+                },
+                "gap_before_host_dispatch_start": {
+                  "count": 13,
+                  "sum_ms": 0.36897,
+                  "median_ms": 0.02683,
+                  "p90_ms": 0.03379,
+                  "p99_ms": 0.04147,
+                  "max_ms": 0.04147
+                },
+                "gap_after_host_dispatch_start": {
+                  "count": 13,
+                  "sum_ms": 0.03345,
+                  "median_ms": 0.00283,
+                  "p90_ms": 0.00517,
+                  "p99_ms": 0.00527,
+                  "max_ms": 0.00527
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -100,6 +100,19 @@ AB 整步缩短 6.458 ms。样本/s 为 94.933 → 122.554，token/s 为 2089.91
 
 另行适配的 eager fold 对 E01 每步一次的有序累加调用显式提供 ABI 和资源信息。8 步训练门 B 腿建立 1 个计划，首调用走普通 Triton，3 步因物理 grid 上限回退，4 步真实进入并返回 C++ 提交，对应 [1,24]、[1,18]、[1,19]、[2,14]；A/B 输入、梯度、权重、优化器状态及非有限跳步通过。该项独立于原版 wrapper 自动触发路径。训练门给出等价性和命中次数，正式比较另取无 profiler 及 Level0。[适配源码](pr42634_eager_fold) · [动态逐步命中](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/02-B/rank000/eager_fold_plan.json) · [语义对照](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/comparison.json)
 
+### Eager fold 显式适配器的整步对照
+
+A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat overflow/norm、直接发布、最多 65,536 项的缓存和同一 PR 包。两腿只切换 `NPU_EAGER_FOLD_PLAN`。下表首行为 A/B，次行为 B/A。
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 21.749 ms/步 | 21.246 ms/步 | +2.31% | 25.901 ms/步 | 88.01% | 21.711 ms/步 | 86.19% | +2.07% |
+| 23.483 ms/步 | 21.734 ms/步 | +7.45% | 27.641 ms/步 | 88.69% | 22.801 ms/步 | 86.69% | +2.25% |
+
+同步窗口分别节省 0.503 和 1.749 ms/步。正序吞吐为 125.063 → 128.025 样本/s、2,753.218 → 2,818.440 token/s，反序为 115.829 → 125.151 样本/s、2,549.942 → 2,755.165 token/s。两序步时降幅相差 5.14 个百分点。B 在每个 50 步窗口均为 16 步命中、34 步因物理 grid 上限走原路径。Level0 的 [1,19]、[2,14] 命中，[2,22] 回退。
+
+前序完整 trace 中，每步仅有一次 fold，下发前可见的设备空档为百微秒量级。观察到的整步差值大于单次 fold 的暴露预算。该配对证明动态 eager 可以实际调用上游 C++ 提交，整步差值还包含系统波动，归因为单次 Host 加快需要独立的下发测量。[双序官方数据与吞吐](reports/pr42634-eager-v3/measurement.md) · [实际路径计数](../pr42634/eager-paired/evidence/pr42634-eager-v3-no-profiler-ab/02-B/rank000/eager_fold_plan.json) · [真实配方](../pr42634/eager-paired/registries/pr42634-eager-v3/recipe.json) · [逐笔原始文件与 SHA-256](../pr42634/eager-paired/receipt-sha256.json)
+
 ## 尝试无优化路径
 
 - **因果 mask 改为 BF16 tril。** 12 个微测样例的输出和梯度逐位一致，四个微测窗口节省 19.17%–31.18%。完整训练正序 21.208 → 22.588 ms/步，慢 6.51%，该轮 Free 占比 88.43% → 86.51%。[微测](working/diagnostics/tril-micro/micro.json) · [整步八列](reports/causal-tril-v1/measurement.md)
