@@ -98,7 +98,7 @@ AB 整步缩短 6.458 ms。样本/s 为 94.933 → 122.554，token/s 为 2089.91
 
 原始 01 动态 eager 本轮正序两腿各 60 步，入口计数均为零，torch_npu._inductor.config 和 patch 模块均未加载。开关从 0 变为 1 时同步窗口实际从 565.304 变为 605.396 ms/步。这个区间反映未激活配置的波动。Level0 的 A/B、B/A 已分别归档，反序同步窗口未成功完成。原始 Level1 的第 4、5 步各有 9,892、9,893 次 ACLNN enqueue，匹配的 Inductor wrapper 调用名均为零。[A 腿计数](working/evidence/pr42634-original-no-profiler-ab/01-A/rank000/pr42634_receipt.json) · [B 腿计数](working/evidence/pr42634-original-no-profiler-ab/02-B/rank000/pr42634_receipt.json) · [两序 Level0 与已完成的同步窗口](reports/pr42634-original/measurement.md) · [原始 Level1](../pr42634/eligibility/stock-level1.json)
 
-另行适配的 eager fold 对 E01 每步一次的有序累加调用显式提供 ABI 和资源信息。8 步训练门 B 腿建立 1 个计划，首调用走普通 Triton，3 步因物理 grid 上限回退，4 步真实进入并返回 C++ 提交；A/B 输入、梯度、权重、优化器状态及非有限跳步通过。该项独立于原版 wrapper 自动触发路径。训练门给出等价性和命中次数，正式比较另取无 profiler 及 Level0。[适配源码](pr42634_eager_fold) · [动态逐步命中](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/02-B/rank000/eager_fold_plan.json) · [语义对照](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/comparison.json)
+另行适配的 eager fold 对 E01 每步一次的有序累加调用显式提供 ABI 和资源信息。8 步训练门 B 腿建立 1 个计划，首调用走普通 Triton，3 步因物理 grid 上限回退，4 步真实进入并返回 C++ 提交，对应 [1,24]、[1,18]、[1,19]、[2,14]；A/B 输入、梯度、权重、优化器状态及非有限跳步通过。该项独立于原版 wrapper 自动触发路径。训练门给出等价性和命中次数，正式比较另取无 profiler 及 Level0。[适配源码](pr42634_eager_fold) · [动态逐步命中](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/02-B/rank000/eager_fold_plan.json) · [语义对照](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/comparison.json)
 
 ## 尝试无优化路径
 
@@ -122,7 +122,7 @@ flat_stats.eligible 对每个 1,052 片梯度重新核对视图根、真实 stor
 
 ## 代码、原始回执与复算
 
-每项代码和实机索引按本轮独立分支归档，早期动态 D01–D05 位于上一层台账。当前快照含 3,738 个原始条目的 SHA-256，涵盖 workspace、runner、设备前后检查、同步窗口、官方 CSV、归因摘要和数值门。[代码分支](https://github.com/j1204150587-svg/pytorch/tree/codex/npu8-dynamic-eager-pr42634-20261127) · [实现与原始证据提交](https://github.com/j1204150587-svg/pytorch/commit/ecae80312b4c5cc84615807637bf0c870237ea6a) · [收据清单](working/receipt-sha256.json) · [完整 trace 路径和 SHA-256](working/trace-index.json)
+每项代码和实机索引按本轮独立分支归档，早期动态 D01–D05 位于上一层台账。当前快照含 3,738 个原始条目的 SHA-256，涵盖 workspace、runner、设备前后检查、同步窗口、官方 CSV、归因摘要和数值门。[代码分支](https://github.com/j1204150587-svg/pytorch/tree/codex/npu8-dynamic-eager-pr42634-20261127) · [实现与原始证据提交](https://github.com/j1204150587-svg/pytorch/commit/ecae80312b4c5cc84615807637bf0c870237ea6a) · [收据清单](working/receipt-sha256.json) · [宿主 trace 清单](working/trace-index.json) · [32 份原始 profiler trace](../pr42634/raw-traces) · [89,258,711 字节逐文件 SHA-256 和 gzip CRC 核验清单](../pr42634/raw-traces.csv) · [独立核验脚本](../pr42634/verify_trace_archive.py)
 
 在 dynamic-free70 目录复算一项对照。代码从对应 session 的实际命令、计数、shape、CSV 和指标读取数值。
 
