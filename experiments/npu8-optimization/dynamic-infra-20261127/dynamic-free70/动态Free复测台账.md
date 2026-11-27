@@ -135,9 +135,16 @@ A 为原始 01，B 同时启用分组侧表、连续梯度叶、分区与打包�
 | 565.304 ms/步 | 605.396 ms/步 | −7.09% | 557.826 ms/步 | 91.59% | 575.908 ms/步 | 91.71% | −0.12% |
 | 574.322 ms/步 | 562.621 ms/步 | +2.04% | 625.350 ms/步 | 92.39% | 568.366 ms/步 | 91.86% | +0.58% |
 
-### 生成 wrapper 的前端加载核验
+### 原版 PR 在真正生成的动态 wrapper 上的独立收益
 
-同一隔离包在独立进程成功导入上游前端，patch 已安装，三个 C++ 符号均可见。此检查只覆盖加载。生成 wrapper 的提交次数和耗时需要独立编译用例记录。[前端加载结果](../pr42634/isolated3/dynamic-free70/isolated-pr-frontend-v3-1795769819467234540/micro.json) · [运行命令](../pr42634/isolated3/dynamic-free70/isolated-pr-frontend-v3-1795769819467234540/command.json)
+独立前向用例为 `x * 2.0 + y`。同一 TorchNPU 2.10.0.post6 隔离包导入 PR 前端、生成真实 Inductor Python wrapper，测试进程用上游 PTA 的设备 guard 类补齐 host Torch 2.10 的接口拼写。A/B 只切换原版 fast-launch 开关，两腿的 grouped autotune 均关闭。四个新进程各建新缓存，在 [1,19]、[2,14]、[2,22]、[4,31] 上分别预热 20 次，然后无 profiler 轮换形状测 512 次，窗口首尾同步。两序步时降幅相差 1.16 个百分点。此处单位为单次编译前向的 μs；HSTU 的 ms/训练步见下节。此局部正控没有采集按训练步定义的 Free。
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 93.240 μs/调用 | 74.678 μs/调用 | +19.91% | — | — | — | — | — |
+| 91.913 μs/调用 | 74.682 μs/调用 | +18.75% | — | — | — | — | — |
+
+A/B 的 Host 返回 p50/p95 为 92.603/99.004→72.302/85.853 μs；B/A 为 90.933/97.214→73.193/78.953 μs。计时区间内没有生成新 wrapper。另一个 Level1 控制中，两腿均 16/16 个前向结果逐位相同。B 有两个新 wrapper 首调用经普通路径并成功创建计划，随后 14 次真实 C++ 提交均返回。四个标记内每个 B 均真实命中一次，A 无命中。两个原始 trace 各步只含物理流 47 上的同一 `triton_poi_fused_add_mul_0` AI_VECTOR_CORE，任务均在区间内。本次改进属于同次数、同设备工作的 Host 提交路径。[原始 512 次窗口、缓存信息与正反序计时](../pr42634/verified-control/pr42634/bench-dynamic-1795771912409431495/summary.json) · [逐核逐流对照](../pr42634/verified-control/pr42634/generated-ab-compare.json) · [正控和真实计数](../pr42634/verified-control/dynamic-free70) · [实际 guard 适配](../pr42634/eligibility/compiled_runtime_compat.py) · [独立计时代码](../pr42634/eligibility/wrapper_bench_compat.py) · [168 个原始条目的 SHA-256](../pr42634/verified-control/sources.sha256.json)
 
 ### Eager fold 显式适配器的训练门与局部效率
 
@@ -169,6 +176,10 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 对同一步的物理 stream 45、47 核对有序任务名、类型和任务 ID。两个命中步分别各有 636、637 笔设备任务，A/B 完全一致；ordered_64 均在 stream 47 只提交一次。Level0 三步中，整个 fold Host 区间与官方 Free 的交集每步平均只减少 0.0440、0.0552 ms。第 6 步两腿都走原 launcher，该步总 Free 在两个顺序仍减少 3.427、4.449 ms。单次 fold 暴露的局部减少与几个毫秒的整步差值不能等同。整步配对证明真实命中及观察值，局部 Host 返回加速见上表的 40 次独立下发测量。[逐步任务、物理流与 Host 阶段](pr42634_eager_fold/paired-attribution.json) · [原始 trace 复算脚本](pr42634_eager_fold/paired_attribution.py) · [同步窗口逐步配对](pr42634_eager_fold/paired-controls.json) · [双序官方数据与吞吐](reports/pr42634-eager-v3/measurement.md) · [实际路径计数](../pr42634/eager-paired/evidence/pr42634-eager-v3-no-profiler-ab/02-B/rank000/eager_fold_plan.json) · [真实配方](../pr42634/eager-paired/registries/pr42634-eager-v3/recipe.json) · [逐笔原始文件与 SHA-256](../pr42634/eager-paired/receipt-sha256.json) · [同轮 6 份原始 trace 的 SHA-256 与 gzip 校验](../pr42634/eager-paired/raw-traces.csv)
 
+### Eager 适配器 v4 的物理网格微测
+
+在已校验的 driver 上，v4 把逻辑 grid 和当前硬件允许的物理 block 数分别传入。独立 fold 门在 [1,19]、[2,14]、[2,22]、[4,31] 及另一 stream 的 [2,14] 全部逐位通过，5 次均进入并返回 C++，注入 profiler 时回退一次。此前因物理 cap 回退的两个代表形状均已命中。[1,19] 普通 Triton、完整适配器和仅已准备参数提交的 Host p50 依次为 47.412、12.011、2.910 μs。四个混合形状同步窗口依次为 122.926→121.075、122.902→121.547、122.120→121.018、123.082→120.930 μs/调用。这里的结果仅覆盖独立 fold。[原始分项、形状及逐次计时](../pr42634/verified-control/dynamic-free70/pr-cap-v4-probe-1795772222098099850/micro.json) · [注册与守卫实现](fold_grid_cap)
+
 ## 尝试无优化路径
 
 ### 将四个输入字段打包成一次 H2D
@@ -181,6 +192,8 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 | 21.455 ms/步 | 21.806 ms/步 | -1.64% | 23.444 ms/步 | 86.96% | 23.933 ms/步 | 87.13% | -0.20% |
 
 [每步三类设备时间、实际吞吐和配对波动](reports/input-transfer-v1/measurement.md)
+
+- **把 linear 反向的两次矩阵乘合并进 GroupedMatmulV5。** 四种实际形状、两类投影的 BF16 输入梯度和权重梯度均逐位通过，但计入转置后的 32 个同步窗口全部变慢，每对梯度多用 23.329–29.597 μs。8 份 Level1 trace 显示，物理流 47 上的两次 MatMulV2 变为一次转置加一次 GroupedMatmulV5，仍是两笔。该候选止于算子微测。[四个 shape 的逐腿计时和原始 trace](linear_gmm/RESULTS.md)
 
 - **因果 mask 改为 BF16 tril。** 12 个微测样例的输出和梯度逐位一致，四个微测窗口节省 19.17%–31.18%。完整训练正序 21.208 → 22.588 ms/步，慢 6.51%，该轮 Free 占比 88.43% → 86.51%。[微测](working/diagnostics/tril-micro/micro.json) · [整步八列](reports/causal-tril-v1/measurement.md)
 

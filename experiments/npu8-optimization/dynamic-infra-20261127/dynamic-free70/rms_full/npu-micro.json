@@ -1,0 +1,3603 @@
+{
+  "device": "npu",
+  "torch": "2.10.0+cpu",
+  "seed": 1234,
+  "width": 64,
+  "bitwise_pass": false,
+  "cases": [
+    {
+      "shape": [
+        1,
+        19
+      ],
+      "kind": "rand_unit_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 473,
+          "numel": 1216,
+          "max_abs": 0.015625,
+          "first": {
+            "flat_index": 2,
+            "reference_hex": "3e28",
+            "candidate_hex": "3e29"
+          }
+        },
+        "dx": {
+          "different": 241,
+          "numel": 1216,
+          "max_abs": 0.015625,
+          "first": {
+            "flat_index": 29,
+            "reference_hex": "bb29",
+            "candidate_hex": "bb2b"
+          }
+        },
+        "dw": {
+          "different": 39,
+          "numel": 64,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "3fc9",
+            "candidate_hex": "3fc8"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "inv",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv": {
+              "different": 4,
+              "numel": 19,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "3f5c",
+                "candidate_hex": "3f5b"
+              }
+            },
+            "z": {
+              "different": 473,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "3e28",
+                "candidate_hex": "3e29"
+              }
+            },
+            "y": {
+              "different": 473,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "3e28",
+                "candidate_hex": "3e29"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 205,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 320,
+                "reference_hex": "bf80",
+                "candidate_hex": "bf7f"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 4,
+              "numel": 19,
+              "max_abs": 0.01171875,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "3f22",
+                "candidate_hex": "3f20"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 8,
+              "numel": 19,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "be8e",
+                "candidate_hex": "be8f"
+              }
+            },
+            "grad_sq": {
+              "different": 512,
+              "numel": 1216,
+              "max_abs": 0.0009765625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bb8e",
+                "candidate_hex": "bb8f"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 631,
+              "numel": 1216,
+              "max_abs": 0.005859375,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3a7e",
+                "candidate_hex": "3a7f"
+              }
+            },
+            "dx": {
+              "different": 241,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 29,
+                "reference_hex": "bb29",
+                "candidate_hex": "bb2b"
+              }
+            },
+            "dw_terms": {
+              "different": 421,
+              "numel": 1216,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "be59",
+                "candidate_hex": "be5a"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 6,
+              "numel": 19,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "be8e",
+                "candidate_hex": "be8f"
+              }
+            },
+            "grad_sq": {
+              "different": 384,
+              "numel": 1216,
+              "max_abs": 0.00048828125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bb8e",
+                "candidate_hex": "bb8f"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 504,
+              "numel": 1216,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3a7e",
+                "candidate_hex": "3a7f"
+              }
+            },
+            "dx": {
+              "different": 93,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 29,
+                "reference_hex": "bb29",
+                "candidate_hex": "bb2b"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 1216,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        1,
+        19
+      ],
+      "kind": "rand_mixed_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 333,
+          "numel": 1216,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 28,
+            "reference_hex": "bf09",
+            "candidate_hex": "bf0a"
+          }
+        },
+        "dx": {
+          "different": 130,
+          "numel": 1216,
+          "max_abs": 0.015625,
+          "first": {
+            "flat_index": 58,
+            "reference_hex": "3b9e",
+            "candidate_hex": "3b9f"
+          }
+        },
+        "dw": {
+          "different": 36,
+          "numel": 64,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "c05d",
+            "candidate_hex": "c05e"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "inv",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv": {
+              "different": 1,
+              "numel": 19,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 18,
+                "reference_hex": "3f86",
+                "candidate_hex": "3f87"
+              }
+            },
+            "z": {
+              "different": 375,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 28,
+                "reference_hex": "3fda",
+                "candidate_hex": "3fdb"
+              }
+            },
+            "y": {
+              "different": 333,
+              "numel": 1216,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 28,
+                "reference_hex": "bf09",
+                "candidate_hex": "bf0a"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 64,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 1152,
+                "reference_hex": "beed",
+                "candidate_hex": "beee"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 1,
+              "numel": 19,
+              "max_abs": 0.0234375,
+              "first": {
+                "flat_index": 18,
+                "reference_hex": "3f93",
+                "candidate_hex": "3f96"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 4,
+              "numel": 19,
+              "max_abs": 0.078125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd85",
+                "candidate_hex": "bd86"
+              }
+            },
+            "grad_sq": {
+              "different": 256,
+              "numel": 1216,
+              "max_abs": 0.001220703125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "ba85",
+                "candidate_hex": "ba86"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 360,
+              "numel": 1216,
+              "max_abs": 0.005859375,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3b36",
+                "candidate_hex": "3b37"
+              }
+            },
+            "dx": {
+              "different": 130,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 58,
+                "reference_hex": "3b9e",
+                "candidate_hex": "3b9f"
+              }
+            },
+            "dw_terms": {
+              "different": 330,
+              "numel": 1216,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 28,
+                "reference_hex": "3eff",
+                "candidate_hex": "3f00"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 3,
+              "numel": 19,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd85",
+                "candidate_hex": "bd86"
+              }
+            },
+            "grad_sq": {
+              "different": 192,
+              "numel": 1216,
+              "max_abs": 0.00048828125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "ba85",
+                "candidate_hex": "ba86"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 302,
+              "numel": 1216,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3b36",
+                "candidate_hex": "3b37"
+              }
+            },
+            "dx": {
+              "different": 70,
+              "numel": 1216,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 58,
+                "reference_hex": "3b9e",
+                "candidate_hex": "3b9f"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 1216,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        1,
+        19
+      ],
+      "kind": "near_epsilon",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 276,
+          "numel": 1216,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 12,
+            "reference_hex": "be79",
+            "candidate_hex": "be77"
+          }
+        },
+        "dx": {
+          "different": 185,
+          "numel": 1216,
+          "max_abs": 16.0,
+          "first": {
+            "flat_index": 68,
+            "reference_hex": "41aa",
+            "candidate_hex": "41a9"
+          }
+        },
+        "dw": {
+          "different": 34,
+          "numel": 64,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "3fb9",
+            "candidate_hex": "3fb8"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "var_eps",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 7,
+              "numel": 19,
+              "max_abs": 1.4901161193847656e-08,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "3626",
+                "candidate_hex": "3627"
+              }
+            },
+            "inv": {
+              "different": 2,
+              "numel": 19,
+              "max_abs": 4.0,
+              "first": {
+                "flat_index": 4,
+                "reference_hex": "4436",
+                "candidate_hex": "4437"
+              }
+            },
+            "z": {
+              "different": 318,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 10,
+                "reference_hex": "bed5",
+                "candidate_hex": "bed4"
+              }
+            },
+            "y": {
+              "different": 276,
+              "numel": 1216,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 12,
+                "reference_hex": "be79",
+                "candidate_hex": "be77"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 122,
+              "numel": 1216,
+              "max_abs": 16.0,
+              "first": {
+                "flat_index": 256,
+                "reference_hex": "c1ba",
+                "candidate_hex": "c1bb"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 2,
+              "numel": 19,
+              "max_abs": 6291456.0,
+              "first": {
+                "flat_index": 4,
+                "reference_hex": "4db8",
+                "candidate_hex": "4dbb"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 5,
+              "numel": 19,
+              "max_abs": 12288.0,
+              "first": {
+                "flat_index": 4,
+                "reference_hex": "c958",
+                "candidate_hex": "c95b"
+              }
+            },
+            "grad_sq": {
+              "different": 320,
+              "numel": 1216,
+              "max_abs": 192.0,
+              "first": {
+                "flat_index": 256,
+                "reference_hex": "c658",
+                "candidate_hex": "c65b"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 534,
+              "numel": 1216,
+              "max_abs": 1.0,
+              "first": {
+                "flat_index": 16,
+                "reference_hex": "bf1b",
+                "candidate_hex": "bf1a"
+              }
+            },
+            "dx": {
+              "different": 185,
+              "numel": 1216,
+              "max_abs": 16.0,
+              "first": {
+                "flat_index": 68,
+                "reference_hex": "41aa",
+                "candidate_hex": "41a9"
+              }
+            },
+            "dw_terms": {
+              "different": 289,
+              "numel": 1216,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 10,
+                "reference_hex": "bc96",
+                "candidate_hex": "bc95"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 19,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 3,
+              "numel": 19,
+              "max_abs": 8192.0,
+              "first": {
+                "flat_index": 10,
+                "reference_hex": "49dc",
+                "candidate_hex": "49dd"
+              }
+            },
+            "grad_sq": {
+              "different": 192,
+              "numel": 1216,
+              "max_abs": 128.0,
+              "first": {
+                "flat_index": 640,
+                "reference_hex": "46dc",
+                "candidate_hex": "46dd"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 462,
+              "numel": 1216,
+              "max_abs": 1.0,
+              "first": {
+                "flat_index": 16,
+                "reference_hex": "bf1b",
+                "candidate_hex": "bf1a"
+              }
+            },
+            "dx": {
+              "different": 77,
+              "numel": 1216,
+              "max_abs": 16.0,
+              "first": {
+                "flat_index": 68,
+                "reference_hex": "41aa",
+                "candidate_hex": "41a9"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 1216,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 1216,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        1,
+        19
+      ],
+      "kind": "zero",
+      "equal": true,
+      "components": {
+        "y": {
+          "different": 0,
+          "numel": 1216,
+          "max_abs": 0.0
+        },
+        "dx": {
+          "different": 0,
+          "numel": 1216,
+          "max_abs": 0.0
+        },
+        "dw": {
+          "different": 0,
+          "numel": 64,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        14
+      ],
+      "kind": "rand_unit_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 552,
+          "numel": 1792,
+          "max_abs": 0.015625,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "bed8",
+            "candidate_hex": "bed7"
+          }
+        },
+        "dx": {
+          "different": 398,
+          "numel": 1792,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 12,
+            "reference_hex": "be1a",
+            "candidate_hex": "be1c"
+          }
+        },
+        "dw": {
+          "different": 42,
+          "numel": 64,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "c0c6",
+            "candidate_hex": "c0c7"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "inv",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv": {
+              "different": 5,
+              "numel": 28,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "3f9a",
+                "candidate_hex": "3f99"
+              }
+            },
+            "z": {
+              "different": 552,
+              "numel": 1792,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bed8",
+                "candidate_hex": "bed7"
+              }
+            },
+            "y": {
+              "different": 552,
+              "numel": 1792,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bed8",
+                "candidate_hex": "bed7"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 268,
+              "numel": 1792,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 320,
+                "reference_hex": "3f67",
+                "candidate_hex": "3f66"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 5,
+              "numel": 28,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "3fdf",
+                "candidate_hex": "3fdb"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 14,
+              "numel": 28,
+              "max_abs": 0.125,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "c09f",
+                "candidate_hex": "c09b"
+              }
+            },
+            "grad_sq": {
+              "different": 896,
+              "numel": 1792,
+              "max_abs": 0.001953125,
+              "first": {
+                "flat_index": 320,
+                "reference_hex": "bd9f",
+                "candidate_hex": "bd9b"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 907,
+              "numel": 1792,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 9,
+                "reference_hex": "3dd0",
+                "candidate_hex": "3dcf"
+              }
+            },
+            "dx": {
+              "different": 398,
+              "numel": 1792,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 12,
+                "reference_hex": "be1a",
+                "candidate_hex": "be1c"
+              }
+            },
+            "dw_terms": {
+              "different": 479,
+              "numel": 1792,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "be48",
+                "candidate_hex": "be47"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 11,
+              "numel": 28,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "c09f",
+                "candidate_hex": "c09e"
+              }
+            },
+            "grad_sq": {
+              "different": 704,
+              "numel": 1792,
+              "max_abs": 0.00048828125,
+              "first": {
+                "flat_index": 320,
+                "reference_hex": "bd9f",
+                "candidate_hex": "bd9e"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 734,
+              "numel": 1792,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 9,
+                "reference_hex": "3dd0",
+                "candidate_hex": "3dcf"
+              }
+            },
+            "dx": {
+              "different": 182,
+              "numel": 1792,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 12,
+                "reference_hex": "be1a",
+                "candidate_hex": "be1c"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 1792,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        14
+      ],
+      "kind": "rand_mixed_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 490,
+          "numel": 1792,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "be72",
+            "candidate_hex": "be73"
+          }
+        },
+        "dx": {
+          "different": 468,
+          "numel": 1792,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "3f1b",
+            "candidate_hex": "3f1c"
+          }
+        },
+        "dw": {
+          "different": 39,
+          "numel": 64,
+          "max_abs": 0.046875,
+          "first": {
+            "flat_index": 1,
+            "reference_hex": "4023",
+            "candidate_hex": "4021"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "inv",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv": {
+              "different": 6,
+              "numel": 28,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3f58",
+                "candidate_hex": "3f59"
+              }
+            },
+            "z": {
+              "different": 535,
+              "numel": 1792,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bedf",
+                "candidate_hex": "bee0"
+              }
+            },
+            "y": {
+              "different": 490,
+              "numel": 1792,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "be72",
+                "candidate_hex": "be73"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 327,
+              "numel": 1792,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3f1f",
+                "candidate_hex": "3f20"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 6,
+              "numel": 28,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3f1a",
+                "candidate_hex": "3f1c"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 14,
+              "numel": 28,
+              "max_abs": 0.09375,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3f63",
+                "candidate_hex": "3f67"
+              }
+            },
+            "grad_sq": {
+              "different": 896,
+              "numel": 1792,
+              "max_abs": 0.00146484375,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3c63",
+                "candidate_hex": "3c67"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 1055,
+              "numel": 1792,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bc6a",
+                "candidate_hex": "bc6e"
+              }
+            },
+            "dx": {
+              "different": 468,
+              "numel": 1792,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3f1b",
+                "candidate_hex": "3f1c"
+              }
+            },
+            "dw_terms": {
+              "different": 468,
+              "numel": 1792,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "bc59",
+                "candidate_hex": "bc5a"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 9,
+              "numel": 28,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3f63",
+                "candidate_hex": "3f64"
+              }
+            },
+            "grad_sq": {
+              "different": 576,
+              "numel": 1792,
+              "max_abs": 0.00048828125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3c63",
+                "candidate_hex": "3c64"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 781,
+              "numel": 1792,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bc6a",
+                "candidate_hex": "bc6b"
+              }
+            },
+            "dx": {
+              "different": 185,
+              "numel": 1792,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 8,
+                "reference_hex": "bdd6",
+                "candidate_hex": "bdd7"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 1792,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        14
+      ],
+      "kind": "near_epsilon",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 465,
+          "numel": 1792,
+          "max_abs": 0.015625,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "3fb3",
+            "candidate_hex": "3fb2"
+          }
+        },
+        "dx": {
+          "different": 228,
+          "numel": 1792,
+          "max_abs": 16.0,
+          "first": {
+            "flat_index": 130,
+            "reference_hex": "c28a",
+            "candidate_hex": "c28b"
+          }
+        },
+        "dw": {
+          "different": 35,
+          "numel": 64,
+          "max_abs": 0.0703125,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "bf26",
+            "candidate_hex": "bf24"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "var_eps",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 5,
+              "numel": 28,
+              "max_abs": 1.4901161193847656e-08,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3600",
+                "candidate_hex": "3601"
+              }
+            },
+            "inv": {
+              "different": 2,
+              "numel": 28,
+              "max_abs": 4.0,
+              "first": {
+                "flat_index": 12,
+                "reference_hex": "4434",
+                "candidate_hex": "4433"
+              }
+            },
+            "z": {
+              "different": 530,
+              "numel": 1792,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bf57",
+                "candidate_hex": "bf56"
+              }
+            },
+            "y": {
+              "different": 465,
+              "numel": 1792,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3fb3",
+                "candidate_hex": "3fb2"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 120,
+              "numel": 1792,
+              "max_abs": 16.0,
+              "first": {
+                "flat_index": 768,
+                "reference_hex": "c43b",
+                "candidate_hex": "c43a"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 2,
+              "numel": 28,
+              "max_abs": 6291456.0,
+              "first": {
+                "flat_index": 12,
+                "reference_hex": "4db2",
+                "candidate_hex": "4daf"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 9,
+              "numel": 28,
+              "max_abs": 16384.0,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "48c6",
+                "candidate_hex": "48c5"
+              }
+            },
+            "grad_sq": {
+              "different": 576,
+              "numel": 1792,
+              "max_abs": 256.0,
+              "first": {
+                "flat_index": 128,
+                "reference_hex": "45c6",
+                "candidate_hex": "45c5"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 687,
+              "numel": 1792,
+              "max_abs": 2.0,
+              "first": {
+                "flat_index": 73,
+                "reference_hex": "3fab",
+                "candidate_hex": "3fac"
+              }
+            },
+            "dx": {
+              "different": 228,
+              "numel": 1792,
+              "max_abs": 16.0,
+              "first": {
+                "flat_index": 130,
+                "reference_hex": "c28a",
+                "candidate_hex": "c28b"
+              }
+            },
+            "dw_terms": {
+              "different": 465,
+              "numel": 1792,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "bf31",
+                "candidate_hex": "bf30"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 28,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 7,
+              "numel": 28,
+              "max_abs": 16384.0,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "48c6",
+                "candidate_hex": "48c5"
+              }
+            },
+            "grad_sq": {
+              "different": 448,
+              "numel": 1792,
+              "max_abs": 256.0,
+              "first": {
+                "flat_index": 128,
+                "reference_hex": "45c6",
+                "candidate_hex": "45c5"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 585,
+              "numel": 1792,
+              "max_abs": 2.0,
+              "first": {
+                "flat_index": 73,
+                "reference_hex": "3fab",
+                "candidate_hex": "3fac"
+              }
+            },
+            "dx": {
+              "different": 114,
+              "numel": 1792,
+              "max_abs": 8.0,
+              "first": {
+                "flat_index": 130,
+                "reference_hex": "c28a",
+                "candidate_hex": "c28b"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 1792,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 1792,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        14
+      ],
+      "kind": "zero",
+      "equal": true,
+      "components": {
+        "y": {
+          "different": 0,
+          "numel": 1792,
+          "max_abs": 0.0
+        },
+        "dx": {
+          "different": 0,
+          "numel": 1792,
+          "max_abs": 0.0
+        },
+        "dw": {
+          "different": 0,
+          "numel": 64,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        22
+      ],
+      "kind": "rand_unit_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 799,
+          "numel": 2816,
+          "max_abs": 0.015625,
+          "first": {
+            "flat_index": 8,
+            "reference_hex": "be40",
+            "candidate_hex": "be3f"
+          }
+        },
+        "dx": {
+          "different": 556,
+          "numel": 2816,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 1,
+            "reference_hex": "bde3",
+            "candidate_hex": "bde2"
+          }
+        },
+        "dw": {
+          "different": 34,
+          "numel": 64,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "408d",
+            "candidate_hex": "408e"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "inv",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv": {
+              "different": 7,
+              "numel": 44,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 16,
+                "reference_hex": "3f5d",
+                "candidate_hex": "3f5e"
+              }
+            },
+            "z": {
+              "different": 799,
+              "numel": 2816,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 8,
+                "reference_hex": "be40",
+                "candidate_hex": "be3f"
+              }
+            },
+            "y": {
+              "different": 799,
+              "numel": 2816,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 8,
+                "reference_hex": "be40",
+                "candidate_hex": "be3f"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 380,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 1024,
+                "reference_hex": "bee0",
+                "candidate_hex": "bee1"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 7,
+              "numel": 44,
+              "max_abs": 0.0390625,
+              "first": {
+                "flat_index": 16,
+                "reference_hex": "3f25",
+                "candidate_hex": "3f27"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 19,
+              "numel": 44,
+              "max_abs": 0.125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c049",
+                "candidate_hex": "c048"
+              }
+            },
+            "grad_sq": {
+              "different": 1216,
+              "numel": 2816,
+              "max_abs": 0.001953125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd49",
+                "candidate_hex": "bd48"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 1383,
+              "numel": 2816,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3db4",
+                "candidate_hex": "3db3"
+              }
+            },
+            "dx": {
+              "different": 556,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "bde3",
+                "candidate_hex": "bde2"
+              }
+            },
+            "dw_terms": {
+              "different": 723,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 8,
+                "reference_hex": "3ed4",
+                "candidate_hex": "3ed2"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 14,
+              "numel": 44,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c049",
+                "candidate_hex": "c048"
+              }
+            },
+            "grad_sq": {
+              "different": 896,
+              "numel": 2816,
+              "max_abs": 0.00048828125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd49",
+                "candidate_hex": "bd48"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 1100,
+              "numel": 2816,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3db4",
+                "candidate_hex": "3db3"
+              }
+            },
+            "dx": {
+              "different": 235,
+              "numel": 2816,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "bde3",
+                "candidate_hex": "bde2"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 2816,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        22
+      ],
+      "kind": "rand_mixed_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 750,
+          "numel": 2816,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "3eb0",
+            "candidate_hex": "3eaf"
+          }
+        },
+        "dx": {
+          "different": 583,
+          "numel": 2816,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 7,
+            "reference_hex": "3b60",
+            "candidate_hex": "3b58"
+          }
+        },
+        "dw": {
+          "different": 40,
+          "numel": 64,
+          "max_abs": 0.125,
+          "first": {
+            "flat_index": 0,
+            "reference_hex": "40a7",
+            "candidate_hex": "40a8"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "inv",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv": {
+              "different": 3,
+              "numel": 44,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 9,
+                "reference_hex": "3fb0",
+                "candidate_hex": "3fb1"
+              }
+            },
+            "z": {
+              "different": 854,
+              "numel": 2816,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bf1a",
+                "candidate_hex": "bf19"
+              }
+            },
+            "y": {
+              "different": 750,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3eb0",
+                "candidate_hex": "3eaf"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 189,
+              "numel": 2816,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 576,
+                "reference_hex": "3fe8",
+                "candidate_hex": "3fea"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 3,
+              "numel": 44,
+              "max_abs": 0.046875,
+              "first": {
+                "flat_index": 9,
+                "reference_hex": "4026",
+                "candidate_hex": "4029"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 19,
+              "numel": 44,
+              "max_abs": 0.25,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "40cb",
+                "candidate_hex": "40cc"
+              }
+            },
+            "grad_sq": {
+              "different": 1216,
+              "numel": 2816,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3dcb",
+                "candidate_hex": "3dcc"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 1490,
+              "numel": 2816,
+              "max_abs": 0.01953125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bdf7",
+                "candidate_hex": "bdf8"
+              }
+            },
+            "dx": {
+              "different": 583,
+              "numel": 2816,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 7,
+                "reference_hex": "3b60",
+                "candidate_hex": "3b58"
+              }
+            },
+            "dw_terms": {
+              "different": 746,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3f95",
+                "candidate_hex": "3f94"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 19,
+              "numel": 44,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "40cb",
+                "candidate_hex": "40cc"
+              }
+            },
+            "grad_sq": {
+              "different": 1216,
+              "numel": 2816,
+              "max_abs": 0.0009765625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3dcb",
+                "candidate_hex": "3dcc"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 1376,
+              "numel": 2816,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bdf7",
+                "candidate_hex": "bdf8"
+              }
+            },
+            "dx": {
+              "different": 443,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 7,
+                "reference_hex": "3b60",
+                "candidate_hex": "3b58"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 2816,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        22
+      ],
+      "kind": "near_epsilon",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 760,
+          "numel": 2816,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 4,
+            "reference_hex": "bf2d",
+            "candidate_hex": "bf2e"
+          }
+        },
+        "dx": {
+          "different": 567,
+          "numel": 2816,
+          "max_abs": 16.0,
+          "first": {
+            "flat_index": 25,
+            "reference_hex": "4161",
+            "candidate_hex": "415f"
+          }
+        },
+        "dw": {
+          "different": 31,
+          "numel": 64,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 3,
+            "reference_hex": "3f22",
+            "candidate_hex": "3f25"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "var_eps",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 11,
+              "numel": 44,
+              "max_abs": 1.4901161193847656e-08,
+              "first": {
+                "flat_index": 6,
+                "reference_hex": "3608",
+                "candidate_hex": "3607"
+              }
+            },
+            "inv": {
+              "different": 7,
+              "numel": 44,
+              "max_abs": 4.0,
+              "first": {
+                "flat_index": 7,
+                "reference_hex": "4432",
+                "candidate_hex": "4431"
+              }
+            },
+            "z": {
+              "different": 883,
+              "numel": 2816,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 4,
+                "reference_hex": "bf5c",
+                "candidate_hex": "bf5d"
+              }
+            },
+            "y": {
+              "different": 760,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 4,
+                "reference_hex": "bf2d",
+                "candidate_hex": "bf2e"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 421,
+              "numel": 2816,
+              "max_abs": 16.0,
+              "first": {
+                "flat_index": 448,
+                "reference_hex": "c431",
+                "candidate_hex": "c430"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 7,
+              "numel": 44,
+              "max_abs": 6291456.0,
+              "first": {
+                "flat_index": 7,
+                "reference_hex": "4dac",
+                "candidate_hex": "4da9"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 18,
+              "numel": 44,
+              "max_abs": 24576.0,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "c8b6",
+                "candidate_hex": "c8b5"
+              }
+            },
+            "grad_sq": {
+              "different": 1152,
+              "numel": 2816,
+              "max_abs": 384.0,
+              "first": {
+                "flat_index": 64,
+                "reference_hex": "c5b6",
+                "candidate_hex": "c5b5"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 1377,
+              "numel": 2816,
+              "max_abs": 1.5,
+              "first": {
+                "flat_index": 10,
+                "reference_hex": "c22b",
+                "candidate_hex": "c22a"
+              }
+            },
+            "dx": {
+              "different": 567,
+              "numel": 2816,
+              "max_abs": 16.0,
+              "first": {
+                "flat_index": 25,
+                "reference_hex": "4161",
+                "candidate_hex": "415f"
+              }
+            },
+            "dw_terms": {
+              "different": 780,
+              "numel": 2816,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 4,
+                "reference_hex": "3fe6",
+                "candidate_hex": "3fe7"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 44,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 13,
+              "numel": 44,
+              "max_abs": 8192.0,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "c8b6",
+                "candidate_hex": "c8b5"
+              }
+            },
+            "grad_sq": {
+              "different": 832,
+              "numel": 2816,
+              "max_abs": 128.0,
+              "first": {
+                "flat_index": 64,
+                "reference_hex": "c5b6",
+                "candidate_hex": "c5b5"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 1093,
+              "numel": 2816,
+              "max_abs": 1.0,
+              "first": {
+                "flat_index": 10,
+                "reference_hex": "c22b",
+                "candidate_hex": "c22a"
+              }
+            },
+            "dx": {
+              "different": 181,
+              "numel": 2816,
+              "max_abs": 4.0,
+              "first": {
+                "flat_index": 25,
+                "reference_hex": "4161",
+                "candidate_hex": "415f"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 2816,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 2816,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        2,
+        22
+      ],
+      "kind": "zero",
+      "equal": true,
+      "components": {
+        "y": {
+          "different": 0,
+          "numel": 2816,
+          "max_abs": 0.0
+        },
+        "dx": {
+          "different": 0,
+          "numel": 2816,
+          "max_abs": 0.0
+        },
+        "dw": {
+          "different": 0,
+          "numel": 64,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "shape": [
+        4,
+        31
+      ],
+      "kind": "rand_unit_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 2127,
+          "numel": 7936,
+          "max_abs": 0.015625,
+          "first": {
+            "flat_index": 1,
+            "reference_hex": "3f21",
+            "candidate_hex": "3f22"
+          }
+        },
+        "dx": {
+          "different": 1191,
+          "numel": 7936,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 2,
+            "reference_hex": "bfb0",
+            "candidate_hex": "bfb1"
+          }
+        },
+        "dw": {
+          "different": 34,
+          "numel": 64,
+          "max_abs": 0.125,
+          "first": {
+            "flat_index": 3,
+            "reference_hex": "c10a",
+            "candidate_hex": "c10b"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "inv",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "inv": {
+              "different": 12,
+              "numel": 124,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 7,
+                "reference_hex": "3f83",
+                "candidate_hex": "3f82"
+              }
+            },
+            "z": {
+              "different": 2127,
+              "numel": 7936,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "3f21",
+                "candidate_hex": "3f22"
+              }
+            },
+            "y": {
+              "different": 2127,
+              "numel": 7936,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "3f21",
+                "candidate_hex": "3f22"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 625,
+              "numel": 7936,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 448,
+                "reference_hex": "3ee7",
+                "candidate_hex": "3ee6"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 12,
+              "numel": 124,
+              "max_abs": 0.0234375,
+              "first": {
+                "flat_index": 7,
+                "reference_hex": "3f89",
+                "candidate_hex": "3f86"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 50,
+              "numel": 124,
+              "max_abs": 0.1875,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c007",
+                "candidate_hex": "c006"
+              }
+            },
+            "grad_sq": {
+              "different": 3200,
+              "numel": 7936,
+              "max_abs": 0.0029296875,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd07",
+                "candidate_hex": "bd06"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 3514,
+              "numel": 7936,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd25",
+                "candidate_hex": "bd23"
+              }
+            },
+            "dx": {
+              "different": 1191,
+              "numel": 7936,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "bfb0",
+                "candidate_hex": "bfb1"
+              }
+            },
+            "dw_terms": {
+              "different": 1863,
+              "numel": 7936,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "3ec8",
+                "candidate_hex": "3ec9"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 42,
+              "numel": 124,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c007",
+                "candidate_hex": "c006"
+              }
+            },
+            "grad_sq": {
+              "different": 2688,
+              "numel": 7936,
+              "max_abs": 0.00048828125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd07",
+                "candidate_hex": "bd06"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 3017,
+              "numel": 7936,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "bd25",
+                "candidate_hex": "bd23"
+              }
+            },
+            "dx": {
+              "different": 628,
+              "numel": 7936,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 2,
+                "reference_hex": "bfb0",
+                "candidate_hex": "bfb1"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 7936,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        4,
+        31
+      ],
+      "kind": "rand_mixed_gamma",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 1894,
+          "numel": 7936,
+          "max_abs": 0.03125,
+          "first": {
+            "flat_index": 18,
+            "reference_hex": "bf32",
+            "candidate_hex": "bf33"
+          }
+        },
+        "dx": {
+          "different": 1904,
+          "numel": 7936,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 3,
+            "reference_hex": "bf85",
+            "candidate_hex": "bf86"
+          }
+        },
+        "dw": {
+          "different": 42,
+          "numel": 64,
+          "max_abs": 0.125,
+          "first": {
+            "flat_index": 2,
+            "reference_hex": "4073",
+            "candidate_hex": "4074"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "var_eps",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 1,
+              "numel": 124,
+              "max_abs": 0.00390625,
+              "first": {
+                "flat_index": 76,
+                "reference_hex": "3f76",
+                "candidate_hex": "3f77"
+              }
+            },
+            "inv": {
+              "different": 17,
+              "numel": 124,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "3f69",
+                "candidate_hex": "3f68"
+              }
+            },
+            "z": {
+              "different": 2121,
+              "numel": 7936,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 16,
+                "reference_hex": "3f40",
+                "candidate_hex": "3f41"
+              }
+            },
+            "y": {
+              "different": 1894,
+              "numel": 7936,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 18,
+                "reference_hex": "bf32",
+                "candidate_hex": "bf33"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 938,
+              "numel": 7936,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 320,
+                "reference_hex": "3ea1",
+                "candidate_hex": "3ea0"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 17,
+              "numel": 124,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "3f41",
+                "candidate_hex": "3f3f"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 55,
+              "numel": 124,
+              "max_abs": 0.125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "40ba",
+                "candidate_hex": "40bb"
+              }
+            },
+            "grad_sq": {
+              "different": 3520,
+              "numel": 7936,
+              "max_abs": 0.001953125,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3dba",
+                "candidate_hex": "3dbb"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 4122,
+              "numel": 7936,
+              "max_abs": 0.01171875,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "3e19",
+                "candidate_hex": "3e1a"
+              }
+            },
+            "dx": {
+              "different": 1904,
+              "numel": 7936,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 3,
+                "reference_hex": "bf85",
+                "candidate_hex": "bf86"
+              }
+            },
+            "dw_terms": {
+              "different": 1865,
+              "numel": 7936,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 16,
+                "reference_hex": "3f68",
+                "candidate_hex": "3f6a"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 46,
+              "numel": 124,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "40ba",
+                "candidate_hex": "40bb"
+              }
+            },
+            "grad_sq": {
+              "different": 2944,
+              "numel": 7936,
+              "max_abs": 0.0009765625,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "3dba",
+                "candidate_hex": "3dbb"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 3502,
+              "numel": 7936,
+              "max_abs": 0.0078125,
+              "first": {
+                "flat_index": 1,
+                "reference_hex": "3e19",
+                "candidate_hex": "3e1a"
+              }
+            },
+            "dx": {
+              "different": 1093,
+              "numel": 7936,
+              "max_abs": 0.03125,
+              "first": {
+                "flat_index": 3,
+                "reference_hex": "bf85",
+                "candidate_hex": "bf86"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 7936,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        4,
+        31
+      ],
+      "kind": "near_epsilon",
+      "equal": false,
+      "components": {
+        "y": {
+          "different": 2089,
+          "numel": 7936,
+          "max_abs": 0.0625,
+          "first": {
+            "flat_index": 13,
+            "reference_hex": "bf95",
+            "candidate_hex": "bf94"
+          }
+        },
+        "dx": {
+          "different": 1572,
+          "numel": 7936,
+          "max_abs": 32.0,
+          "first": {
+            "flat_index": 9,
+            "reference_hex": "c10e",
+            "candidate_hex": "c10c"
+          }
+        },
+        "dw": {
+          "different": 37,
+          "numel": 64,
+          "max_abs": 0.125,
+          "first": {
+            "flat_index": 3,
+            "reference_hex": "3f8f",
+            "candidate_hex": "3f91"
+          }
+        }
+      },
+      "diagnosis": {
+        "fwd": {
+          "first_divergence": "var_eps",
+          "stages": {
+            "sq": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "mean": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "var_eps": {
+              "different": 31,
+              "numel": 124,
+              "max_abs": 1.4901161193847656e-08,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "35f2",
+                "candidate_hex": "35f3"
+              }
+            },
+            "inv": {
+              "different": 18,
+              "numel": 124,
+              "max_abs": 4.0,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "4434",
+                "candidate_hex": "4433"
+              }
+            },
+            "z": {
+              "different": 2373,
+              "numel": 7936,
+              "max_abs": 0.015625,
+              "first": {
+                "flat_index": 13,
+                "reference_hex": "3fc9",
+                "candidate_hex": "3fc8"
+              }
+            },
+            "y": {
+              "different": 2089,
+              "numel": 7936,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 13,
+                "reference_hex": "bf95",
+                "candidate_hex": "bf94"
+              }
+            }
+          }
+        },
+        "bwd_with_candidate_forward": {
+          "first_divergence": "direct",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 1071,
+              "numel": 7936,
+              "max_abs": 32.0,
+              "first": {
+                "flat_index": 320,
+                "reference_hex": "43a5",
+                "candidate_hex": "43a4"
+              }
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 18,
+              "numel": 124,
+              "max_abs": 6291456.0,
+              "first": {
+                "flat_index": 5,
+                "reference_hex": "4db2",
+                "candidate_hex": "4daf"
+              }
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 60,
+              "numel": 124,
+              "max_abs": 32768.0,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c915",
+                "candidate_hex": "c914"
+              }
+            },
+            "grad_sq": {
+              "different": 3840,
+              "numel": 7936,
+              "max_abs": 512.0,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c615",
+                "candidate_hex": "c614"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 3957,
+              "numel": 7936,
+              "max_abs": 2.5,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c15a",
+                "candidate_hex": "c159"
+              }
+            },
+            "dx": {
+              "different": 1572,
+              "numel": 7936,
+              "max_abs": 32.0,
+              "first": {
+                "flat_index": 9,
+                "reference_hex": "c10e",
+                "candidate_hex": "c10c"
+              }
+            },
+            "dw_terms": {
+              "different": 2095,
+              "numel": 7936,
+              "max_abs": 0.0625,
+              "first": {
+                "flat_index": 13,
+                "reference_hex": "4005",
+                "candidate_hex": "4004"
+              }
+            }
+          }
+        },
+        "bwd_with_reference_forward": {
+          "first_divergence": "grad_var",
+          "stages": {
+            "gz": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "direct": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "inv_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "grad_inv": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "inv3": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "half_grad": {
+              "different": 0,
+              "numel": 124,
+              "max_abs": 0.0
+            },
+            "grad_var": {
+              "different": 50,
+              "numel": 124,
+              "max_abs": 32768.0,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c915",
+                "candidate_hex": "c914"
+              }
+            },
+            "grad_sq": {
+              "different": 3200,
+              "numel": 7936,
+              "max_abs": 512.0,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c615",
+                "candidate_hex": "c614"
+              }
+            },
+            "double_x": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            },
+            "from_var": {
+              "different": 3313,
+              "numel": 7936,
+              "max_abs": 2.0,
+              "first": {
+                "flat_index": 0,
+                "reference_hex": "c15a",
+                "candidate_hex": "c159"
+              }
+            },
+            "dx": {
+              "different": 637,
+              "numel": 7936,
+              "max_abs": 8.0,
+              "first": {
+                "flat_index": 9,
+                "reference_hex": "c10e",
+                "candidate_hex": "c10c"
+              }
+            },
+            "dw_terms": {
+              "different": 0,
+              "numel": 7936,
+              "max_abs": 0.0
+            }
+          }
+        },
+        "aten_diagnostic_oracle_vs_autograd": {
+          "dx": {
+            "different": 0,
+            "numel": 7936,
+            "max_abs": 0.0
+          },
+          "dw": {
+            "different": 0,
+            "numel": 64,
+            "max_abs": 0.0
+          }
+        }
+      }
+    },
+    {
+      "shape": [
+        4,
+        31
+      ],
+      "kind": "zero",
+      "equal": true,
+      "components": {
+        "y": {
+          "different": 0,
+          "numel": 7936,
+          "max_abs": 0.0
+        },
+        "dx": {
+          "different": 0,
+          "numel": 7936,
+          "max_abs": 0.0
+        },
+        "dw": {
+          "different": 0,
+          "numel": 64,
+          "max_abs": 0.0
+        }
+      }
+    }
+  ],
+  "timing": []
+}

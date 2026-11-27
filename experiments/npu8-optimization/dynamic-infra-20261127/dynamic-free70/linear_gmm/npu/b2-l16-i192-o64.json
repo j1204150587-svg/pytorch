@@ -1,0 +1,184 @@
+{
+  "shape": [
+    2,
+    16
+  ],
+  "M": 32,
+  "cin": 192,
+  "cout": 64,
+  "device": "npu",
+  "torch": "2.10.0+cpu",
+  "tq": "1",
+  "seen_once": true,
+  "status": "completed",
+  "torch_npu": "2.10.0.post6",
+  "strides": {
+    "dy": [
+      64,
+      1
+    ],
+    "dyT": [
+      1,
+      64
+    ],
+    "weight": [
+      192,
+      1
+    ],
+    "x": [
+      192,
+      1
+    ]
+  },
+  "transpose_copy_bytes": 4096,
+  "stock_vs_manual": {
+    "dx": {
+      "shape": [
+        32,
+        192
+      ],
+      "equal": true,
+      "different": 0,
+      "elements": 6144,
+      "max_abs": 0.0
+    },
+    "dw": {
+      "shape": [
+        64,
+        192
+      ],
+      "equal": true,
+      "different": 0,
+      "elements": 12288,
+      "max_abs": 0.0
+    }
+  },
+  "phase": "separate_profile_or_timing",
+  "first_call_us": 6019.633,
+  "stock_vs_grouped": {
+    "dx": {
+      "shape": [
+        32,
+        192
+      ],
+      "equal": true,
+      "different": 0,
+      "elements": 6144,
+      "max_abs": 0.0
+    },
+    "dw": {
+      "shape": [
+        64,
+        192
+      ],
+      "equal": true,
+      "different": 0,
+      "elements": 12288,
+      "max_abs": 0.0
+    }
+  },
+  "profiles": {
+    "A": {
+      "trace": "/artifacts/dynamic-infra-20261127/dynamic-free70/linear-gmm-screen-1795772241469300773/b2-l16-i192-o64-A-profile/604fdc318af4_221345_20261127093846241_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "physical": [
+        {
+          "stream": "48",
+          "kind": "PROFILING_ENABLE",
+          "name": "PROFILING_ENABLE",
+          "n": 1
+        },
+        {
+          "stream": "47",
+          "kind": "AI_CORE",
+          "name": "aclnnMm_MatMulCommon_MatMulV2",
+          "n": 2
+        },
+        {
+          "stream": "48",
+          "kind": "PROFILING_DISABLE",
+          "name": "PROFILING_DISABLE",
+          "n": 1
+        }
+      ],
+      "acl": {
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 2
+      },
+      "enqueue": {
+        "Enqueue@aclnnMm": 2
+      },
+      "aten": {
+        "aten::mm": 2,
+        "aten::as_strided": 1,
+        "aten::transpose": 1,
+        "aten::t": 1
+      }
+    },
+    "B": {
+      "trace": "/artifacts/dynamic-infra-20261127/dynamic-free70/linear-gmm-screen-1795772241469300773/b2-l16-i192-o64-B-profile/604fdc318af4_221345_20261127093850994_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json",
+      "physical": [
+        {
+          "stream": "48",
+          "kind": "PROFILING_ENABLE",
+          "name": "PROFILING_ENABLE",
+          "n": 1
+        },
+        {
+          "stream": "47",
+          "kind": "AI_VECTOR_CORE",
+          "name": "aclnnInplaceCopy_TransposeAiCore_Transpose",
+          "n": 1
+        },
+        {
+          "stream": "47",
+          "kind": "MIX_AIC",
+          "name": "aclnnGroupedMatmulV5_GroupedMatmul_GroupedMatmul",
+          "n": 1
+        },
+        {
+          "stream": "48",
+          "kind": "PROFILING_DISABLE",
+          "name": "PROFILING_DISABLE",
+          "n": 1
+        }
+      ],
+      "acl": {
+        "AscendCL@aclrtLaunchKernelWithHostArgs": 2
+      },
+      "enqueue": {
+        "Enqueue@aclnnInplaceCopy": 1,
+        "Enqueue@aclnnGroupedMatmulV5": 1
+      },
+      "aten": {
+        "aten::as_strided": 1,
+        "aten::transpose": 1,
+        "aten::t": 1,
+        "aten::copy_": 1,
+        "aten::clone": 1,
+        "aten::contiguous": 1
+      }
+    }
+  },
+  "window_us_per_pair": [
+    {
+      "order": "AB",
+      "A": 31.0528125,
+      "B": 54.381875
+    },
+    {
+      "order": "BA",
+      "B": 54.518125,
+      "A": 29.8418125
+    },
+    {
+      "order": "AB",
+      "A": 30.15965625,
+      "B": 55.05128125
+    },
+    {
+      "order": "BA",
+      "B": 54.7671875,
+      "A": 30.33403125
+    }
+  ],
+  "median_paired_delta_us": -24.554734375
+}
