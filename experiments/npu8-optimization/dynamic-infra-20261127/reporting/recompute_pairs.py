@@ -91,6 +91,36 @@ def parse_leg(path, variant, mode, schedule):
                  if (p / "metrics.json").is_file()), None)
     check(rank is not None, f"{path}: missing raw rank000/metrics.json")
     metrics = read(rank / "metrics.json")
+    runtime_path, model_path = rank / "runtime.json", rank / "model_summary.json"
+    runtime = read(runtime_path) if runtime_path.is_file() else {}
+    model = read(model_path) if model_path.is_file() else {}
+    if runtime:
+        check((runtime["rank"], runtime["world_size"], runtime["device"]) == (0, 1, "npu:0"),
+              f"{rank}: expected single rank on the container NPU")
+    if model:
+        check(model["config"]["num_tables"] == 1024 and model["trainable_parameter_tensors"] == 1052,
+              f"{rank}: unexpected side table or gradient count")
+    card = {}
+    slot_receipt = path / "slot-verification.json"
+    reduced = read(slot_receipt) if slot_receipt.is_file() else {}
+    for boundary in ("before", "after"):
+        receipt = path / f"{boundary}.card.json"
+        if receipt.is_file():
+            v = read(receipt)
+            v = {**v, "target_process_count": len(v["host_pids"]), "has_orphan_context": v.get("orphan_context") is not None}
+        elif boundary in reduced:
+            v = reduced[boundary]
+        else:
+            continue
+        check((v["logical_device"], v["board"], v["chip"], v["physical_id"]) == (8,4,0,8) and v["health"] == "OK"
+              and v["target_process_count"] == 0 and v["has_orphan_context"] is False,
+              f"{path}/{boundary}: unexpected mapping, health or active NPU process")
+        card[boundary] = {k: v[k] for k in ("logical_device","board","chip","physical_id","health",
+                          "target_process_count","has_orphan_context")}
+        if v.get("utc"):
+            card[boundary]["utc"] = v["utc"]
+    if card or slot_receipt.is_file():
+        check(len(card) == 2, f"{path}: missing one boundary card receipt")
     rows, summary = metrics["steps"], metrics["summary"]
     shapes = [[r["batch_size"], r["seq_len"]] for r in rows]
     count = {"no-profiler": 60, "l0": 8, "l1": 8, "l1-late": 16}[mode]
@@ -128,6 +158,7 @@ def parse_leg(path, variant, mode, schedule):
     if mode == "no-profiler":
         result["host_step_ms"] = [float(r["host_step_ms"]) for r in rows[10:60]]
     return {"variant": variant, "directory": str(path), "metrics": str(rank / "metrics.json"),
+            "runtime": runtime, "model": model, "card_at_boundaries": card,
             "environment": env, "arguments": {k: v for k, v in args.items() if k != "output_dir"},
             "deepspeed": config, "shape_count": len(set(map(tuple, shapes))), "overflow_scan": scan,
             "sampled_loss": {r["step"]: r["loss"] for r in rows if "loss" in r}, **result}
@@ -154,7 +185,7 @@ def parse_pair(spec, schedule, switch):
     if len(legs) == 1:
         return pair
     a, b = (legs if order != "ba" else reversed(legs))
-    for field in ("arguments", "deepspeed"):
+    for field in ("arguments", "deepspeed", "runtime", "model"):
         check(a[field] == b[field], f"{path}: A/B {field} differ")
     if a["environment"] is not None and b["environment"] is not None:
         env_a, env_b = a["environment"], b["environment"]

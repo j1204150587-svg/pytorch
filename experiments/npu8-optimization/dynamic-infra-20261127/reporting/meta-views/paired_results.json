@@ -1,0 +1,1274 @@
+{
+  "schedule": "evidence\\baseline-steady\\workspace\\configs\\dynamic_shapes_npu8.json",
+  "schedule_sha256": "2ef9fe87cad730b64f46b00a71cf1587cb8b1cb777cf899f90e01f63cd6246bf",
+  "eight_column_names": [
+    "优化前端到端",
+    "优化后端到端",
+    "端到端提升比例",
+    "优化前 Free",
+    "优化前 Free 占比",
+    "优化后 Free",
+    "优化后 Free 占比",
+    "Free 占比提升比例"
+  ],
+  "eight_column_rows": [],
+  "pairs": [
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "no-profiler",
+      "directory": "evidence\\meta-views-no-profiler-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "evidence\\meta-views-no-profiler-ab\\01-A",
+          "metrics": "evidence\\meta-views-no-profiler-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6+git38e483e",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T05:01:49+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T05:03:03+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/native-meta-v2/package",
+            "NPU_EXPERIMENT_FLAT_ND": "0",
+            "NPU_EXPERIMENT_UNFLATTEN_VIEWS": "0",
+            "NPU_EXPERIMENT_QUEUE_COPY_REPLAY": "0",
+            "NPU_DYNAMIC_META_UNFLATTEN": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 1020,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "9": 29.21807098388672,
+            "19": 26.272584915161133,
+            "29": 25.244102478027344,
+            "39": 22.707324981689453,
+            "49": 21.029186248779297,
+            "59": 18.379600524902344
+          },
+          "ms_per_step": 744.5592347788624,
+          "samples_per_s": 3.653168039488292,
+          "tokens_per_s": 80.42341992814667,
+          "elapsed_s": 37.22796173894312,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            699.0040520904586,
+            739.3764479784295,
+            737.3329160036519,
+            690.7471310114488,
+            718.5407649958506,
+            690.0804950855672,
+            673.2505609979853,
+            676.8088629469275,
+            731.5547550097108,
+            728.4458610229194,
+            748.5758959082887,
+            688.348236028105,
+            660.231520072557,
+            721.5330339968204,
+            616.508090053685,
+            722.6896699285135,
+            666.5292419493198,
+            658.9353180024773,
+            744.9673620285466,
+            716.0809059860185,
+            723.580566002056,
+            697.915568947792,
+            696.8670070637017,
+            667.1755980933085,
+            668.3135139755905,
+            638.5418119607493,
+            678.3684160327539,
+            683.5598639445379,
+            700.226471060887,
+            785.1073490455747,
+            874.0967110497877,
+            770.2696050982922,
+            1079.9627819797024,
+            765.9101310418919,
+            834.6210509771481,
+            788.1410400150344,
+            822.4228119943291,
+            837.844830006361,
+            726.0178440483287,
+            788.3615689352155,
+            704.9321699887514,
+            865.4190640663728,
+            901.4896580483764,
+            705.8759080246091,
+            895.05759999156,
+            703.4616710152477,
+            875.527038006112,
+            796.1523310514167,
+            698.5584050416946,
+            824.0524079883471
+          ]
+        },
+        {
+          "variant": "B",
+          "directory": "evidence\\meta-views-no-profiler-ab\\02-B",
+          "metrics": "evidence\\meta-views-no-profiler-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6+git38e483e",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T05:03:08+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T05:04:22+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/native-meta-v2/package",
+            "NPU_EXPERIMENT_FLAT_ND": "0",
+            "NPU_EXPERIMENT_UNFLATTEN_VIEWS": "0",
+            "NPU_EXPERIMENT_QUEUE_COPY_REPLAY": "0",
+            "NPU_DYNAMIC_META_UNFLATTEN": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 1020,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.78255271911621,
+            "9": 29.218069076538086,
+            "19": 26.2725887298584,
+            "29": 25.244104385375977,
+            "39": 22.707326889038086,
+            "49": 21.029184341430664,
+            "59": 18.379600524902344
+          },
+          "ms_per_step": 726.7407545004971,
+          "samples_per_s": 3.7427376724861237,
+          "tokens_per_s": 82.39526905458422,
+          "elapsed_s": 36.33703772502486,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            699.2091580759734,
+            646.6059109661728,
+            706.7541599972174,
+            615.1589620858431,
+            650.617482024245,
+            738.6992289684713,
+            651.3934429967776,
+            772.7224510163069,
+            645.8075389964506,
+            740.9028970869258,
+            816.8054759735242,
+            665.7584580825642,
+            792.2158510191366,
+            674.8626120388508,
+            766.9188779545948,
+            769.9834810337052,
+            708.1090729916468,
+            591.5556469699368,
+            716.3716549985111,
+            856.7026839591563,
+            683.1316739553586,
+            863.6753229657188,
+            645.4549150075763,
+            685.3788940934464,
+            738.1046949885786,
+            649.0497089689597,
+            771.3141450658441,
+            887.6313130604103,
+            614.7907470585778,
+            676.9236250547692,
+            726.8747059861198,
+            697.1442749490961,
+            800.8196959272027,
+            854.2267540469766,
+            702.9011950362474,
+            803.6542090121657,
+            832.8209880273789,
+            655.717256013304,
+            715.65606596414,
+            818.6605810187757,
+            666.2502581020817,
+            765.8923669951037,
+            715.0260899215937,
+            692.5957129569724,
+            693.1231039343402,
+            749.0525130415335,
+            785.8541769674048,
+            691.2204480031505,
+            726.0250810068101,
+            800.2830049954355
+          ]
+        }
+      ],
+      "changed_environment": {
+        "NPU_DYNAMIC_META_UNFLATTEN": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 3.814697265625e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_ms_per_step": 17.818480278365314,
+      "step_gain": 0.023931581862197238,
+      "host_step_pairs": [
+        {
+          "step": 10,
+          "batch_size": 1,
+          "seq_len": 26,
+          "host_a_ms": 699.0040520904586,
+          "host_b_ms": 699.2091580759734,
+          "host_a_minus_b_ms": -0.20510598551481962
+        },
+        {
+          "step": 11,
+          "batch_size": 4,
+          "seq_len": 29,
+          "host_a_ms": 739.3764479784295,
+          "host_b_ms": 646.6059109661728,
+          "host_a_minus_b_ms": 92.77053701225668
+        },
+        {
+          "step": 12,
+          "batch_size": 4,
+          "seq_len": 17,
+          "host_a_ms": 737.3329160036519,
+          "host_b_ms": 706.7541599972174,
+          "host_a_minus_b_ms": 30.57875600643456
+        },
+        {
+          "step": 13,
+          "batch_size": 1,
+          "seq_len": 25,
+          "host_a_ms": 690.7471310114488,
+          "host_b_ms": 615.1589620858431,
+          "host_a_minus_b_ms": 75.58816892560571
+        },
+        {
+          "step": 14,
+          "batch_size": 1,
+          "seq_len": 12,
+          "host_a_ms": 718.5407649958506,
+          "host_b_ms": 650.617482024245,
+          "host_a_minus_b_ms": 67.92328297160566
+        },
+        {
+          "step": 15,
+          "batch_size": 3,
+          "seq_len": 31,
+          "host_a_ms": 690.0804950855672,
+          "host_b_ms": 738.6992289684713,
+          "host_a_minus_b_ms": -48.61873388290405
+        },
+        {
+          "step": 16,
+          "batch_size": 4,
+          "seq_len": 13,
+          "host_a_ms": 673.2505609979853,
+          "host_b_ms": 651.3934429967776,
+          "host_a_minus_b_ms": 21.85711800120771
+        },
+        {
+          "step": 17,
+          "batch_size": 4,
+          "seq_len": 15,
+          "host_a_ms": 676.8088629469275,
+          "host_b_ms": 772.7224510163069,
+          "host_a_minus_b_ms": -95.91358806937933
+        },
+        {
+          "step": 18,
+          "batch_size": 2,
+          "seq_len": 26,
+          "host_a_ms": 731.5547550097108,
+          "host_b_ms": 645.8075389964506,
+          "host_a_minus_b_ms": 85.74721601326019
+        },
+        {
+          "step": 19,
+          "batch_size": 3,
+          "seq_len": 15,
+          "host_a_ms": 728.4458610229194,
+          "host_b_ms": 740.9028970869258,
+          "host_a_minus_b_ms": -12.457036064006388
+        },
+        {
+          "step": 20,
+          "batch_size": 3,
+          "seq_len": 24,
+          "host_a_ms": 748.5758959082887,
+          "host_b_ms": 816.8054759735242,
+          "host_a_minus_b_ms": -68.2295800652355
+        },
+        {
+          "step": 21,
+          "batch_size": 4,
+          "seq_len": 28,
+          "host_a_ms": 688.348236028105,
+          "host_b_ms": 665.7584580825642,
+          "host_a_minus_b_ms": 22.589777945540845
+        },
+        {
+          "step": 22,
+          "batch_size": 2,
+          "seq_len": 18,
+          "host_a_ms": 660.231520072557,
+          "host_b_ms": 792.2158510191366,
+          "host_a_minus_b_ms": -131.98433094657958
+        },
+        {
+          "step": 23,
+          "batch_size": 3,
+          "seq_len": 22,
+          "host_a_ms": 721.5330339968204,
+          "host_b_ms": 674.8626120388508,
+          "host_a_minus_b_ms": 46.670421957969666
+        },
+        {
+          "step": 24,
+          "batch_size": 3,
+          "seq_len": 27,
+          "host_a_ms": 616.508090053685,
+          "host_b_ms": 766.9188779545948,
+          "host_a_minus_b_ms": -150.41078790090978
+        },
+        {
+          "step": 25,
+          "batch_size": 2,
+          "seq_len": 13,
+          "host_a_ms": 722.6896699285135,
+          "host_b_ms": 769.9834810337052,
+          "host_a_minus_b_ms": -47.29381110519171
+        },
+        {
+          "step": 26,
+          "batch_size": 4,
+          "seq_len": 26,
+          "host_a_ms": 666.5292419493198,
+          "host_b_ms": 708.1090729916468,
+          "host_a_minus_b_ms": -41.57983104232699
+        },
+        {
+          "step": 27,
+          "batch_size": 4,
+          "seq_len": 14,
+          "host_a_ms": 658.9353180024773,
+          "host_b_ms": 591.5556469699368,
+          "host_a_minus_b_ms": 67.3796710325405
+        },
+        {
+          "step": 28,
+          "batch_size": 3,
+          "seq_len": 16,
+          "host_a_ms": 744.9673620285466,
+          "host_b_ms": 716.3716549985111,
+          "host_a_minus_b_ms": 28.595707030035555
+        },
+        {
+          "step": 29,
+          "batch_size": 2,
+          "seq_len": 30,
+          "host_a_ms": 716.0809059860185,
+          "host_b_ms": 856.7026839591563,
+          "host_a_minus_b_ms": -140.6217779731378
+        },
+        {
+          "step": 30,
+          "batch_size": 2,
+          "seq_len": 31,
+          "host_a_ms": 723.580566002056,
+          "host_b_ms": 683.1316739553586,
+          "host_a_minus_b_ms": 40.44889204669744
+        },
+        {
+          "step": 31,
+          "batch_size": 4,
+          "seq_len": 27,
+          "host_a_ms": 697.915568947792,
+          "host_b_ms": 863.6753229657188,
+          "host_a_minus_b_ms": -165.75975401792675
+        },
+        {
+          "step": 32,
+          "batch_size": 3,
+          "seq_len": 23,
+          "host_a_ms": 696.8670070637017,
+          "host_b_ms": 645.4549150075763,
+          "host_a_minus_b_ms": 51.4120920561254
+        },
+        {
+          "step": 33,
+          "batch_size": 2,
+          "seq_len": 20,
+          "host_a_ms": 667.1755980933085,
+          "host_b_ms": 685.3788940934464,
+          "host_a_minus_b_ms": -18.203296000137925
+        },
+        {
+          "step": 34,
+          "batch_size": 1,
+          "seq_len": 20,
+          "host_a_ms": 668.3135139755905,
+          "host_b_ms": 738.1046949885786,
+          "host_a_minus_b_ms": -69.79118101298809
+        },
+        {
+          "step": 35,
+          "batch_size": 3,
+          "seq_len": 12,
+          "host_a_ms": 638.5418119607493,
+          "host_b_ms": 649.0497089689597,
+          "host_a_minus_b_ms": -10.50789700821042
+        },
+        {
+          "step": 36,
+          "batch_size": 4,
+          "seq_len": 16,
+          "host_a_ms": 678.3684160327539,
+          "host_b_ms": 771.3141450658441,
+          "host_a_minus_b_ms": -92.94572903309017
+        },
+        {
+          "step": 37,
+          "batch_size": 4,
+          "seq_len": 31,
+          "host_a_ms": 683.5598639445379,
+          "host_b_ms": 887.6313130604103,
+          "host_a_minus_b_ms": -204.07144911587238
+        },
+        {
+          "step": 38,
+          "batch_size": 1,
+          "seq_len": 21,
+          "host_a_ms": 700.226471060887,
+          "host_b_ms": 614.7907470585778,
+          "host_a_minus_b_ms": 85.43572400230914
+        },
+        {
+          "step": 39,
+          "batch_size": 1,
+          "seq_len": 28,
+          "host_a_ms": 785.1073490455747,
+          "host_b_ms": 676.9236250547692,
+          "host_a_minus_b_ms": 108.18372399080545
+        },
+        {
+          "step": 40,
+          "batch_size": 2,
+          "seq_len": 15,
+          "host_a_ms": 874.0967110497877,
+          "host_b_ms": 726.8747059861198,
+          "host_a_minus_b_ms": 147.2220050636679
+        },
+        {
+          "step": 41,
+          "batch_size": 1,
+          "seq_len": 22,
+          "host_a_ms": 770.2696050982922,
+          "host_b_ms": 697.1442749490961,
+          "host_a_minus_b_ms": 73.12533014919609
+        },
+        {
+          "step": 42,
+          "batch_size": 2,
+          "seq_len": 23,
+          "host_a_ms": 1079.9627819797024,
+          "host_b_ms": 800.8196959272027,
+          "host_a_minus_b_ms": 279.1430860524997
+        },
+        {
+          "step": 43,
+          "batch_size": 1,
+          "seq_len": 27,
+          "host_a_ms": 765.9101310418919,
+          "host_b_ms": 854.2267540469766,
+          "host_a_minus_b_ms": -88.3166230050847
+        },
+        {
+          "step": 44,
+          "batch_size": 3,
+          "seq_len": 19,
+          "host_a_ms": 834.6210509771481,
+          "host_b_ms": 702.9011950362474,
+          "host_a_minus_b_ms": 131.71985594090074
+        },
+        {
+          "step": 45,
+          "batch_size": 3,
+          "seq_len": 21,
+          "host_a_ms": 788.1410400150344,
+          "host_b_ms": 803.6542090121657,
+          "host_a_minus_b_ms": -15.513168997131288
+        },
+        {
+          "step": 46,
+          "batch_size": 3,
+          "seq_len": 28,
+          "host_a_ms": 822.4228119943291,
+          "host_b_ms": 832.8209880273789,
+          "host_a_minus_b_ms": -10.398176033049822
+        },
+        {
+          "step": 47,
+          "batch_size": 1,
+          "seq_len": 14,
+          "host_a_ms": 837.844830006361,
+          "host_b_ms": 655.717256013304,
+          "host_a_minus_b_ms": 182.127573993057
+        },
+        {
+          "step": 48,
+          "batch_size": 3,
+          "seq_len": 14,
+          "host_a_ms": 726.0178440483287,
+          "host_b_ms": 715.65606596414,
+          "host_a_minus_b_ms": 10.3617780841887
+        },
+        {
+          "step": 49,
+          "batch_size": 4,
+          "seq_len": 23,
+          "host_a_ms": 788.3615689352155,
+          "host_b_ms": 818.6605810187757,
+          "host_a_minus_b_ms": -30.29901208356023
+        },
+        {
+          "step": 50,
+          "batch_size": 1,
+          "seq_len": 29,
+          "host_a_ms": 704.9321699887514,
+          "host_b_ms": 666.2502581020817,
+          "host_a_minus_b_ms": 38.681911886669695
+        },
+        {
+          "step": 51,
+          "batch_size": 3,
+          "seq_len": 30,
+          "host_a_ms": 865.4190640663728,
+          "host_b_ms": 765.8923669951037,
+          "host_a_minus_b_ms": 99.52669707126915
+        },
+        {
+          "step": 52,
+          "batch_size": 4,
+          "seq_len": 22,
+          "host_a_ms": 901.4896580483764,
+          "host_b_ms": 715.0260899215937,
+          "host_a_minus_b_ms": 186.46356812678277
+        },
+        {
+          "step": 53,
+          "batch_size": 3,
+          "seq_len": 13,
+          "host_a_ms": 705.8759080246091,
+          "host_b_ms": 692.5957129569724,
+          "host_a_minus_b_ms": 13.280195067636669
+        },
+        {
+          "step": 54,
+          "batch_size": 2,
+          "seq_len": 32,
+          "host_a_ms": 895.05759999156,
+          "host_b_ms": 693.1231039343402,
+          "host_a_minus_b_ms": 201.9344960572198
+        },
+        {
+          "step": 55,
+          "batch_size": 3,
+          "seq_len": 17,
+          "host_a_ms": 703.4616710152477,
+          "host_b_ms": 749.0525130415335,
+          "host_a_minus_b_ms": -45.59084202628583
+        },
+        {
+          "step": 56,
+          "batch_size": 4,
+          "seq_len": 25,
+          "host_a_ms": 875.527038006112,
+          "host_b_ms": 785.8541769674048,
+          "host_a_minus_b_ms": 89.6728610387072
+        },
+        {
+          "step": 57,
+          "batch_size": 3,
+          "seq_len": 26,
+          "host_a_ms": 796.1523310514167,
+          "host_b_ms": 691.2204480031505,
+          "host_a_minus_b_ms": 104.93188304826617
+        },
+        {
+          "step": 58,
+          "batch_size": 4,
+          "seq_len": 30,
+          "host_a_ms": 698.5584050416946,
+          "host_b_ms": 726.0250810068101,
+          "host_a_minus_b_ms": -27.466675965115428
+        },
+        {
+          "step": 59,
+          "batch_size": 4,
+          "seq_len": 19,
+          "host_a_ms": 824.0524079883471,
+          "host_b_ms": 800.2830049954355,
+          "host_a_minus_b_ms": 23.769402992911637
+        }
+      ],
+      "training_loop_wall_delta_ms": {
+        "min": -204.07144911587238,
+        "p10": -131.98433094657958,
+        "median": 22.223447973374277,
+        "p90": 131.71985594090074,
+        "max": 279.1430860524997
+      }
+    },
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "l1",
+      "directory": "evidence\\meta-views-l1-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "evidence\\meta-views-l1-ab\\01-A",
+          "metrics": "evidence\\meta-views-l1-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6+git38e483e",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T04:56:07+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T04:57:03+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/native-meta-v2/package",
+            "NPU_EXPERIMENT_FLAT_ND": "0",
+            "NPU_EXPERIMENT_UNFLATTEN_VIEWS": "0",
+            "NPU_EXPERIMENT_QUEUE_COPY_REPLAY": "0",
+            "NPU_DYNAMIC_META_UNFLATTEN": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 2,
+            "profile_stack": false,
+            "profile_level1": true,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 136,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.78255271911621,
+            "3": 28.95204734802246,
+            "7": 29.098711013793945
+          },
+          "csv": "evidence\\meta-views-l1-ab\\01-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 851.2552600000064,
+              "stage_ms": 906.64325,
+              "computing_ms": 55.12969999999953,
+              "communication_not_overlapped_ms": 0.25833999999999996,
+              "cpu_marker_ms": 906.37575,
+              "cpu_marker_minus_stage_ms": -0.26749999999992724
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 803.3505000000092,
+              "stage_ms": 855.51725,
+              "computing_ms": 51.909119999999795,
+              "communication_not_overlapped_ms": 0.25744,
+              "cpu_marker_ms": 899.67322,
+              "cpu_marker_minus_stage_ms": 44.155970000000025
+            }
+          ],
+          "free_ms": 827.3028800000078,
+          "stage_ms": 881.08025,
+          "computing_ms": 53.51940999999967,
+          "communication_not_overlapped_ms": 0.25788999999999995,
+          "free_fraction": 0.9389642770905463
+        },
+        {
+          "variant": "B",
+          "directory": "evidence\\meta-views-l1-ab\\02-B",
+          "metrics": "evidence\\meta-views-l1-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6+git38e483e",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T04:57:13+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T04:58:06+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/native-meta-v2/package",
+            "NPU_EXPERIMENT_FLAT_ND": "0",
+            "NPU_EXPERIMENT_UNFLATTEN_VIEWS": "0",
+            "NPU_EXPERIMENT_QUEUE_COPY_REPLAY": "0",
+            "NPU_DYNAMIC_META_UNFLATTEN": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 2,
+            "profile_stack": false,
+            "profile_level1": true,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 136,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.78255271911621,
+            "3": 28.95204734802246,
+            "7": 29.098709106445312
+          },
+          "csv": "evidence\\meta-views-l1-ab\\02-B\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 733.8112600000035,
+              "stage_ms": 788.223,
+              "computing_ms": 54.12179999999983,
+              "communication_not_overlapped_ms": 0.28998,
+              "cpu_marker_ms": 787.54304,
+              "cpu_marker_minus_stage_ms": -0.6799599999999373
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 752.1336400000048,
+              "stage_ms": 803.52475,
+              "computing_ms": 51.20428000000078,
+              "communication_not_overlapped_ms": 0.18706,
+              "cpu_marker_ms": 826.68819,
+              "cpu_marker_minus_stage_ms": 23.163439999999923
+            }
+          ],
+          "free_ms": 742.9724500000041,
+          "stage_ms": 795.873875,
+          "computing_ms": 52.66304000000031,
+          "communication_not_overlapped_ms": 0.23852,
+          "free_fraction": 0.9335303913575553
+        }
+      ],
+      "changed_environment": {
+        "NPU_DYNAMIC_META_UNFLATTEN": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 1.9073486328125e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_free_ms": 84.33043000000373,
+      "free_fraction_gain": 0.005787105926785885
+    }
+  ],
+  "paired_variation": {
+    "step_gain": {
+      "n": 1,
+      "min": 0.023931581862197238,
+      "max": 0.023931581862197238,
+      "range": 0.0,
+      "median": 0.023931581862197238
+    },
+    "saved_ms_per_step": {
+      "n": 1,
+      "min": 17.818480278365314,
+      "max": 17.818480278365314,
+      "range": 0.0,
+      "median": 17.818480278365314
+    }
+  },
+  "paired_variation_by_series": {
+    "r1": {
+      "step_gain": {
+        "n": 1,
+        "min": 0.023931581862197238,
+        "max": 0.023931581862197238,
+        "range": 0.0,
+        "median": 0.023931581862197238
+      },
+      "saved_ms_per_step": {
+        "n": 1,
+        "min": 17.818480278365314,
+        "max": 17.818480278365314,
+        "range": 0.0,
+        "median": 17.818480278365314
+      }
+    }
+  }
+}
