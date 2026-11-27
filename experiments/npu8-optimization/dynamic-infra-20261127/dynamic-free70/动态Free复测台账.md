@@ -1,6 +1,6 @@
 # 动态 eager HSTU 的 NPU 8 实测台账
 
-60 个合成 shape 上，分组侧表查找使无 profiler 步时在 A/B、B/A 分别缩短 73.27%、75.09%，绝对 Free 下降，设备计算缩短得更多，Free 占比随之上升。把同一 ZeRO flat 上连续的侧表交给单一梯度叶处理，两序步时再相对该项各自的基线缩短 16.51%、19.63%，候选 Free 占比分别为 91.11%、90.72%。两项所用基线不同。
+60 个合成 shape 上，分组侧表查找使无 profiler 步时在 A/B、B/A 分别缩短 73.27%、75.09%，绝对 Free 下降，设备计算缩短得更多，Free 占比随之上升。把同一 ZeRO flat 上连续的侧表交给单一梯度叶处理，两序步时再相对该项各自的基线缩短 16.51%、19.63%，候选 Free 占比分别为 91.11%、90.72%。两项所用基线不同。直接发布配置上，C++ eager RMSNorm v2 使双序步时再相对各自基线缩短 10.93%、4.42%。原始 01 到多项组合的直接双序对照为 635.654→22.186、599.226→21.529 ms/步，组合两序的绝对 Free 为 22.907、23.377 ms/步，Free 占比 86.55%、87.03%。
 
 ## 负载与测量
 
@@ -42,7 +42,26 @@ BA 整步缩短 12.116 ms。样本/s 为 44.079 → 54.848，token/s 为 970.384
 
 [分步 Stage、Computing 和完整同步窗口](reports/side-slab-v1/measurement.md) · [同轮未舍入数值](reports/side-slab-v1/paired_results.json) · [实际启动配方](working/registries/side-slab-v1/recipe.json)
 
+### C++ eager RMSNorm v2
+
+直接发布等共同前置保持一致。v2 在 C++ autograd 节点上保留两条输入边，维持原反向累加次序。独立 16 组算子和四个完整 block 对照通过，8 步训练门每步核对全部 1,052 个梯度。两序 Level0 中，每步前向都发 54 个物理工作，反向范围内都发 139 个；反向有 54→9 个 autograd 节点，同时 device 工作类型发生替换。两序无 profiler 步时分别缩短 10.93%、4.42%，相差 6.51 个百分点。绝对 Free 分别少 1.878、2.400 ms，Free 占比在两序均下降。[实现、位级门和任务类型](rms_native/README.md) · [训练门](receipts-1732/gates/native-rms-v2/gate-attempt-j06xttw9/comparison.json)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 23.073 ms/步 | 20.551 ms/步 | +10.93% | 23.081 ms/步 | 86.79% | 21.203 ms/步 | 85.79% | +1.15% |
+| 22.630 ms/步 | 21.630 ms/步 | +4.42% | 23.770 ms/步 | 87.15% | 21.370 ms/步 | 85.88% | +1.47% |
+
+[两序各步 Free、Stage、Computing、吞吐和配对波动](reports/native-rms-v2/measurement.md)
+
 ## 已完成的单序观测
+
+### 用 C++ 调度同一 eager HSTUBlock
+
+四个 block 逐层调用原 ATen 操作并保留 autograd。两腿均执行直接发布、打包和 flat norm。8 步语义门通过。正序无 profiler 步时缩短 12.85%，这一轮独立 Level0 的绝对 Free 却增加 3.816 ms。正序观测不能说明设备空档变小。[逐步吞吐与 Stage、Computing](reports/host-block-v1/measurement.md) · [两腿相同的训练门](receipts-1800/gates/host-block-v1/gate-attempt-ab5lxx_8/comparison.json)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 24.339 ms/步 | 21.212 ms/步 | +12.85% | 22.847 ms/步 | 86.63% | 26.663 ms/步 | 88.41% | -2.06% |
 
 ### 已有 #09 在分组查表路径上的复测
 
@@ -102,23 +121,14 @@ AB 整步缩短 6.458 ms。样本/s 为 94.933 → 122.554，token/s 为 2089.91
 
 [实际样本/s、token/s、Stage 和 Computing](reports/ipg-range-v1/measurement.md)
 
-### C++ eager RMSNorm v2
-
-直接发布等共同前置保持一致。v2 在 C++ autograd 节点上保留两条输入边，维持原反向累加次序。独立 16 组算子和四个完整 block 对照通过，8 步训练门每步核对全部 1,052 个梯度。两序 Level0 中，每步前向都发 54 个物理工作，反向范围内都发 139 个；反向有 54→9 个 autograd 节点，同时 device 工作类型发生替换。反序 Level0 的 Free 为 23.770→21.370 ms/步，当前八列含已完成的正序同步窗口。[实现、位级门和任务类型](rms_native/README.md) · [训练门](receipts-1732/gates/native-rms-v2/gate-attempt-j06xttw9/comparison.json)
-
-| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 23.073 ms/步 | 20.551 ms/步 | +10.93% | 23.081 ms/步 | 86.79% | 21.203 ms/步 | 85.79% | +1.15% |
-
-[两序各步 Free、Stage、Computing 和已完成的同步窗口](reports/native-rms-v2/measurement.md)
-
 ## 从原始 01 到组合配置的实测
 
-A 为原始 01，B 同时启用分组侧表、连续梯度叶、分区与打包、flat overflow/norm、直接发布、缓存及 eager fold 适配。两腿按各自配方运行同一动态形状序列。下表直接比较两个端点，步时变化包含设备工作量、框架循环和下发次数的改变。当前窗口为正序。[两端配方](receipts-1732/registries/stock01-to-direct-pr-v1/recipe.json) · [8 步 gate](receipts-1732/gates/stock01-to-direct-pr-v1/gate-attempt-f82xl_r0/comparison.json)
+A 为原始 01，B 同时启用分组侧表、连续梯度叶、分区与打包、flat overflow/norm、直接发布、缓存及 eager fold 适配。两腿按各自配方运行同一动态形状序列。下表直接比较两个端点，步时变化包含设备工作量、框架循环和下发次数的改变。A/B 和 B/A 都有完整同步窗口与独立 Level0，按 A→B 展示。每秒样本数分别为 4.279→122.600、4.539→126.340，token/s 为 94.202→2,699.008、99.929→2,781.343。[两端配方](receipts-1732/registries/stock01-to-direct-pr-v1/recipe.json) · [8 步 gate](receipts-1732/gates/stock01-to-direct-pr-v1/gate-attempt-f82xl_r0/comparison.json)
 
 | 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 635.654 ms/步 | 22.186 ms/步 | +96.51% | 566.919 ms/步 | 91.48% | 22.907 ms/步 | 86.55% | +5.39% |
+| 599.226 ms/步 | 21.529 ms/步 | +96.41% | 673.711 ms/步 | 92.83% | 23.377 ms/步 | 87.03% | +6.25% |
 
 [原始视角的吞吐与三步 Level0 时间](reports/stock01-to-direct-pr-v1/measurement.md)
 
@@ -178,13 +188,21 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 ### Eager 适配器 v4 的物理网格微测
 
-在已校验的 driver 上，v4 把逻辑 grid 和当前硬件允许的物理 block 数分别传入。独立 fold 门在 [1,19]、[2,14]、[2,22]、[4,31] 及另一 stream 的 [2,14] 全部逐位通过，5 次均进入并返回 C++，注入 profiler 时回退一次。此前因物理 cap 回退的两个代表形状均已命中。[1,19] 普通 Triton、完整适配器和仅已准备参数提交的 Host p50 依次为 47.412、12.011、2.910 μs。四个混合形状同步窗口依次为 122.926→121.075、122.902→121.547、122.120→121.018、123.082→120.930 μs/调用。这里的结果仅覆盖独立 fold。[原始分项、形状及逐次计时](../pr42634/verified-control/dynamic-free70/pr-cap-v4-probe-1795772222098099850/micro.json) · [注册与守卫实现](fold_grid_cap)
+在已校验的 driver 上，v4 把逻辑 grid 和当前硬件允许的物理 block 数分别传入。独立 fold 门在 [1,19]、[2,14]、[2,22]、[4,31] 及另一 stream 的 [2,14] 全部逐位通过，5 次均进入并返回 C++，注入 profiler 时回退一次。此前因物理 cap 回退的两个代表形状均已命中。[1,19] 普通 Triton、完整适配器和仅已准备参数提交的 Host p50 依次为 47.412、12.011、2.910 μs。四个混合形状同步窗口依次为 122.926→121.075、122.902→121.547、122.120→121.018、123.082→120.930 μs/调用。独立 fold 之外，8 步 HSTU 训练门中两腿各有一次普通首调用。A 的 4 次 v3 计划命中及 3 次 cap 回退，变为 B 的 7 次真实 C++ 返回，其中 3 次使用新入口；梯度、跳步和更新通过。另在 v3 计划上单开 RMS v2 的 8 步训练门也已通过，两个条件均须独立采完整同步窗口。[v4 训练门](receipts-1800/gates/pr42634-physical-cap-v4/gate-attempt-8ml2m93x/comparison.json) · [v3+RMS 的训练门](receipts-1800/gates/pr-rms-v1/gate-attempt-6mmbl6xe/comparison.json)[原始分项、形状及逐次计时](../pr42634/verified-control/dynamic-free70/pr-cap-v4-probe-1795772222098099850/micro.json) · [注册与守卫实现](fold_grid_cap)
 
 ### RMS 查表前向与显式计划提交的独立微测
 
 在 [1,19]、[2,14]、[2,22]、[4,31] 四种实际形状上比较原生六次 ATen 前向（N）、普通 Triton 查表（S）和相同查表内核的 C++ 计划提交（P）。原生和普通查表的 Level1 已确认六次设备工作降至一次，但首轮普通查表的前端准备延长了时间。v2 在已验证的 driver 上识别两个 launcher 入口的物理 grid cap，544 次真实计划提交全部返回，其中 272 次使用 cap。四轮完整前向的同步均摊范围为 N 62.561–63.085、S 124.294–126.100、P 60.852–62.165 μs/次；预先分配输出和中间张量后，仅一次相同查表内核的同步均摊为 S 56.960–58.496、P 16.641–17.022 μs。对应的 12 对 Level1 范围均为物理流 47 上的单个同名 `lut_forward`。这些窗口分别隔离了查表融合与单次下发的变化。[两组原始记数、命令和 Level1](../pr42634/lut-forward-raw) · [查表普通/计划路的逐物理流核对](rms_lut/forward-level1-plan.json) · [逐次计时与语义门](rms_lut/forward-plan-npu.json)
 
 ## 尝试无优化路径
+
+### 直接发布配置的侧表原生 guard
+
+8 步训练门通过后，在同一直接发布基线上独立切换 native guard。正序无 profiler 步时增加 2.96%，独立 Level0 的绝对 Free 和 Free 占比均略增。[完整同步窗口与各步设备时间](reports/direct-native-slab-guard/measurement.md) · [语义对照](receipts-1800/gates/direct-native-slab-guard/gate-attempt-23tk9rom/comparison.json)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 21.970 ms/步 | 22.622 ms/步 | -2.96% | 23.046 ms/步 | 86.66% | 23.230 ms/步 | 86.94% | -0.33% |
 
 ### 将四个输入字段打包成一次 H2D
 
@@ -228,6 +246,8 @@ flat_stats.eligible 对每个 1,052 片梯度重新核对视图根、真实 stor
 本轮分批保存实现、原始输入和结果。分支上的固定提交可直接复现对应观察。[E01/E02、原始配方及运行结果](https://github.com/j1204150587-svg/pytorch/commit/10b006372cfea4a616cd55b17df20cc56e8f274f) · [eager fold v3 双序与设备归因](https://github.com/j1204150587-svg/pytorch/commit/930c7f055804801478d87c6b4685436bd368951c) · [原版开关双序和适配器分段微测](https://github.com/j1204150587-svg/pytorch/commit/19ae451124c34de27060763cbfb6a18310963263) · [输入搬运、IPG 区间复制、RMS v2 与原始 01 端点](https://github.com/j1204150587-svg/pytorch/commit/18ce2679c63b925b711165c1c8c5fd8958346e9f) · [生成 wrapper 正控、物理网格和 GMM](https://github.com/j1204150587-svg/pytorch/commit/83b3c8deb3f532960830678eb8c4859ba34e8be0)
 
 17:32 实机快照另含 1,981 条带 SHA-256 的原收据，16 份原始 Level0/Level1 trace 合计 51,868,063 字节。[新增原始回执与注册表](receipts-1732) · [新增 trace 逐文件核验](receipts-1732/raw-traces.csv)
+
+18:00 快照含 1,985 条原收据和 12 份、23,785,942 字节的 trace，含上个快照中已收录的正序。本次补齐的反序独立汇总于相应八列表。[两序收据](receipts-1800) · [逐份 trace 哈希](receipts-1800/raw-traces.csv)
 
 在 dynamic-free70 目录复算一项对照。代码从对应 session 的实际命令、计数、shape、CSV 和指标读取数值。
 
