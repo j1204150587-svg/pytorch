@@ -1,0 +1,42 @@
+can not use command: npu-smi info
+can not use command: npu-smi info
+[rank0]:[W1127 07:13:56.292624392 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+{"chunk_elements": 262144, "component": "zero2_batch_overflow", "deepspeed": "0.19.0", "device": "npu:0", "event": "installed", "grad_accum_dtype": "torch.bfloat16", "source_hashes": {"_has_inf_or_nan": "d3252aef4efb2f28aa999d5834c2e65d397cc39f6c1e8fe585f5d1275f5971cd", "has_overflow": "7bb9d1f516f05fc446ab6aa6755f7994e252a3d15db8859abc56a7c9d70366ff", "has_overflow_partitioned_grads_serial": "b54b01f27a954af8eaabbbf5af3ba8a7aad2c631217a87a474e53c4f34064e49", "step": "44750b4ab49af6bb844cb020d3c2306f474a32c90ff4e7d56b140b75187dc966"}}
+{
+  "model": {
+    "config": {
+      "num_tables": 1024,
+      "table_rows": 64,
+      "features_per_table": 4,
+      "vocab_size": 1024,
+      "seq_len": 32,
+      "embedding_dim": 64,
+      "num_heads": 4,
+      "hidden_dim": 16,
+      "attention_dim": 16,
+      "num_layers": 4,
+      "dropout": 0.0,
+      "num_user_groups": 32
+    },
+    "trainable_parameter_tensors": 1052,
+    "trainable_parameter_elements": 4380544,
+    "embedding_table_tensors": 1027,
+    "side_embedding_elements": 4194304
+  },
+  "world_size": 1,
+  "profile": true
+}
+[2026-11-27 07:13:58] [WARNING] [66476] profiler.py: Please use level1 or level2 if you want to collect aic metrics, reset aic metrics to None!
+[2026-11-27 07:13:58] [WARNING] [66476] profiler.py: Please use level1 or level2 if you want to collect aic metrics, reset aic metrics to None!
+/usr/local/python3.12.13/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+[rank0]:[W1127 07:13:58.645234219 VariableFallbackKernel.cpp:67] Warning: npu::npu_format_cast: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (function operator())
+[rank0]:[W1127 07:13:59.720289436 ToKernelNpu.cpp:40] Warning: Device do not support double dtype now, dtype cast replace with float. (function operator())
+{"step": 0, "batch_size": 1, "seq_len": 13, "host_step_ms": 521.683013997972, "loss": 30.782554626464844}
+{"step": 3, "batch_size": 1, "seq_len": 18, "host_step_ms": 102.04091900959611, "loss": 28.95204734802246}
+[2026-11-27 07:14:00] [INFO] [66557] profiler.py: Start parsing profiling data in sync mode at: /artifacts/dynamic-infra-20261127/dynamic-free70/20261127T071238Z-ab-l0-1qbtgtu7/02-B/rank000/profile/604fdc318af4_66476_20261127071359194_ascend_pt
+|/-\[2026-11-27 07:14:03] [INFO] [66566] profiler.py: CANN profiling data parsed in a total time of 0:00:03.052085
+|[2026-11-27 07:14:05] [INFO] [66557] profiler.py: All profiling data parsed in a total time of 0:00:04.796482
+{"step": 7, "batch_size": 4, "seq_len": 21, "host_step_ms": 108.82005095481873, "loss": 29.098711013793945}
+{"status": "completed", "rank": 0, "steps": 8, "elapsed_s_synchronized": 7.253008860978298, "profile_enabled": true, "input_shape_count": 8, "samples": 14, "tokens": 286, "samples_per_s": 1.9302334063482252, "tokens_per_s": 39.43191101539946, "profiled_elapsed_includes_profiler_overhead": true}
+{"calls": 8, "chunks": 136, "component": "zero2_batch_overflow", "errors": 0, "event": "run_scan_summary", "expected_steps": 8, "fallback_calls": 0, "fast_calls": 8, "first_npu_formats": {"2": 1052}, "first_shards": [{"count": 1052, "device": "npu:0", "dtype": "torch.bfloat16", "layout": "torch.strided"}], "reasons": {}, "training_completed": true, "valid": true}

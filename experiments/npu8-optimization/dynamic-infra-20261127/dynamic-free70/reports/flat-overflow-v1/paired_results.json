@@ -1,0 +1,1359 @@
+{
+  "recipe": {
+    "stage": [
+      "side_tables",
+      "partition_hints",
+      "side_slab",
+      "flat_stats_stage"
+    ],
+    "common": {
+      "RECSYS_DYNAMIC_PARTITION": "1",
+      "RECSYS_DYNAMIC_NORM": "1",
+      "ACLNN_CACHE_LIMIT": "65536",
+      "NPU_DYNAMIC_GROUPED_SIDE": "1",
+      "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+      "NPU_DYNAMIC_SIDE_SLAB": "1"
+    },
+    "A": {
+      "RECSYS_DYNAMIC_FLAT_STATS": "off"
+    },
+    "B": {
+      "RECSYS_DYNAMIC_FLAT_STATS": "overflow"
+    },
+    "activation": [
+      {
+        "file": "grouped_side_counts.json",
+        "A": {
+          "hits": "$steps",
+          "fallbacks": 0
+        },
+        "B": {
+          "hits": "$steps",
+          "fallbacks": 0
+        }
+      },
+      {
+        "file": "zero_flat_hints.json",
+        "A": {
+          "validated": true,
+          "enabled": true
+        },
+        "B": {
+          "validated": true,
+          "enabled": true
+        }
+      },
+      {
+        "file": "side_slab_counts.json",
+        "A": {
+          "installed": 1,
+          "slab_forwards": "$steps",
+          "dense_gradients": "$steps"
+        },
+        "B": {
+          "installed": 1,
+          "slab_forwards": "$steps",
+          "dense_gradients": "$steps"
+        }
+      }
+    ]
+  },
+  "schedule": "working\\evidence\\grouped-side-v1-no-profiler-ab\\workspace\\configs\\dynamic_shapes_npu8.json",
+  "pairs": [
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "l0",
+      "directory": "working\\evidence\\flat-overflow-v1-l0-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "working\\evidence\\flat-overflow-v1-l0-ab\\01-A",
+          "metrics": "working\\evidence\\flat-overflow-v1-l0-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:54:05+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:54:40+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "off"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 136,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098709106445312
+          },
+          "csv": "working\\evidence\\flat-overflow-v1-l0-ab\\01-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 65.17539999999977,
+              "stage_ms": 70.7965,
+              "computing_ms": 5.546960000000001,
+              "communication_not_overlapped_ms": 0.07419999999999999,
+              "cpu_marker_ms": 70.53082,
+              "cpu_marker_minus_stage_ms": -0.26567999999998904
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 66.2463399999999,
+              "stage_ms": 72.0065,
+              "computing_ms": 5.688259999999998,
+              "communication_not_overlapped_ms": 0.07204,
+              "cpu_marker_ms": 71.55648,
+              "cpu_marker_minus_stage_ms": -0.4500200000000092
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 63.809459999999866,
+              "stage_ms": 69.9405,
+              "computing_ms": 6.046979999999993,
+              "communication_not_overlapped_ms": 0.08392000000000001,
+              "cpu_marker_ms": 72.31662,
+              "cpu_marker_minus_stage_ms": 2.3761200000000002
+            }
+          ],
+          "free_ms": 65.07706666666651,
+          "stage_ms": 70.91449999999999,
+          "computing_ms": 5.760733333333331,
+          "communication_not_overlapped_ms": 0.07672,
+          "free_fraction": 0.9176835014935806,
+          "first_two_steps_free_fraction_diagnostic": 0.9203009740691699
+        },
+        {
+          "variant": "B",
+          "directory": "working\\evidence\\flat-overflow-v1-l0-ab\\02-B",
+          "metrics": "working\\evidence\\flat-overflow-v1-l0-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:54:44+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:55:17+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "overflow"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 8,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.952043533325195,
+            "7": 29.098705291748047
+          },
+          "csv": "working\\evidence\\flat-overflow-v1-l0-ab\\02-B\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 49.44899999999992,
+              "stage_ms": 53.98575,
+              "computing_ms": 4.476260000000001,
+              "communication_not_overlapped_ms": 0.06044,
+              "cpu_marker_ms": 53.72362,
+              "cpu_marker_minus_stage_ms": -0.2621300000000062
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 51.15325999999988,
+              "stage_ms": 55.8755,
+              "computing_ms": 4.639880000000008,
+              "communication_not_overlapped_ms": 0.08225999999999999,
+              "cpu_marker_ms": 55.43321,
+              "cpu_marker_minus_stage_ms": -0.44228999999999985
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 49.719499999999904,
+              "stage_ms": 54.79,
+              "computing_ms": 4.996620000000002,
+              "communication_not_overlapped_ms": 0.07386,
+              "cpu_marker_ms": 56.95871,
+              "cpu_marker_minus_stage_ms": 2.1687100000000044
+            }
+          ],
+          "free_ms": 50.10725333333323,
+          "stage_ms": 54.88375,
+          "computing_ms": 4.7042533333333365,
+          "communication_not_overlapped_ms": 0.07218666666666666,
+          "free_fraction": 0.912970657677969,
+          "first_two_steps_free_fraction_diagnostic": 0.9157210572426564
+        }
+      ],
+      "changed_environment": {
+        "RECSYS_DYNAMIC_FLAT_STATS": [
+          "off",
+          "overflow"
+        ]
+      },
+      "sampled_loss_max_difference": 3.814697265625e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_free_ms": 14.969813333333278,
+      "free_fraction_gain": 0.005135587387090523
+    },
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "no-profiler",
+      "directory": "working\\evidence\\flat-overflow-v1-no-profiler-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "working\\evidence\\flat-overflow-v1-no-profiler-ab\\01-A",
+          "metrics": "working\\evidence\\flat-overflow-v1-no-profiler-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:58:26+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:58:56+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "off"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 1020,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "9": 29.218067169189453,
+            "19": 26.2725887298584,
+            "29": 25.24410057067871,
+            "39": 22.707326889038086,
+            "49": 21.02918815612793,
+            "59": 18.37959861755371
+          },
+          "ms_per_step": 55.96445268020034,
+          "samples_per_s": 48.60228001411883,
+          "tokens_per_s": 1069.9648997225866,
+          "elapsed_s": 2.798222634010017,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            54.720842046663165,
+            60.17068901564926,
+            55.79995410516858,
+            53.515802952460945,
+            54.814484901726246,
+            57.51842295285314,
+            58.3812779514119,
+            54.198861005716026,
+            52.10452596656978,
+            54.779762984253466,
+            52.634836989454925,
+            53.60467603895813,
+            52.354476996697485,
+            59.45572105702013,
+            60.54726510774344,
+            51.191629958339036,
+            57.13716789614409,
+            56.832885020412505,
+            53.81919501814991,
+            54.21316099818796,
+            59.46320202201605,
+            58.82992595434189,
+            58.60352702438831,
+            54.31534501258284,
+            54.37493708450347,
+            54.98491192702204,
+            55.37545692641288,
+            58.271493995562196,
+            54.65708905830979,
+            51.31268489640206,
+            57.10836697835475,
+            53.77407290507108,
+            57.50223295763135,
+            58.372056926600635,
+            54.38640795182437,
+            57.77111300267279,
+            52.977340994402766,
+            54.20237104408443,
+            59.66553895268589,
+            55.495303007774055,
+            56.593615910969675,
+            57.875956990756094,
+            55.580105050466955,
+            59.48321195319295,
+            52.474680938757956,
+            56.34139594621956,
+            59.81422506738454,
+            55.59824698138982,
+            59.66449889820069,
+            55.20537099801004
+          ]
+        },
+        {
+          "variant": "B",
+          "directory": "working\\evidence\\flat-overflow-v1-no-profiler-ab\\02-B",
+          "metrics": "working\\evidence\\flat-overflow-v1-no-profiler-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:58:59+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T07:59:29+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "overflow"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 60,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.78255271911621,
+            "9": 29.21807098388672,
+            "19": 26.2725887298584,
+            "29": 25.244102478027344,
+            "39": 22.70732307434082,
+            "49": 21.02918243408203,
+            "59": 18.379600524902344
+          },
+          "ms_per_step": 43.297955461312085,
+          "samples_per_s": 62.82051822124476,
+          "tokens_per_s": 1382.9752320176972,
+          "elapsed_s": 2.1648977730656043,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            42.16185898985714,
+            44.75067195016891,
+            44.251971994526684,
+            42.75370191317052,
+            42.59374598041177,
+            43.91155892517418,
+            42.525113094598055,
+            43.26980304904282,
+            41.10816598404199,
+            43.07910508941859,
+            43.60480699688196,
+            44.389607035554945,
+            42.276993044652045,
+            43.27439202461392,
+            43.638306902721524,
+            40.616297046653926,
+            43.974620988592505,
+            40.59422493446618,
+            42.55347396247089,
+            41.14924801979214,
+            42.740120901726186,
+            43.90508797951043,
+            43.456920073367655,
+            42.651887983083725,
+            41.847096057608724,
+            40.146918036043644,
+            42.6139859482646,
+            44.509222032502294,
+            41.989450925029814,
+            42.632696917280555,
+            43.212110991589725,
+            42.94033907353878,
+            43.04680391214788,
+            42.79576404951513,
+            43.3669569902122,
+            43.51435194257647,
+            41.641277028247714,
+            42.39895800128579,
+            47.26920300163329,
+            44.51242298819125,
+            42.598356027156115,
+            44.18776894453913,
+            44.28769298829138,
+            44.11844699643552,
+            42.593165999278426,
+            43.75289205927402,
+            45.199539978057146,
+            48.79921406973153,
+            45.52366305142641,
+            45.940350042656064
+          ]
+        }
+      ],
+      "changed_environment": {
+        "RECSYS_DYNAMIC_FLAT_STATS": [
+          "off",
+          "overflow"
+        ]
+      },
+      "sampled_loss_max_difference": 5.7220458984375e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_ms_per_step": 12.666497218888253,
+      "step_gain": 0.2263311193494354,
+      "host_step_pairs": [
+        {
+          "step": 10,
+          "batch_size": 1,
+          "seq_len": 26,
+          "host_a_ms": 54.720842046663165,
+          "host_b_ms": 42.16185898985714,
+          "host_a_minus_b_ms": 12.558983056806028
+        },
+        {
+          "step": 11,
+          "batch_size": 4,
+          "seq_len": 29,
+          "host_a_ms": 60.17068901564926,
+          "host_b_ms": 44.75067195016891,
+          "host_a_minus_b_ms": 15.420017065480351
+        },
+        {
+          "step": 12,
+          "batch_size": 4,
+          "seq_len": 17,
+          "host_a_ms": 55.79995410516858,
+          "host_b_ms": 44.251971994526684,
+          "host_a_minus_b_ms": 11.547982110641897
+        },
+        {
+          "step": 13,
+          "batch_size": 1,
+          "seq_len": 25,
+          "host_a_ms": 53.515802952460945,
+          "host_b_ms": 42.75370191317052,
+          "host_a_minus_b_ms": 10.762101039290428
+        },
+        {
+          "step": 14,
+          "batch_size": 1,
+          "seq_len": 12,
+          "host_a_ms": 54.814484901726246,
+          "host_b_ms": 42.59374598041177,
+          "host_a_minus_b_ms": 12.220738921314478
+        },
+        {
+          "step": 15,
+          "batch_size": 3,
+          "seq_len": 31,
+          "host_a_ms": 57.51842295285314,
+          "host_b_ms": 43.91155892517418,
+          "host_a_minus_b_ms": 13.606864027678967
+        },
+        {
+          "step": 16,
+          "batch_size": 4,
+          "seq_len": 13,
+          "host_a_ms": 58.3812779514119,
+          "host_b_ms": 42.525113094598055,
+          "host_a_minus_b_ms": 15.856164856813848
+        },
+        {
+          "step": 17,
+          "batch_size": 4,
+          "seq_len": 15,
+          "host_a_ms": 54.198861005716026,
+          "host_b_ms": 43.26980304904282,
+          "host_a_minus_b_ms": 10.929057956673205
+        },
+        {
+          "step": 18,
+          "batch_size": 2,
+          "seq_len": 26,
+          "host_a_ms": 52.10452596656978,
+          "host_b_ms": 41.10816598404199,
+          "host_a_minus_b_ms": 10.996359982527792
+        },
+        {
+          "step": 19,
+          "batch_size": 3,
+          "seq_len": 15,
+          "host_a_ms": 54.779762984253466,
+          "host_b_ms": 43.07910508941859,
+          "host_a_minus_b_ms": 11.700657894834876
+        },
+        {
+          "step": 20,
+          "batch_size": 3,
+          "seq_len": 24,
+          "host_a_ms": 52.634836989454925,
+          "host_b_ms": 43.60480699688196,
+          "host_a_minus_b_ms": 9.030029992572963
+        },
+        {
+          "step": 21,
+          "batch_size": 4,
+          "seq_len": 28,
+          "host_a_ms": 53.60467603895813,
+          "host_b_ms": 44.389607035554945,
+          "host_a_minus_b_ms": 9.215069003403187
+        },
+        {
+          "step": 22,
+          "batch_size": 2,
+          "seq_len": 18,
+          "host_a_ms": 52.354476996697485,
+          "host_b_ms": 42.276993044652045,
+          "host_a_minus_b_ms": 10.07748395204544
+        },
+        {
+          "step": 23,
+          "batch_size": 3,
+          "seq_len": 22,
+          "host_a_ms": 59.45572105702013,
+          "host_b_ms": 43.27439202461392,
+          "host_a_minus_b_ms": 16.18132903240621
+        },
+        {
+          "step": 24,
+          "batch_size": 3,
+          "seq_len": 27,
+          "host_a_ms": 60.54726510774344,
+          "host_b_ms": 43.638306902721524,
+          "host_a_minus_b_ms": 16.908958205021918
+        },
+        {
+          "step": 25,
+          "batch_size": 2,
+          "seq_len": 13,
+          "host_a_ms": 51.191629958339036,
+          "host_b_ms": 40.616297046653926,
+          "host_a_minus_b_ms": 10.57533291168511
+        },
+        {
+          "step": 26,
+          "batch_size": 4,
+          "seq_len": 26,
+          "host_a_ms": 57.13716789614409,
+          "host_b_ms": 43.974620988592505,
+          "host_a_minus_b_ms": 13.162546907551587
+        },
+        {
+          "step": 27,
+          "batch_size": 4,
+          "seq_len": 14,
+          "host_a_ms": 56.832885020412505,
+          "host_b_ms": 40.59422493446618,
+          "host_a_minus_b_ms": 16.23866008594632
+        },
+        {
+          "step": 28,
+          "batch_size": 3,
+          "seq_len": 16,
+          "host_a_ms": 53.81919501814991,
+          "host_b_ms": 42.55347396247089,
+          "host_a_minus_b_ms": 11.265721055679023
+        },
+        {
+          "step": 29,
+          "batch_size": 2,
+          "seq_len": 30,
+          "host_a_ms": 54.21316099818796,
+          "host_b_ms": 41.14924801979214,
+          "host_a_minus_b_ms": 13.06391297839582
+        },
+        {
+          "step": 30,
+          "batch_size": 2,
+          "seq_len": 31,
+          "host_a_ms": 59.46320202201605,
+          "host_b_ms": 42.740120901726186,
+          "host_a_minus_b_ms": 16.723081120289862
+        },
+        {
+          "step": 31,
+          "batch_size": 4,
+          "seq_len": 27,
+          "host_a_ms": 58.82992595434189,
+          "host_b_ms": 43.90508797951043,
+          "host_a_minus_b_ms": 14.924837974831462
+        },
+        {
+          "step": 32,
+          "batch_size": 3,
+          "seq_len": 23,
+          "host_a_ms": 58.60352702438831,
+          "host_b_ms": 43.456920073367655,
+          "host_a_minus_b_ms": 15.146606951020658
+        },
+        {
+          "step": 33,
+          "batch_size": 2,
+          "seq_len": 20,
+          "host_a_ms": 54.31534501258284,
+          "host_b_ms": 42.651887983083725,
+          "host_a_minus_b_ms": 11.663457029499114
+        },
+        {
+          "step": 34,
+          "batch_size": 1,
+          "seq_len": 20,
+          "host_a_ms": 54.37493708450347,
+          "host_b_ms": 41.847096057608724,
+          "host_a_minus_b_ms": 12.527841026894748
+        },
+        {
+          "step": 35,
+          "batch_size": 3,
+          "seq_len": 12,
+          "host_a_ms": 54.98491192702204,
+          "host_b_ms": 40.146918036043644,
+          "host_a_minus_b_ms": 14.837993890978396
+        },
+        {
+          "step": 36,
+          "batch_size": 4,
+          "seq_len": 16,
+          "host_a_ms": 55.37545692641288,
+          "host_b_ms": 42.6139859482646,
+          "host_a_minus_b_ms": 12.761470978148282
+        },
+        {
+          "step": 37,
+          "batch_size": 4,
+          "seq_len": 31,
+          "host_a_ms": 58.271493995562196,
+          "host_b_ms": 44.509222032502294,
+          "host_a_minus_b_ms": 13.762271963059902
+        },
+        {
+          "step": 38,
+          "batch_size": 1,
+          "seq_len": 21,
+          "host_a_ms": 54.65708905830979,
+          "host_b_ms": 41.989450925029814,
+          "host_a_minus_b_ms": 12.66763813327998
+        },
+        {
+          "step": 39,
+          "batch_size": 1,
+          "seq_len": 28,
+          "host_a_ms": 51.31268489640206,
+          "host_b_ms": 42.632696917280555,
+          "host_a_minus_b_ms": 8.679987979121506
+        },
+        {
+          "step": 40,
+          "batch_size": 2,
+          "seq_len": 15,
+          "host_a_ms": 57.10836697835475,
+          "host_b_ms": 43.212110991589725,
+          "host_a_minus_b_ms": 13.896255986765027
+        },
+        {
+          "step": 41,
+          "batch_size": 1,
+          "seq_len": 22,
+          "host_a_ms": 53.77407290507108,
+          "host_b_ms": 42.94033907353878,
+          "host_a_minus_b_ms": 10.8337338315323
+        },
+        {
+          "step": 42,
+          "batch_size": 2,
+          "seq_len": 23,
+          "host_a_ms": 57.50223295763135,
+          "host_b_ms": 43.04680391214788,
+          "host_a_minus_b_ms": 14.45542904548347
+        },
+        {
+          "step": 43,
+          "batch_size": 1,
+          "seq_len": 27,
+          "host_a_ms": 58.372056926600635,
+          "host_b_ms": 42.79576404951513,
+          "host_a_minus_b_ms": 15.576292877085507
+        },
+        {
+          "step": 44,
+          "batch_size": 3,
+          "seq_len": 19,
+          "host_a_ms": 54.38640795182437,
+          "host_b_ms": 43.3669569902122,
+          "host_a_minus_b_ms": 11.019450961612165
+        },
+        {
+          "step": 45,
+          "batch_size": 3,
+          "seq_len": 21,
+          "host_a_ms": 57.77111300267279,
+          "host_b_ms": 43.51435194257647,
+          "host_a_minus_b_ms": 14.256761060096323
+        },
+        {
+          "step": 46,
+          "batch_size": 3,
+          "seq_len": 28,
+          "host_a_ms": 52.977340994402766,
+          "host_b_ms": 41.641277028247714,
+          "host_a_minus_b_ms": 11.336063966155052
+        },
+        {
+          "step": 47,
+          "batch_size": 1,
+          "seq_len": 14,
+          "host_a_ms": 54.20237104408443,
+          "host_b_ms": 42.39895800128579,
+          "host_a_minus_b_ms": 11.803413042798638
+        },
+        {
+          "step": 48,
+          "batch_size": 3,
+          "seq_len": 14,
+          "host_a_ms": 59.66553895268589,
+          "host_b_ms": 47.26920300163329,
+          "host_a_minus_b_ms": 12.396335951052606
+        },
+        {
+          "step": 49,
+          "batch_size": 4,
+          "seq_len": 23,
+          "host_a_ms": 55.495303007774055,
+          "host_b_ms": 44.51242298819125,
+          "host_a_minus_b_ms": 10.982880019582808
+        },
+        {
+          "step": 50,
+          "batch_size": 1,
+          "seq_len": 29,
+          "host_a_ms": 56.593615910969675,
+          "host_b_ms": 42.598356027156115,
+          "host_a_minus_b_ms": 13.99525988381356
+        },
+        {
+          "step": 51,
+          "batch_size": 3,
+          "seq_len": 30,
+          "host_a_ms": 57.875956990756094,
+          "host_b_ms": 44.18776894453913,
+          "host_a_minus_b_ms": 13.688188046216965
+        },
+        {
+          "step": 52,
+          "batch_size": 4,
+          "seq_len": 22,
+          "host_a_ms": 55.580105050466955,
+          "host_b_ms": 44.28769298829138,
+          "host_a_minus_b_ms": 11.292412062175572
+        },
+        {
+          "step": 53,
+          "batch_size": 3,
+          "seq_len": 13,
+          "host_a_ms": 59.48321195319295,
+          "host_b_ms": 44.11844699643552,
+          "host_a_minus_b_ms": 15.364764956757426
+        },
+        {
+          "step": 54,
+          "batch_size": 2,
+          "seq_len": 32,
+          "host_a_ms": 52.474680938757956,
+          "host_b_ms": 42.593165999278426,
+          "host_a_minus_b_ms": 9.88151493947953
+        },
+        {
+          "step": 55,
+          "batch_size": 3,
+          "seq_len": 17,
+          "host_a_ms": 56.34139594621956,
+          "host_b_ms": 43.75289205927402,
+          "host_a_minus_b_ms": 12.588503886945546
+        },
+        {
+          "step": 56,
+          "batch_size": 4,
+          "seq_len": 25,
+          "host_a_ms": 59.81422506738454,
+          "host_b_ms": 45.199539978057146,
+          "host_a_minus_b_ms": 14.614685089327395
+        },
+        {
+          "step": 57,
+          "batch_size": 3,
+          "seq_len": 26,
+          "host_a_ms": 55.59824698138982,
+          "host_b_ms": 48.79921406973153,
+          "host_a_minus_b_ms": 6.799032911658287
+        },
+        {
+          "step": 58,
+          "batch_size": 4,
+          "seq_len": 30,
+          "host_a_ms": 59.66449889820069,
+          "host_b_ms": 45.52366305142641,
+          "host_a_minus_b_ms": 14.14083584677428
+        },
+        {
+          "step": 59,
+          "batch_size": 4,
+          "seq_len": 19,
+          "host_a_ms": 55.20537099801004,
+          "host_b_ms": 45.940350042656064,
+          "host_a_minus_b_ms": 9.265020955353975
+        }
+      ],
+      "training_loop_wall_delta_ms": {
+        "min": 6.799032911658287,
+        "p10": 9.265020955353975,
+        "median": 12.573743471875787,
+        "p90": 15.576292877085507,
+        "max": 16.908958205021918
+      }
+    }
+  ],
+  "eight_column_rows": [
+    {
+      "series": "r1",
+      "order": "AB",
+      "cells": [
+        55.96445268020034,
+        43.297955461312085,
+        0.2263311193494354,
+        65.07706666666651,
+        0.9176835014935806,
+        50.10725333333323,
+        0.912970657677969,
+        0.005135587387090523
+      ]
+    }
+  ],
+  "variation": {
+    "step_gain": {
+      "n": 1,
+      "min": 0.2263311193494354,
+      "max": 0.2263311193494354,
+      "range": 0.0,
+      "median": 0.2263311193494354
+    },
+    "saved_ms_per_step": {
+      "n": 1,
+      "min": 12.666497218888253,
+      "max": 12.666497218888253,
+      "range": 0.0,
+      "median": 12.666497218888253
+    }
+  },
+  "target": {
+    "weighted_B_Free_share_below_0.70_both_orders": null,
+    "unprofiled_e2e_faster_both_orders": null,
+    "absolute_Free_time_lower_both_orders": null,
+    "paired_measurements_meet_free_and_e2e_target": null
+  }
+}

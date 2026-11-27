@@ -1,0 +1,1707 @@
+{
+  "recipe": {
+    "stage": "pr42634_trace",
+    "common": {
+      "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package"
+    },
+    "A": {
+      "TORCHINDUCTOR_NPU_FAST_LAUNCH": "0"
+    },
+    "B": {
+      "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1"
+    },
+    "activation": [
+      {
+        "file": "pr42634_receipt.json",
+        "A": {
+          "switch": "0",
+          "symbols": {
+            "_npu_inductor_make_fast_launch_plan": true,
+            "_npu_inductor_fast_launch_with_plan": true
+          }
+        },
+        "B": {
+          "switch": "1",
+          "symbols": {
+            "_npu_inductor_make_fast_launch_plan": true,
+            "_npu_inductor_fast_launch_with_plan": true
+          }
+        }
+      }
+    ]
+  },
+  "schedule": "working\\evidence\\grouped-side-v1-no-profiler-ab\\workspace\\configs\\dynamic_shapes_npu8.json",
+  "pairs": [
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "l0",
+      "directory": "working\\evidence\\pr42634-original-l0-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "working\\evidence\\pr42634-original-l0-ab\\01-A",
+          "metrics": "working\\evidence\\pr42634-original-l0-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:18:20+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:19:11+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 136,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098711013793945
+          },
+          "csv": "working\\evidence\\pr42634-original-l0-ab\\01-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 555.275900000004,
+              "stage_ms": 609.935,
+              "computing_ms": 54.559719999999196,
+              "communication_not_overlapped_ms": 0.09926,
+              "cpu_marker_ms": 609.85695,
+              "cpu_marker_minus_stage_ms": -0.07804999999996198
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 563.653700000003,
+              "stage_ms": 614.9165,
+              "computing_ms": 51.15987999999964,
+              "communication_not_overlapped_ms": 0.10291999999999998,
+              "cpu_marker_ms": 614.58512,
+              "cpu_marker_minus_stage_ms": -0.33138000000008105
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 554.549300000002,
+              "stage_ms": 602.203,
+              "computing_ms": 47.53097999999953,
+              "communication_not_overlapped_ms": 0.12272,
+              "cpu_marker_ms": 616.89134,
+              "cpu_marker_minus_stage_ms": 14.68834000000004
+            }
+          ],
+          "free_ms": 557.826300000003,
+          "stage_ms": 609.0181666666666,
+          "computing_ms": 51.083526666666124,
+          "communication_not_overlapped_ms": 0.1083,
+          "free_fraction": 0.9159436130668293,
+          "first_two_steps_free_fraction_diagnostic": 0.91352265968569
+        },
+        {
+          "variant": "B",
+          "directory": "working\\evidence\\pr42634-original-l0-ab\\02-B",
+          "metrics": "working\\evidence\\pr42634-original-l0-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:19:20+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:20:13+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 136,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.78255271911621,
+            "3": 28.952043533325195,
+            "7": 29.098709106445312
+          },
+          "csv": "working\\evidence\\pr42634-original-l0-ab\\02-B\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 572.9222200000058,
+              "stage_ms": 628.23575,
+              "computing_ms": 55.198799999999586,
+              "communication_not_overlapped_ms": 0.11458,
+              "cpu_marker_ms": 627.80823,
+              "cpu_marker_minus_stage_ms": -0.4275200000000723
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 582.5149000000066,
+              "stage_ms": 634.8565,
+              "computing_ms": 52.21852000000006,
+              "communication_not_overlapped_ms": 0.12296000000000001,
+              "cpu_marker_ms": 634.73106,
+              "cpu_marker_minus_stage_ms": -0.12544000000002598
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 572.2875600000026,
+              "stage_ms": 620.87625,
+              "computing_ms": 48.4585000000002,
+              "communication_not_overlapped_ms": 0.13016,
+              "cpu_marker_ms": 644.20893,
+              "cpu_marker_minus_stage_ms": 23.332679999999982
+            }
+          ],
+          "free_ms": 575.9082266666717,
+          "stage_ms": 627.9895,
+          "computing_ms": 51.95860666666662,
+          "communication_not_overlapped_ms": 0.12256666666666667,
+          "free_fraction": 0.9170666494689349,
+          "first_two_steps_free_fraction_diagnostic": 0.9147685927136455
+        }
+      ],
+      "changed_environment": {
+        "TORCHINDUCTOR_NPU_FAST_LAUNCH": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 3.814697265625e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_free_ms": -18.081926666668664,
+      "free_fraction_gain": -0.0012260977489055858
+    },
+    {
+      "series": "r1",
+      "order": "BA",
+      "mode": "l0",
+      "directory": "working\\evidence\\pr42634-original-l0-ba",
+      "legs": [
+        {
+          "variant": "B",
+          "directory": "working\\evidence\\pr42634-original-l0-ba\\01-B",
+          "metrics": "working\\evidence\\pr42634-original-l0-ba\\01-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:23:34+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:24:26+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 136,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098705291748047
+          },
+          "csv": "working\\evidence\\pr42634-original-l0-ba\\01-B\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 570.2567400000058,
+              "stage_ms": 623.70175,
+              "computing_ms": 53.34279999999992,
+              "communication_not_overlapped_ms": 0.10226,
+              "cpu_marker_ms": 623.48983,
+              "cpu_marker_minus_stage_ms": -0.2119199999999637
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 575.1898400000061,
+              "stage_ms": 625.63,
+              "computing_ms": 50.32019999999957,
+              "communication_not_overlapped_ms": 0.11996,
+              "cpu_marker_ms": 625.14527,
+              "cpu_marker_minus_stage_ms": -0.4847300000000132
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 559.6520000000037,
+              "stage_ms": 606.84925,
+              "computing_ms": 47.096660000000206,
+              "communication_not_overlapped_ms": 0.10046000000000001,
+              "cpu_marker_ms": 623.29953,
+              "cpu_marker_minus_stage_ms": 16.45028000000002
+            }
+          ],
+          "free_ms": 568.3661933333386,
+          "stage_ms": 618.727,
+          "computing_ms": 50.25321999999991,
+          "communication_not_overlapped_ms": 0.10756,
+          "free_fraction": 0.9186057717431737,
+          "first_two_steps_free_fraction_diagnostic": 0.9168474106257303
+        },
+        {
+          "variant": "A",
+          "directory": "working\\evidence\\pr42634-original-l0-ba\\02-A",
+          "metrics": "working\\evidence\\pr42634-original-l0-ba\\02-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:24:35+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:25:36+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 136,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.78255271911621,
+            "3": 28.95204734802246,
+            "7": 29.098709106445312
+          },
+          "csv": "working\\evidence\\pr42634-original-l0-ba\\02-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 609.4526200000063,
+              "stage_ms": 664.57525,
+              "computing_ms": 54.976239999999706,
+              "communication_not_overlapped_ms": 0.14654,
+              "cpu_marker_ms": 664.05801,
+              "cpu_marker_minus_stage_ms": -0.5172400000000152
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 662.2635200000047,
+              "stage_ms": 713.90375,
+              "computing_ms": 51.49128000000045,
+              "communication_not_overlapped_ms": 0.14914,
+              "cpu_marker_ms": 713.75986,
+              "cpu_marker_minus_stage_ms": -0.14388999999994212
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 604.3334200000114,
+              "stage_ms": 652.03125,
+              "computing_ms": 47.56036000000019,
+              "communication_not_overlapped_ms": 0.13748000000000002,
+              "cpu_marker_ms": 668.05629,
+              "cpu_marker_minus_stage_ms": 16.02503999999999
+            }
+          ],
+          "free_ms": 625.3498533333408,
+          "stage_ms": 676.8367499999999,
+          "computing_ms": 51.34262666666678,
+          "communication_not_overlapped_ms": 0.14438666666666666,
+          "free_fraction": 0.9239301106704694,
+          "first_two_steps_free_fraction_diagnostic": 0.9225502455967853
+        }
+      ],
+      "changed_environment": {
+        "TORCHINDUCTOR_NPU_FAST_LAUNCH": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 3.814697265625e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_free_ms": 56.983660000002146,
+      "free_fraction_gain": 0.005762707444865067
+    },
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "no-profiler",
+      "directory": "working\\evidence\\pr42634-original-no-profiler-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "working\\evidence\\pr42634-original-no-profiler-ab\\01-A",
+          "metrics": "working\\evidence\\pr42634-original-no-profiler-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:21:05+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:22:06+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 1020,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "9": 29.218069076538086,
+            "19": 26.2725887298584,
+            "29": 25.244104385375977,
+            "39": 22.707324981689453,
+            "49": 21.029186248779297,
+            "59": 18.379600524902344
+          },
+          "ms_per_step": 565.3044621809386,
+          "samples_per_s": 4.811566477834385,
+          "tokens_per_s": 105.92522084291286,
+          "elapsed_s": 28.26522310904693,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            541.8262589955702,
+            529.714472941123,
+            531.9012509426102,
+            532.5752879725769,
+            532.2346950415522,
+            536.5275769727305,
+            543.7840269878507,
+            572.5319100311026,
+            527.8560279402882,
+            530.4639929672703,
+            533.6910530459136,
+            534.5983989536762,
+            533.2053429447114,
+            535.5658780317754,
+            534.0058249421418,
+            534.0463470201939,
+            536.2642860272899,
+            541.5394180454314,
+            564.5682809408754,
+            600.4051980562508,
+            598.4372390666977,
+            594.841524027288,
+            593.0041829124093,
+            586.2573239719495,
+            587.0984179200605,
+            590.5234239762649,
+            590.6017270172015,
+            596.6013650177047,
+            593.4934220276773,
+            598.2919830130413,
+            595.9074180573225,
+            591.8243359774351,
+            594.6695290040225,
+            595.7212700741366,
+            590.1794999372214,
+            564.854503958486,
+            566.6684259194881,
+            571.8087209388614,
+            567.6517050014809,
+            572.8300309274346,
+            566.5616319747642,
+            567.6799169741571,
+            570.8365919999778,
+            568.9527069916949,
+            572.6870950311422,
+            573.3512319857255,
+            568.8970549963415,
+            564.7943919757381,
+            569.9432170949876,
+            572.2613990074024
+          ]
+        },
+        {
+          "variant": "B",
+          "directory": "working\\evidence\\pr42634-original-no-profiler-ab\\02-B",
+          "metrics": "working\\evidence\\pr42634-original-no-profiler-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:22:10+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:23:13+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 1020,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "9": 29.21807098388672,
+            "19": 26.272584915161133,
+            "29": 25.244104385375977,
+            "39": 22.70732307434082,
+            "49": 21.029186248779297,
+            "59": 18.379602432250977
+          },
+          "ms_per_step": 605.395712540485,
+          "samples_per_s": 4.492929077059006,
+          "tokens_per_s": 98.91051218172545,
+          "elapsed_s": 30.26978562702425,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            560.0804399000481,
+            571.8748930376023,
+            562.636811984703,
+            557.593550067395,
+            557.0993709843606,
+            558.9227440068498,
+            559.5942110521719,
+            559.0497589437291,
+            551.6693129902706,
+            578.5893419524655,
+            626.6255259979516,
+            634.1871289769188,
+            632.0010819472373,
+            631.9769609253854,
+            643.5237730620429,
+            636.8339749751613,
+            631.7837029928342,
+            634.8813080694526,
+            642.2283520223573,
+            649.1591000230983,
+            629.6657590428367,
+            558.9712559012696,
+            565.9487650264055,
+            556.2910480657592,
+            563.348650932312,
+            565.1497639482841,
+            623.2858030125499,
+            628.6419170210138,
+            626.7468909500167,
+            623.2030689716339,
+            624.8016630997881,
+            624.1286759031937,
+            615.837593912147,
+            621.6238759225234,
+            617.1287160832435,
+            628.027172992006,
+            624.2706519551575,
+            625.3915270790458,
+            637.9030479583889,
+            626.845465041697,
+            573.7217969726771,
+            573.0400600004941,
+            564.7644080454484,
+            581.9091650191694,
+            639.4170490093529,
+            633.5634650895372,
+            629.9201590009034,
+            634.6146669238806,
+            631.7843630677089,
+            638.5965059744194
+          ]
+        }
+      ],
+      "changed_environment": {
+        "TORCHINDUCTOR_NPU_FAST_LAUNCH": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 3.814697265625e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_ms_per_step": -40.09125035954639,
+      "step_gain": -0.07091974863399231,
+      "host_step_pairs": [
+        {
+          "step": 10,
+          "batch_size": 1,
+          "seq_len": 26,
+          "host_a_ms": 541.8262589955702,
+          "host_b_ms": 560.0804399000481,
+          "host_a_minus_b_ms": -18.254180904477835
+        },
+        {
+          "step": 11,
+          "batch_size": 4,
+          "seq_len": 29,
+          "host_a_ms": 529.714472941123,
+          "host_b_ms": 571.8748930376023,
+          "host_a_minus_b_ms": -42.160420096479356
+        },
+        {
+          "step": 12,
+          "batch_size": 4,
+          "seq_len": 17,
+          "host_a_ms": 531.9012509426102,
+          "host_b_ms": 562.636811984703,
+          "host_a_minus_b_ms": -30.73556104209274
+        },
+        {
+          "step": 13,
+          "batch_size": 1,
+          "seq_len": 25,
+          "host_a_ms": 532.5752879725769,
+          "host_b_ms": 557.593550067395,
+          "host_a_minus_b_ms": -25.018262094818056
+        },
+        {
+          "step": 14,
+          "batch_size": 1,
+          "seq_len": 12,
+          "host_a_ms": 532.2346950415522,
+          "host_b_ms": 557.0993709843606,
+          "host_a_minus_b_ms": -24.86467594280839
+        },
+        {
+          "step": 15,
+          "batch_size": 3,
+          "seq_len": 31,
+          "host_a_ms": 536.5275769727305,
+          "host_b_ms": 558.9227440068498,
+          "host_a_minus_b_ms": -22.395167034119368
+        },
+        {
+          "step": 16,
+          "batch_size": 4,
+          "seq_len": 13,
+          "host_a_ms": 543.7840269878507,
+          "host_b_ms": 559.5942110521719,
+          "host_a_minus_b_ms": -15.81018406432122
+        },
+        {
+          "step": 17,
+          "batch_size": 4,
+          "seq_len": 15,
+          "host_a_ms": 572.5319100311026,
+          "host_b_ms": 559.0497589437291,
+          "host_a_minus_b_ms": 13.482151087373495
+        },
+        {
+          "step": 18,
+          "batch_size": 2,
+          "seq_len": 26,
+          "host_a_ms": 527.8560279402882,
+          "host_b_ms": 551.6693129902706,
+          "host_a_minus_b_ms": -23.81328504998237
+        },
+        {
+          "step": 19,
+          "batch_size": 3,
+          "seq_len": 15,
+          "host_a_ms": 530.4639929672703,
+          "host_b_ms": 578.5893419524655,
+          "host_a_minus_b_ms": -48.12534898519516
+        },
+        {
+          "step": 20,
+          "batch_size": 3,
+          "seq_len": 24,
+          "host_a_ms": 533.6910530459136,
+          "host_b_ms": 626.6255259979516,
+          "host_a_minus_b_ms": -92.93447295203805
+        },
+        {
+          "step": 21,
+          "batch_size": 4,
+          "seq_len": 28,
+          "host_a_ms": 534.5983989536762,
+          "host_b_ms": 634.1871289769188,
+          "host_a_minus_b_ms": -99.58873002324253
+        },
+        {
+          "step": 22,
+          "batch_size": 2,
+          "seq_len": 18,
+          "host_a_ms": 533.2053429447114,
+          "host_b_ms": 632.0010819472373,
+          "host_a_minus_b_ms": -98.7957390025258
+        },
+        {
+          "step": 23,
+          "batch_size": 3,
+          "seq_len": 22,
+          "host_a_ms": 535.5658780317754,
+          "host_b_ms": 631.9769609253854,
+          "host_a_minus_b_ms": -96.41108289361
+        },
+        {
+          "step": 24,
+          "batch_size": 3,
+          "seq_len": 27,
+          "host_a_ms": 534.0058249421418,
+          "host_b_ms": 643.5237730620429,
+          "host_a_minus_b_ms": -109.51794811990112
+        },
+        {
+          "step": 25,
+          "batch_size": 2,
+          "seq_len": 13,
+          "host_a_ms": 534.0463470201939,
+          "host_b_ms": 636.8339749751613,
+          "host_a_minus_b_ms": -102.78762795496732
+        },
+        {
+          "step": 26,
+          "batch_size": 4,
+          "seq_len": 26,
+          "host_a_ms": 536.2642860272899,
+          "host_b_ms": 631.7837029928342,
+          "host_a_minus_b_ms": -95.51941696554422
+        },
+        {
+          "step": 27,
+          "batch_size": 4,
+          "seq_len": 14,
+          "host_a_ms": 541.5394180454314,
+          "host_b_ms": 634.8813080694526,
+          "host_a_minus_b_ms": -93.34189002402127
+        },
+        {
+          "step": 28,
+          "batch_size": 3,
+          "seq_len": 16,
+          "host_a_ms": 564.5682809408754,
+          "host_b_ms": 642.2283520223573,
+          "host_a_minus_b_ms": -77.66007108148187
+        },
+        {
+          "step": 29,
+          "batch_size": 2,
+          "seq_len": 30,
+          "host_a_ms": 600.4051980562508,
+          "host_b_ms": 649.1591000230983,
+          "host_a_minus_b_ms": -48.75390196684748
+        },
+        {
+          "step": 30,
+          "batch_size": 2,
+          "seq_len": 31,
+          "host_a_ms": 598.4372390666977,
+          "host_b_ms": 629.6657590428367,
+          "host_a_minus_b_ms": -31.22851997613907
+        },
+        {
+          "step": 31,
+          "batch_size": 4,
+          "seq_len": 27,
+          "host_a_ms": 594.841524027288,
+          "host_b_ms": 558.9712559012696,
+          "host_a_minus_b_ms": 35.870268126018345
+        },
+        {
+          "step": 32,
+          "batch_size": 3,
+          "seq_len": 23,
+          "host_a_ms": 593.0041829124093,
+          "host_b_ms": 565.9487650264055,
+          "host_a_minus_b_ms": 27.055417886003852
+        },
+        {
+          "step": 33,
+          "batch_size": 2,
+          "seq_len": 20,
+          "host_a_ms": 586.2573239719495,
+          "host_b_ms": 556.2910480657592,
+          "host_a_minus_b_ms": 29.966275906190276
+        },
+        {
+          "step": 34,
+          "batch_size": 1,
+          "seq_len": 20,
+          "host_a_ms": 587.0984179200605,
+          "host_b_ms": 563.348650932312,
+          "host_a_minus_b_ms": 23.749766987748444
+        },
+        {
+          "step": 35,
+          "batch_size": 3,
+          "seq_len": 12,
+          "host_a_ms": 590.5234239762649,
+          "host_b_ms": 565.1497639482841,
+          "host_a_minus_b_ms": 25.373660027980804
+        },
+        {
+          "step": 36,
+          "batch_size": 4,
+          "seq_len": 16,
+          "host_a_ms": 590.6017270172015,
+          "host_b_ms": 623.2858030125499,
+          "host_a_minus_b_ms": -32.684075995348394
+        },
+        {
+          "step": 37,
+          "batch_size": 4,
+          "seq_len": 31,
+          "host_a_ms": 596.6013650177047,
+          "host_b_ms": 628.6419170210138,
+          "host_a_minus_b_ms": -32.04055200330913
+        },
+        {
+          "step": 38,
+          "batch_size": 1,
+          "seq_len": 21,
+          "host_a_ms": 593.4934220276773,
+          "host_b_ms": 626.7468909500167,
+          "host_a_minus_b_ms": -33.25346892233938
+        },
+        {
+          "step": 39,
+          "batch_size": 1,
+          "seq_len": 28,
+          "host_a_ms": 598.2919830130413,
+          "host_b_ms": 623.2030689716339,
+          "host_a_minus_b_ms": -24.911085958592594
+        },
+        {
+          "step": 40,
+          "batch_size": 2,
+          "seq_len": 15,
+          "host_a_ms": 595.9074180573225,
+          "host_b_ms": 624.8016630997881,
+          "host_a_minus_b_ms": -28.894245042465627
+        },
+        {
+          "step": 41,
+          "batch_size": 1,
+          "seq_len": 22,
+          "host_a_ms": 591.8243359774351,
+          "host_b_ms": 624.1286759031937,
+          "host_a_minus_b_ms": -32.30433992575854
+        },
+        {
+          "step": 42,
+          "batch_size": 2,
+          "seq_len": 23,
+          "host_a_ms": 594.6695290040225,
+          "host_b_ms": 615.837593912147,
+          "host_a_minus_b_ms": -21.168064908124506
+        },
+        {
+          "step": 43,
+          "batch_size": 1,
+          "seq_len": 27,
+          "host_a_ms": 595.7212700741366,
+          "host_b_ms": 621.6238759225234,
+          "host_a_minus_b_ms": -25.902605848386884
+        },
+        {
+          "step": 44,
+          "batch_size": 3,
+          "seq_len": 19,
+          "host_a_ms": 590.1794999372214,
+          "host_b_ms": 617.1287160832435,
+          "host_a_minus_b_ms": -26.94921614602208
+        },
+        {
+          "step": 45,
+          "batch_size": 3,
+          "seq_len": 21,
+          "host_a_ms": 564.854503958486,
+          "host_b_ms": 628.027172992006,
+          "host_a_minus_b_ms": -63.172669033519924
+        },
+        {
+          "step": 46,
+          "batch_size": 3,
+          "seq_len": 28,
+          "host_a_ms": 566.6684259194881,
+          "host_b_ms": 624.2706519551575,
+          "host_a_minus_b_ms": -57.602226035669446
+        },
+        {
+          "step": 47,
+          "batch_size": 1,
+          "seq_len": 14,
+          "host_a_ms": 571.8087209388614,
+          "host_b_ms": 625.3915270790458,
+          "host_a_minus_b_ms": -53.5828061401844
+        },
+        {
+          "step": 48,
+          "batch_size": 3,
+          "seq_len": 14,
+          "host_a_ms": 567.6517050014809,
+          "host_b_ms": 637.9030479583889,
+          "host_a_minus_b_ms": -70.25134295690805
+        },
+        {
+          "step": 49,
+          "batch_size": 4,
+          "seq_len": 23,
+          "host_a_ms": 572.8300309274346,
+          "host_b_ms": 626.845465041697,
+          "host_a_minus_b_ms": -54.01543411426246
+        },
+        {
+          "step": 50,
+          "batch_size": 1,
+          "seq_len": 29,
+          "host_a_ms": 566.5616319747642,
+          "host_b_ms": 573.7217969726771,
+          "host_a_minus_b_ms": -7.160164997912943
+        },
+        {
+          "step": 51,
+          "batch_size": 3,
+          "seq_len": 30,
+          "host_a_ms": 567.6799169741571,
+          "host_b_ms": 573.0400600004941,
+          "host_a_minus_b_ms": -5.3601430263370275
+        },
+        {
+          "step": 52,
+          "batch_size": 4,
+          "seq_len": 22,
+          "host_a_ms": 570.8365919999778,
+          "host_b_ms": 564.7644080454484,
+          "host_a_minus_b_ms": 6.072183954529464
+        },
+        {
+          "step": 53,
+          "batch_size": 3,
+          "seq_len": 13,
+          "host_a_ms": 568.9527069916949,
+          "host_b_ms": 581.9091650191694,
+          "host_a_minus_b_ms": -12.956458027474582
+        },
+        {
+          "step": 54,
+          "batch_size": 2,
+          "seq_len": 32,
+          "host_a_ms": 572.6870950311422,
+          "host_b_ms": 639.4170490093529,
+          "host_a_minus_b_ms": -66.72995397821069
+        },
+        {
+          "step": 55,
+          "batch_size": 3,
+          "seq_len": 17,
+          "host_a_ms": 573.3512319857255,
+          "host_b_ms": 633.5634650895372,
+          "host_a_minus_b_ms": -60.21223310381174
+        },
+        {
+          "step": 56,
+          "batch_size": 4,
+          "seq_len": 25,
+          "host_a_ms": 568.8970549963415,
+          "host_b_ms": 629.9201590009034,
+          "host_a_minus_b_ms": -61.0231040045619
+        },
+        {
+          "step": 57,
+          "batch_size": 3,
+          "seq_len": 26,
+          "host_a_ms": 564.7943919757381,
+          "host_b_ms": 634.6146669238806,
+          "host_a_minus_b_ms": -69.82027494814247
+        },
+        {
+          "step": 58,
+          "batch_size": 4,
+          "seq_len": 30,
+          "host_a_ms": 569.9432170949876,
+          "host_b_ms": 631.7843630677089,
+          "host_a_minus_b_ms": -61.84114597272128
+        },
+        {
+          "step": 59,
+          "batch_size": 4,
+          "seq_len": 19,
+          "host_a_ms": 572.2613990074024,
+          "host_b_ms": 638.5965059744194,
+          "host_a_minus_b_ms": -66.33510696701705
+        }
+      ],
+      "training_loop_wall_delta_ms": {
+        "min": -109.51794811990112,
+        "p10": -96.41108289361,
+        "median": -32.49420796055347,
+        "p90": 13.482151087373495,
+        "max": 35.870268126018345
+      }
+    }
+  ],
+  "eight_column_rows": [
+    {
+      "series": "r1",
+      "order": "AB",
+      "cells": [
+        565.3044621809386,
+        605.395712540485,
+        -0.07091974863399231,
+        557.826300000003,
+        0.9159436130668293,
+        575.9082266666717,
+        0.9170666494689349,
+        -0.0012260977489055858
+      ]
+    }
+  ],
+  "variation": {
+    "step_gain": {
+      "n": 1,
+      "min": -0.07091974863399231,
+      "max": -0.07091974863399231,
+      "range": 0.0,
+      "median": -0.07091974863399231
+    },
+    "saved_ms_per_step": {
+      "n": 1,
+      "min": -40.09125035954639,
+      "max": -40.09125035954639,
+      "range": 0.0,
+      "median": -40.09125035954639
+    }
+  },
+  "target": {
+    "weighted_B_Free_share_below_0.70_both_orders": null,
+    "unprofiled_e2e_faster_both_orders": null,
+    "absolute_Free_time_lower_both_orders": null,
+    "paired_measurements_meet_free_and_e2e_target": null
+  }
+}

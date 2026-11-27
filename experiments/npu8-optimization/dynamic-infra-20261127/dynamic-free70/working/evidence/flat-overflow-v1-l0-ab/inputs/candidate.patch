@@ -1,0 +1,33 @@
+diff --git a/train_deepspeed.py b/train_deepspeed.py
+--- a/train_deepspeed.py
++++ b/train_deepspeed.py
+@@ -89,6 +89,12 @@
+     engine, _, _, _ = deepspeed.initialize(model=model, optimizer=optimizer,
+                                           config=ds_config, dist_init_required=False)
+     engine.train()
++    overflow_stats = None
++    overflow_switch = os.environ.get("RECSYS_ZERO2_BATCH_OVERFLOW", "0")
++    if overflow_switch != "0":
++        from overflow import install
++
++        overflow_stats = install(engine.optimizer)
+     (rank_dir / "model_summary.json").write_text(json.dumps(summary, indent=2))
+     (rank_dir / "effective_deepspeed_config.json").write_text(json.dumps(ds_config, indent=2))
+     (rank_dir / "run_arguments.json").write_text(json.dumps(vars(args), indent=2))
+@@ -164,8 +170,14 @@
+         if args.save_checkpoint:
+             engine.save_checkpoint(str(output_dir / "checkpoint"), tag="final")
+         print(json.dumps(result), flush=True)
+     finally:
+-        if dist.is_initialized():
+-            dist.destroy_process_group()
++        try:
++            if overflow_stats is not None:
++                from overflow import finish_run
++
++                finish_run(overflow_stats, rank_dir, args.steps, sys.exc_info()[0] is None)
++        finally:
++            if dist.is_initialized():
++                dist.destroy_process_group()
+ 
+ 
