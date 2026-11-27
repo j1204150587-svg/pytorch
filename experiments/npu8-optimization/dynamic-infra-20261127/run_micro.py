@@ -29,6 +29,8 @@ def main():
             leg.mkdir()
             env = {**cfg["common"], **cfg[variant], "TASK_QUEUE_ENABLE":"1","PYTHONDONTWRITEBYTECODE":"1"}
             source = "rebase_forward" if "NPU_DYNAMIC_REBASE_FORWARD" in env else "rebase"
+            if "NPU_DYNAMIC_META_UNFLATTEN" in env:
+                source = "meta_unflatten"
             cmd = [*runner.DOCKER,"exec", *(x for k,v in env.items() for x in ("--env",k+"="+v)),
                    container,"python3", "-B", inner(HERE / source / "micro_gate.py"), inner(leg / "micro.json")]
             (leg/"command.json").write_text(json.dumps(cmd))

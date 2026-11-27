@@ -91,7 +91,11 @@ def compare(output, schedule, legs):
                        f"{variant}: missing rebase activation {totals}")
                 verify(len({tuple(d["shape"]) for d in changes if d["delta"].get("eligible", 0)}) > 1,
                        f"{variant}: rebase activated on fewer than two shapes")
-            elif evidence["counter"] == "npu_dynamic_index_rebase_counter":
+            elif env.get("NPU_DYNAMIC_META_UNFLATTEN") == "1":
+                verify([d["delta"]["eligible"] for d in changes] == [1,1,0,1,0,1,0,1],
+                       f"{variant}: wrong set of weight updates taking the Meta path")
+                verify(activation_totals[variant]["fallback"] >= STEPS, f"{variant}: missing small-list fallback")
+            elif evidence["counter"] in ("npu_dynamic_index_rebase_counter", "meta_view_helper"):
                 verify(not any(activation_totals[variant].values()), f"{variant}: inactive native switch recorded work")
         records[variant] = values
     if libraries:

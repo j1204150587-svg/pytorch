@@ -252,6 +252,47 @@ def write_tables(out, pairs):
                         s.writerow({**row, **keys})
 
 
+def measurement_tables(pairs, rows, variation_by_series):
+    text = ["# 同步窗口和标准 Level0 复算", ""]
+    if rows:
+        text.extend(["八列按各自轮次的同序无 profiler 与 Level0 配对。", "", markdown(rows), ""])
+    steady_pairs = [p for p in pairs if p["mode"] == "no-profiler" and len(p["legs"]) == 2]
+    if steady_pairs:
+        text.extend(["## 无 profiler 的 50 步同步窗口", "",
+                     "每腿预热 10 步，同步后依次执行第 10–59 步，以窗口结束时同步后的总秒数计算吞吐。下表 A/B、B/A 均按 A → B 展示，A/A 按第一次 A → 第二次 A 展示。", "",
+                     "| 轮次 | 执行顺序 | ms/步 | 样本/s | token/s | 相对缩短 | 同形状 Host 单步差 p10 / p50 / p90（ms） |",
+                     "|---|---|---:|---:|---:|---:|---:|"])
+        for pair in steady_pairs:
+            a,b = pair["legs"] if pair["order"] != "BA" else reversed(pair["legs"])
+            d = pair["training_loop_wall_delta_ms"]
+            text.append(f'| {pair["series"]} | {"/".join(pair["order"])} | {a["ms_per_step"]:.3f} → {b["ms_per_step"]:.3f} | '
+                        f'{a["samples_per_s"]:.4f} → {b["samples_per_s"]:.4f} | {a["tokens_per_s"]:.3f} → {b["tokens_per_s"]:.3f} | '
+                        f'{pair["step_gain"]:+.2%} | {d["p10"]:.2f} / {d["median"]:.2f} / {d["p90"]:.2f} |')
+        text.append("")
+        for name,variation in variation_by_series.items():
+            gain = variation.get("step_gain", {})
+            if gain.get("n", 0) > 1:
+                text.extend([f'{name} 的 {gain["n"]} 个跨处理配对降幅相差 {gain["range"]*100:.2f} 个百分点，中位数 {gain["median"]:+.2%}。', ""])
+        w = steady_pairs[0]["legs"][0]
+        text.extend([f'各腿测量窗口为 {w["window_samples"]:,} 个样本、{w["window_tokens"]:,} 个 token。逐步 Host 墙时包含当时发生的隐式等待，表中的 p10/p50/p90 来自相同步号的未逐步同步墙时差。[窗口明细](synchronized_windows.csv) · [逐步配对与来源路径](paired_results.json)', ""])
+    l0_pairs = [p for p in pairs if p["mode"] == "l0" and len(p["legs"]) == 2]
+    if l0_pairs:
+        text.extend(["## 标准 Level0 的逐步时间", "",
+                     "下表每组三列依次为 Free / Stage / Computing，单位 ms。各步取自官方 step_trace_time.csv，占比按各腿 ΣFree/ΣStage 计算。", "",
+                     "| 轮次与顺序 | 步号与实际 [B,L] | A 的 Free / Stage / Computing | B 的 Free / Stage / Computing |",
+                     "|---|---|---:|---:|"])
+        def phases(row):
+            return " / ".join(f'{row[field]:.3f}' for field in ("free_ms","stage_ms","computing_ms"))
+        for pair in l0_pairs:
+            a,b = pair["legs"] if pair["order"] != "BA" else reversed(pair["legs"])
+            prefix = pair["series"] + " · " + "/".join(pair["order"])
+            for sa,sb in zip(a["per_step"],b["per_step"],strict=True):
+                text.append(f'| {prefix} | #{sa["step"]} [{sa["batch_size"]},{sa["seq_len"]}] | {phases(sa)} | {phases(sb)} |')
+            text.append(f'| {prefix} | 三步均值 | {phases(a)} | {phases(b)} |')
+        text.extend(["", "CPU ProfilerStep 墙时和设备 Stage 的边界差逐步列入明细。[含 CPU 边界的逐步 CSV](profile_steps.csv)", ""])
+    return "\n".join(text)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--schedule", type=Path, required=True)
@@ -263,13 +304,17 @@ def main():
     schedule = read(args.schedule)
     pairs = [parse_pair(spec, schedule, args.switch) for spec in args.pair]
     rows, variation = summarize(pairs)
+    variation_by_series = {series: summarize([p for p in pairs if p["series"] == series])[1]
+                           for series in sorted({p["series"] for p in pairs})}
     out = args.output
     out.mkdir(parents=True, exist_ok=True)
     result = {"schedule": str(args.schedule), "schedule_sha256": hashlib.sha256(args.schedule.read_bytes()).hexdigest(),
-              "eight_column_names": COLUMNS, "eight_column_rows": rows, "pairs": pairs, "paired_variation": variation}
+              "eight_column_names": COLUMNS, "eight_column_rows": rows, "pairs": pairs, "paired_variation": variation,
+              "paired_variation_by_series": variation_by_series}
     (out / "paired_results.json").write_text(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
                                               encoding="utf-8")
     (out / "eight_columns.md").write_text(markdown(rows), encoding="utf-8")
+    (out / "measurement.md").write_text(measurement_tables(pairs, rows, variation_by_series), encoding="utf-8")
     write_tables(out, pairs)
     print(json.dumps({"eight_column_rows": rows, "paired_variation": variation}, ensure_ascii=False))
 

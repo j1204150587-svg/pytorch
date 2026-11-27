@@ -3,6 +3,7 @@ import ctypes
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 
 import torch
@@ -72,6 +73,10 @@ class SemanticAudit:
         self.zero.get_grad_norm_direct = audited_norm
 
     def read_counters(self):
+        if "NPU_DYNAMIC_META_UNFLATTEN" in os.environ:
+            from torch_npu._dynamic_meta_unflatten import counters
+            self.activation["counter"] = "meta_view_helper"
+            return counters()
         if self.counter is None:
             return {}
         return {name: int(self.counter(i)) for i, name in enumerate(self.counter_names)}

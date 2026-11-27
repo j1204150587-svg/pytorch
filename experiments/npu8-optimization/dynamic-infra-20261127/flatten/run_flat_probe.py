@@ -13,7 +13,7 @@ def insert_once(code, anchor, value):
     return code.replace(anchor, value + anchor)
 
 
-def prepare(source, stage):
+def prepare(source, stage, probe_directory="flatten", probe_module="inspect_flat"):
     for item in source.iterdir():
         if item.is_file() and item.suffix in {".py", ".json", ".patch"}:
             shutil.copyfile(item, stage / item.name)
@@ -32,6 +32,7 @@ def prepare(source, stage):
                             "                _flat_probe.update(step=step, shape=[batch_size, sequence_length])\\n")
         entry.write_text(code)
 '''
+    hook = hook.replace('"flatten"', repr(probe_directory)).replace("inspect_flat", probe_module)
     code = insert_once(code, '    for source_file in workspace.glob("*.py"):', hook)
     compile(code, str(p), "exec")
     p.write_text(code)

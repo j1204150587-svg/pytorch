@@ -9,6 +9,13 @@ from pathlib import Path
 from analyze_dynamic_trace import Span, is_work, ns, write_csv
 
 
+UNFLATTEN_OPS = {
+    "aten::unflatten_dense_tensors", "aten::_unflatten_dense_tensors",
+    "npu_dynamic_meta_views::try_unflatten",
+}
+UNFLATTEN_MARKERS = {"NPUUnflattenContiguousViews", "NPUDynamicMetaUnflattenViews"}
+
+
 def covered(intervals):
     total = 0
     frontier = None
@@ -42,9 +49,9 @@ def main():
             free.append(s)
         elif s.name.startswith("ProfilerStep#"):
             step_times[int(s.name.split("#")[1])] = s
-        elif e.get("cat") in {"cpu_op","enqueue","dequeue"} or s.name=="NPUUnflattenContiguousViews":
+        elif e.get("cat") in {"cpu_op","enqueue","dequeue"} or s.name in UNFLATTEN_MARKERS | UNFLATTEN_OPS:
             scopes.append(s)
-            if s.name in ("aten::unflatten_dense_tensors","aten::_unflatten_dense_tensors"):
+            if s.name in UNFLATTEN_OPS:
                 unflatten.append(s)
         elif e["pid"] == pids["CANN"] and s.name.startswith("AscendCL@aclrtSynchronize"):
             syncs.append(s)
@@ -76,13 +83,22 @@ def main():
                 row=dict(**meta,scope=s.name,offset_ms=(s.start-scope.start)/1e6,
                          duration_ms=(s.end-s.start)/1e6,work_overlap_ms=intersect(hardware,s.start,s.end)/1e6,
                          free_overlap_ms=intersect(free,s.start,s.end)/1e6)
-                if s.name.startswith(("aten::unflatten","aten::_unflatten")):
-                    targets={"aten::narrow","aten::view","aten::slice","aten::as_strided","NPUUnflattenContiguousViews"}
+                if s.name in UNFLATTEN_OPS:
+                    targets={"aten::narrow","aten::view","aten::slice","aten::as_strided"} | UNFLATTEN_MARKERS
                     counts={k:0 for k in sorted(targets)}
                     for x in scopes:
                         if x.tid==s.tid and s.start<=x.start<x.end<=s.end and x.name in counts:
                             counts[x.name]+=1
                     row.update(counts)
+                    previous=max((x for x in hardware if x.end<=s.start),key=lambda x:x.end,default=None)
+                    k=bisect_left(hw_starts,s.end)
+                    after=hardware[k] if k<len(hardware) else None
+                    if previous:
+                        row.update(previous_task=previous.name,previous_stream=previous.args["Physic Stream Id"],
+                                   previous_end_to_scope_us=(s.start-previous.end)/1000)
+                    if after:
+                        row.update(next_task=after.name,next_stream=after.args["Physic Stream Id"],
+                                   scope_end_to_next_us=(after.start-s.end)/1000)
                 tails.append(row)
         # This boundary excludes the next step if it falls outside the active profiler interval.
         i = bisect_left(hw_starts,scope.end)
