@@ -14,6 +14,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("recipe", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--late-meta-override", action="store_true",
+                        help="check the enabled sidecar with a process-local AutogradMeta implementation")
     args = parser.parse_args()
     cfg = json.loads(args.recipe.read_text())
     out = args.output.resolve()
@@ -24,15 +26,19 @@ def main():
     with runner.LOCK.open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         container, init = runner.inspect_container(artifacts, out)
-        for idx, variant in enumerate(("A", "B"), 1):
+        variants = ("B",) if args.late_meta_override else ("A", "B")
+        for idx, variant in enumerate(variants, 1):
             leg = out / f"{idx:02d}-{variant}"
             leg.mkdir()
             env = {**cfg["common"], **cfg[variant], "TASK_QUEUE_ENABLE":"1","PYTHONDONTWRITEBYTECODE":"1"}
             source = "rebase_forward" if "NPU_DYNAMIC_REBASE_FORWARD" in env else "rebase"
             if "NPU_DYNAMIC_META_UNFLATTEN" in env:
                 source = "meta_unflatten"
+            script = "override_gate.py" if args.late_meta_override else "micro_gate.py"
+            if args.late_meta_override and source != "meta_unflatten":
+                parser.error("--late-meta-override requires the meta-views recipe")
             cmd = [*runner.DOCKER,"exec", *(x for k,v in env.items() for x in ("--env",k+"="+v)),
-                   container,"python3", "-B", inner(HERE / source / "micro_gate.py"), inner(leg / "micro.json")]
+                   container,"python3", "-B", inner(HERE / source / script), inner(leg / "micro.json")]
             (leg/"command.json").write_text(json.dumps(cmd))
             runner.check_card(leg,"before",container,init)
             with (leg/"run.log").open("wb") as log:

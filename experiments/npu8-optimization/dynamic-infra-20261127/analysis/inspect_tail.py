@@ -6,7 +6,7 @@ import gzip
 import json
 from pathlib import Path
 
-from analyze_dynamic_trace import Span, is_work, ns, write_csv
+from analyze_dynamic_trace import Span, is_work, stats, write_csv
 
 
 UNFLATTEN_OPS = {
@@ -85,11 +85,14 @@ def main():
                          free_overlap_ms=intersect(free,s.start,s.end)/1e6)
                 if s.name in UNFLATTEN_OPS:
                     targets={"aten::narrow","aten::view","aten::slice","aten::as_strided"} | UNFLATTEN_MARKERS
-                    counts={k:0 for k in sorted(targets)}
+                    samples={k:[] for k in sorted(targets)}
                     for x in scopes:
-                        if x.tid==s.tid and s.start<=x.start<x.end<=s.end and x.name in counts:
-                            counts[x.name]+=1
-                    row.update(counts)
+                        if x.tid==s.tid and s.start<=x.start<x.end<=s.end and x.name in samples:
+                            samples[x.name].append(x.end-x.start)
+                    for name,values in samples.items():
+                        row[name]=len(values)
+                        if len(values)>1:
+                            row.update({f"{name}_{key}":value for key,value in stats(values).items() if key!="n"})
                     previous=max((x for x in hardware if x.end<=s.start),key=lambda x:x.end,default=None)
                     k=bisect_left(hw_starts,s.end)
                     after=hardware[k] if k<len(hardware) else None

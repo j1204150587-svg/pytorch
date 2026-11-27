@@ -273,6 +273,18 @@ def measurement_tables(pairs, rows, variation_by_series):
             gain = variation.get("step_gain", {})
             if gain.get("n", 0) > 1:
                 text.extend([f'{name} 的 {gain["n"]} 个跨处理配对降幅相差 {gain["range"]*100:.2f} 个百分点，中位数 {gain["median"]:+.2%}。', ""])
+            orders = {p["order"]: p for p in steady_pairs if p["series"] == name}
+            if {"AB","BA"} <= orders.keys():
+                host = [orders[seq]["host_step_pairs"] for seq in ("AB","BA")]
+                both_faster = both_slower = 0
+                for first, reverse in zip(*host, strict=True):
+                    check(all(first[key] == reverse[key] for key in ("step","batch_size","seq_len")),
+                          f"{name}: same-step shape mismatch across orders")
+                    a,b = first["host_a_minus_b_ms"], reverse["host_a_minus_b_ms"]
+                    both_faster += a > 0 and b > 0
+                    both_slower += a < 0 and b < 0
+                diff = len(host[0])-both_faster-both_slower
+                text.extend([f'{name} 的 {len(host[0])} 个相同步号里，B 的 Host 单步墙时双序均缩短 {both_faster} 次、均增加 {both_slower} 次、方向不同或相等 {diff} 次。', ""])
         w = steady_pairs[0]["legs"][0]
         text.extend([f'各腿测量窗口为 {w["window_samples"]:,} 个样本、{w["window_tokens"]:,} 个 token。逐步 Host 墙时包含当时发生的隐式等待，表中的 p10/p50/p90 来自相同步号的未逐步同步墙时差。[窗口明细](synchronized_windows.csv) · [逐步配对与来源路径](paired_results.json)', ""])
     l0_pairs = [p for p in pairs if p["mode"] == "l0" and len(p["legs"]) == 2]

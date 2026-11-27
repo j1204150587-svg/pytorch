@@ -30,7 +30,7 @@ def candidates(root):
         elif "workspace" in rel.parts or rel.parts[0] == "work":
             if not (path.name == "dynamic_shapes_npu8.json" or path.suffix in (".py", ".sh", ".patch", ".json")):
                 continue
-        elif path.suffix.lower() not in (".json", ".csv", ".tsv", ".sha256", ".log", ".exit", ".py", ".sh", ".patch") and not (
+        elif path.suffix.lower() not in (".json", ".jsonl", ".csv", ".tsv", ".sha256", ".log", ".exit", ".py", ".sh", ".patch") and not (
                 path.name.endswith((".csv.gz", ".tsv.gz")) or path.name in ("trace_view.json.gz", "source.sha")):
             continue
         yield path

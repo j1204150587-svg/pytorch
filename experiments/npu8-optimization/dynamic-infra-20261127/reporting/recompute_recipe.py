@@ -36,7 +36,8 @@ def main():
             if (args.available or mode.startswith("l1")) and not (STUDY / directory / "status.json").is_file():
                 continue
             argv.extend(["--pair", f"r1/{order}/{mode}={directory}"])
-    repeats = args.steady_repeat or (["cross-check"] if args.recipe == "cross-copy" else [])
+    defaults = {"cross-copy": ["cross-check"], "meta-views": ["meta-check"]}
+    repeats = args.steady_repeat or defaults.get(args.recipe, [])
     for repeat in repeats:
         for order in ("aa", "ab", "ba"):
             directory = base / f"{repeat}-no-profiler-{order}"
