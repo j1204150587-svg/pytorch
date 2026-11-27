@@ -70,6 +70,8 @@ TorchNPU 包安装时为 `torch._utils._unflatten_dense_tensors` 增加窄适配
 
 首轮无 profiler 正序 744.559 → 726.741 ms/步（+2.39%），对应 3.653 → 3.743 样本/s、80.423 → 82.395 token/s。13:05 逻辑卡 8 被外部进程占用，反序在第一腿启动前退出，追加的 A/A 在第一腿运行后卡况核对未通过。两组无效记录已排除，等待独占后重跑。本项目前确认局部 Host 和设备空档改善，完整端到端及 Level0 结论待配对。[同步窗口与实测状态](reporting/meta-views/RESULTS.md)
 
+14:11（UTC+8）复核时，板 4 芯片 0 仍有两个外部进程，SGLang 调度进程占显存 45,107 MiB。训练容器仅有原来的 `sleep`，共享锁已释放。恢复控制器在宿主等待，缺少本配方的无 profiler 反序、Level0 正反序以及独立无 profiler A/A、A/B、B/A。以本轮每个完整配对 137–157 秒计，合计约需 15 分钟独占时间。[卡况快照](evidence/occupied-slot.json) · [两次无效运行的原始回执索引](provenance/interrupted-pairs.json)
+
 ## 尝试无优化路径
 
 ### D04 跨分配流直接 SDMA 提交，整步收益未复现
