@@ -29,7 +29,7 @@ def main():
     schedule = base / "baseline-steady/workspace/configs/dynamic_shapes_npu8.json"
     out = args.output.resolve() if args.output else Path("reporting") / args.recipe
     argv = [sys.executable, "-B", str(HERE / "recompute_pairs.py"), "--switch", switch,
-            "--schedule", str(schedule), "--output", str(out)]
+            "--recipe", str(STUDY / (args.recipe + ".json")), "--schedule", str(schedule), "--output", str(out)]
     for mode in ("no-profiler", "l0", "l1", "l1-late"):
         for order in ("ab", "ba"):
             directory = base / f"{args.recipe}-{mode}-{order}"

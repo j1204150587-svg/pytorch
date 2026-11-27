@@ -1,5 +1,7 @@
 # 动态形状 HSTU 训练的 NPU 8 Infra 优化台账
 
+在本轮 60 个合成形状上，扩大 CANN executor 缓存使两序端到端步时分别缩短 23.53% / 31.70%，规范化反向 embedding 描述符缩短 18.39% / 10.01%，规范化前向描述符缩短 12.97% / 13.80%。跨流 D2D 和修订版 unflatten 均缩短了对应的局部 Host 阶段，端到端收益未复现。2026-11-27 14:47:39（UTC+8）六个剩余配对全部收尾，目标卡健康、无进程，共享锁已释放。[收尾卡况](evidence/final-slot.json)
+
 ## 负载与独立基线
 
 2026-11-27，宿主逻辑 NPU 8 映射到板 4、芯片 0、物理卡 8，训练容器 `recsys-gr-ds019-npu8` 内为 `npu:0`。每腿使用宿主共享锁，进程检查按芯片区分。BF16 ZeRO-2，单 rank，梯度累积 1，1,024 张侧表，seed 1234，Task Queue Mode 1，开启 01 分块 overflow。除列明的原生前置开关外均使用原分区和 norm，HSTU 前反向全程 eager。
@@ -62,19 +64,28 @@
 
 D02 和 D05 的 8,192 次都是输入通过快路径守卫的计数。128 和 288 次分别是合格张量进入 `ConvertType` 的次数，D05 的权重、索引按两个张量计；实际 workspace API 次数另由 Level1 测得。单卡实测覆盖 Mode 1、非 capture 的 NPU int64 `[B,L,4]` 只读索引，D05 的权重为连续 BF16 `[64,64]`。60 个形状跑完整训练性能窗，其中前 8 个形状逐步比对全部梯度、权重和溢出跳步，独立微测另含 rank-2 回退。异设备、其他队列模式和 capture 的调用没有在本轮上卡验证；D02 和 D05 各用独立构建。
 
-## D03 修订的实机验证
+## 尝试无优化路径
+
+### D03 修订在权重回写中直接构造视图
 
 TorchNPU 包安装时为 `torch._utils._unflatten_dense_tensors` 增加窄适配入口。B 遇到连续 NPU BF16 flat 和合格的 BF16 Meta 模板时调用独立 C++ op；每个模板按正确 offset 只建立一个新的 `as_strided` 视图。A 和 B 均关闭旧 #43 和 #41。8 步中共有 5 次正常更新、3 次非有限跳步，B 的 13 次调用对应 5 次真实权重回写激活、8 次单模板桶回退。每步 1,052 个梯度以及 BF16/FP32 权重、AdamW 状态均核对通过。独立微测覆核非零 offset、版本计数、存储别名与后注册显式 AutogradMeta 的回退。[TorchNPU 入口](meta_unflatten/adapter.py) · [构建收据](provenance/meta/build-receipt.json) · [正确性](reporting/meta-views/RESULTS.md)
 
 第 4、5 步每步减少 3,156 次 Host ATen 操作，保留 1,052 次 `as_strided`，三条物理流的设备提交次数、名称与顺序均相同。权重恢复大组分别从 19.712 → 4.506、25.191 → 5.526 ms；两腿这段时间内全设备均无计算和搬运。第 4 步末任务至下一步首任务的空档从 33.782 降至 20.413 ms。第 5 步跨步空档超出采集边界。[逐步视图、物理流和设备空档](analysis/meta-views-l1-ab/RESULTS.md)
 
-首轮无 profiler 正序 744.559 → 726.741 ms/步（+2.39%），对应 3.653 → 3.743 样本/s、80.423 → 82.395 token/s。13:05 逻辑卡 8 被外部进程占用，反序在第一腿启动前退出，追加的 A/A 在第一腿运行后卡况核对未通过。两组无效记录已排除，等待独占后重跑。本项目前确认局部 Host 和设备空档改善，完整端到端及 Level0 结论待配对。[同步窗口与实测状态](reporting/meta-views/RESULTS.md)
+首轮无 profiler 正序 744.559 → 726.741 ms/步（+2.39%），反序 576.542 → 633.970 ms/步（−9.96%）。前者吞吐为 3.653 → 3.743 样本/s、80.423 → 82.395 token/s，后者为 4.718 → 4.290 样本/s、103.861 → 94.452 token/s。核对原始运行后，两序降幅相差 12.35 个百分点。[同步窗口与实测状态](reporting/meta-views/RESULTS.md)
 
-14:11（UTC+8）复核时，板 4 芯片 0 仍有两个外部进程，SGLang 调度进程占显存 45,107 MiB。训练容器仅有原来的 `sleep`，共享锁已释放。恢复控制器在宿主等待，缺少本配方的无 profiler 反序、Level0 正反序以及独立无 profiler A/A、A/B、B/A。以本轮每个完整配对 137–157 秒计，合计约需 15 分钟独占时间。[卡况快照](evidence/occupied-slot.json) · [两次无效运行的原始回执索引](provenance/interrupted-pairs.json)
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 744.559 ms/步 | 726.741 ms/步 | +2.39% | 634.296 ms/步 | 92.45% | 774.264 ms/步 | 93.66% | −1.32% |
+| 576.542 ms/步 | 633.970 ms/步 | −9.96% | 921.131 ms/步 | 94.69% | 609.444 ms/步 | 92.18% | +2.65% |
 
-恢复后每完成一对，宿主都从成功的运行目录重算并写入 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/reporting/meta-views/measurement.md`、`eight_columns.md` 与 `paired_results.json`。已用完成的第一对和 Level1 验证该入口，当前只产生一对稳态结果，待同序 Level0 补齐后才生成相应八列。[宿主复算器](reporting/host_windows.py)
+Level0 正序每步 Free 多 139.968 ms，反序每步少 311.687 ms。局部权重恢复期间的 Host 工作已减少，规定三步窗口的全步 Free 变化随顺序反向。[逐步 Free、Stage、Computing](reporting/meta-views/profile_steps.csv)
 
-## 尝试无优化路径
+追加复核的同包 A/A 为 537.435 → 540.147 ms/步，相差 0.50%。第二轮 A/B 为 557.044 → 607.108 ms/步（慢 8.99%），B/A 为 540.732 → 554.636 ms/步（慢 2.57%）。四个独立跨处理窗口中有三个回退，降幅中位数为 −5.78%。本项确认单步回写期间的 Host 视图构造提速；完整训练和全步 Free 均未复现稳定收益。[各轮原始同步窗口、吞吐、波动与复算](reporting/meta-views/measurement.md)
+
+13:05（UTC+8）目标芯片被外部进程占用，反序在第一腿启动前退出，追加 A/A 在第一腿运行后卡况核对失败。两次均为 exit 12，完整轮数为零。14:11 仍能观察到 SGLang 进程，14:32 卡释放后恢复控制器重新取得共享锁，从第一腿开始独立重跑。上述失败运行排除在全部统计之外。[占卡快照](evidence/occupied-slot.json) · [中断回执](provenance/interrupted-pairs.json)
+
+每对结束后，宿主从成功的运行目录重算 `reporting/meta-views/measurement.md`、`eight_columns.md` 与 `paired_results.json`。[宿主复算器](reporting/host_windows.py)
 
 ### D04 跨分配流直接 SDMA 提交，整步收益未复现
 

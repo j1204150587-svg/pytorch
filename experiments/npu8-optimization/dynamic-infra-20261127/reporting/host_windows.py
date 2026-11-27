@@ -17,7 +17,8 @@ def update(recipe_name):
         raise ValueError(f"Expected one switch in {family}")
     output = STUDY / "reporting" / family
     args = [sys.executable, "-B", str(STUDY / "reporting/recompute_pairs.py"),
-            "--switch", changes[0], "--schedule", str(STUDY / "runner/dynamic_shapes_npu8.json"),
+            "--switch", changes[0], "--recipe", str(STUDY / (family + ".json")),
+            "--schedule", str(STUDY / "runner/dynamic_shapes_npu8.json"),
             "--output", str(output)]
     for name in [family, *(item for item, base in REPLICATES.items() if base == family)]:
         registry = STUDY / (name + "-runs.json")

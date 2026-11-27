@@ -147,6 +147,26 @@
 宿主文件 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/20261127T034854Z-ab-l1-mo8pa29z/02-B/trace_view.json.gz`。
 共 9,398,444 字节，SHA-256 为 `9675ecfbf9338eaaddef173ae724ea221b8e49169754caf5481e9399ddfb17c4`。
 
+### meta-views-l0-ab/01-A/trace_view.json.gz
+
+宿主文件 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/20261127T063504Z-ab-l0-6j6tx16x/01-A/trace_view.json.gz`。
+共 9,746,491 字节，SHA-256 为 `932bb9e5bea24b0819bed724556571bcc72ec66fff4b2fbca0224ead18ef0689`。
+
+### meta-views-l0-ab/02-B/trace_view.json.gz
+
+宿主文件 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/20261127T063504Z-ab-l0-6j6tx16x/02-B/trace_view.json.gz`。
+共 9,693,304 字节，SHA-256 为 `317bca68e4fc8762a55b8d1770fd650113967f8c565d2f9ee73ad04a133d26fa`。
+
+### meta-views-l0-ba/01-B/trace_view.json.gz
+
+宿主文件 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/20261127T063731Z-ba-l0-wm_kcsij/01-B/trace_view.json.gz`。
+共 9,606,667 字节，SHA-256 为 `23eee6db87ded4da1e1057f582b3e0158673eb3294f2286559567c30f8525bc3`。
+
+### meta-views-l0-ba/02-A/trace_view.json.gz
+
+宿主文件 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/20261127T063731Z-ba-l0-wm_kcsij/02-A/trace_view.json.gz`。
+共 9,814,640 字节，SHA-256 为 `fb7bff97a707793100ffd0f22be6ffa51fba5ea7e3a5f9360e155a7169c66196`。
+
 ### meta-views-l1-ab/01-A/trace_view.json.gz
 
 宿主文件 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/20261127T045348Z-ab-l1-ni3nrms2/01-A/trace_view.json.gz`。

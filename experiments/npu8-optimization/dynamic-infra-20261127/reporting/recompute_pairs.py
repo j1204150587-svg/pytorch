@@ -164,14 +164,21 @@ def parse_leg(path, variant, mode, schedule):
             "sampled_loss": {r["step"]: r["loss"] for r in rows if "loss" in r}, **result}
 
 
-def parse_pair(spec, schedule, switch):
+def parse_pair(spec, schedule, switch, expected_variants=None):
     name, directory = spec.split("=", 1)
     series, order, mode = name.split("/")
     check(series and order in ("ab", "ba", "a", "b", "aa") and mode in ("l0", "l1", "l1-late", "no-profiler"),
           f"invalid --pair expression: {spec}")
     path = Path(directory)
-    if (path / "status.json").is_file():
-        status = read(path / "status.json")
+    status_file = path / "status.json"
+    status = read(status_file) if status_file.is_file() else {}
+    if len(order) > 1:
+        check(status.get("exit") == 0 and status.get("phase") == "completed", f"{path}: incomplete or failed pair")
+        if "completed_runs" in status:
+            expected = [(f"{i:02d}-{v}", v) for i, v in enumerate(order.upper(), 1)]
+            actual = [(v["directory"], v["variant"]) for v in status["completed_runs"]]
+            check(actual == expected, f"{path}: completed legs differ from expected {expected}")
+    elif status:
         if "exit" in status:
             check(status["exit"] == 0, f"{path}: failed session")
     subdirs = sorted((p for p in path.iterdir() if p.is_dir() and re.fullmatch(r"\d+-[AB]", p.name)),
@@ -181,6 +188,12 @@ def parse_pair(spec, schedule, switch):
     else:
         check("".join(p.name[-1] for p in subdirs).lower() == order, f"{path}: leg order disagrees with {order}")
     legs = [parse_leg(p, v, mode, schedule) for v, p in zip(order.upper(), subdirs, strict=True)]
+    if expected_variants is not None:
+        for leg in legs:
+            env = leg["environment"]
+            wanted = expected_variants[leg["variant"]].get(switch)
+            check(env is not None and env.get(switch) == wanted,
+                  f'{path}: {leg["variant"]} must run {switch}={wanted!r}')
     pair = {"series": series, "order": order.upper(), "mode": mode, "directory": str(path), "legs": legs}
     if len(legs) == 1:
         return pair
@@ -340,12 +353,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--schedule", type=Path, required=True)
     parser.add_argument("--switch", help="enforce a single changed environment variable for an A/B pair")
+    parser.add_argument("--recipe", type=Path, help="enforce each leg's expected A or B switch value")
     parser.add_argument("--pair", action="append", required=True, metavar="SERIES/ORDER/MODE=DIR",
                         help="ORDER can be ab, ba, aa or a/b for a single leg; MODE no-profiler, l0, l1 or l1-late")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     schedule = read(args.schedule)
-    pairs = [parse_pair(spec, schedule, args.switch) for spec in args.pair]
+    variants = read(args.recipe) if args.recipe else None
+    if variants:
+        check(args.switch is not None, "--recipe requires --switch")
+    pairs = [parse_pair(spec, schedule, args.switch, variants) for spec in args.pair]
     rows, variation = summarize(pairs)
     variation_by_series = {series: summarize([p for p in pairs if p["series"] == series])[1]
                            for series in sorted({p["series"] for p in pairs})}
