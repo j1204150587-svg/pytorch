@@ -1,0 +1,82 @@
+diff --git a/torch_npu/csrc/aten/ops/UnflattenViewsExperiment.cpp b/torch_npu/csrc/aten/ops/UnflattenViewsExperiment.cpp
+new file mode 100644
+--- /dev/null
++++ b/torch_npu/csrc/aten/ops/UnflattenViewsExperiment.cpp
+@@ -0,0 +1,77 @@
++#include <ATen/TensorSubclassLikeUtils.h>
++#include <ATen/ops/unflatten_dense_tensors_native.h>
++#include <ATen/record_function.h>
++#include <c10/util/strides.h>
++#include <torch/library.h>
++
++#include <cstdlib>
++#include <cstring>
++
++#include "torch_npu/csrc/core/NPUBridge.h"
++
++namespace {
++
++// This opt-in experiment only specializes ordinary, detached BF16 flat weights.
++// In particular it never reuses a previously returned TensorImpl or shape.
++bool can_unflatten_weight_group(const at::Tensor& flat, at::TensorList shapes)
++{
++    if (!flat.defined() || !flat.device().is_privateuseone() ||
++        flat.scalar_type() != at::kBFloat16 || flat.layout() != at::kStrided ||
++        at::isTensorSubclassLike(flat) || flat.is_inference() || flat.has_names() ||
++        flat.is_nested() || flat.is_conj() || flat.is_neg() || flat.requires_grad() ||
++        (flat.is_view() && flat._base().requires_grad()) || flat._fw_grad(0).defined() ||
++        flat.dim() != 1 || flat.stride(0) != 1 ||
++        shapes.size() < 32) {
++        return false;
++    }
++    const auto& desc = torch_npu::NPUBridge::GetNpuStorageImpl(flat)->npu_desc_;
++    if (desc.npu_format_ != ACL_FORMAT_ND) {
++        return false;
++    }
++    int64_t remaining = flat.numel();
++    for (const auto& shape : shapes) {
++        if (!shape.defined() || shape.device() != flat.device() ||
++            shape.scalar_type() != flat.scalar_type() || shape.layout() != at::kStrided ||
++            at::isTensorSubclassLike(shape) || shape.is_nested() || shape.has_names()) {
++            return false;
++        }
++        const int64_t elements = shape.numel();
++        if (elements == 0 || elements > remaining) {
++            return false;
++        }
++        remaining -= elements;
++    }
++    return true;  // Native unflatten also permits unused trailing padding.
++}
++
++std::vector<at::Tensor> unflatten_weight_group(const at::Tensor& flat, at::TensorList shapes)
++{
++    if (!can_unflatten_weight_group(flat, shapes)) {
++        // Call the stock implementation directly. Its nested ops still dispatch
++        // through their normal autograd and in-place/view keys.
++        return at::native::unflatten_dense_tensors(flat, shapes);
++    }
++    RECORD_FUNCTION("NPUUnflattenContiguousViews", std::vector<c10::IValue>());
++    std::vector<at::Tensor> result;
++    result.reserve(shapes.size());
++    int64_t offset = flat.storage_offset();
++    for (const auto& shape : shapes) {
++        const auto sizes = shape.sizes();
++        const auto strides = c10::contiguous_strides(sizes);
++        result.emplace_back(flat.as_strided(sizes, strides, offset));
++        offset += shape.numel();
++    }
++    return result;
++}
++
++}  // namespace
++
++// No PrivateUse1 registration: preserve the stock CompositeImplicitAutograd
++// inference/backend route. Intercept the regular NPU autograd dispatch key only.
++TORCH_LIBRARY_IMPL(aten, AutogradPrivateUse1, m)
++{
++    const char* enabled = std::getenv("NPU_EXPERIMENT_UNFLATTEN_VIEWS");
++    if (enabled != nullptr && std::strcmp(enabled, "1") == 0) {
++        m.impl("unflatten_dense_tensors", TORCH_FN(unflatten_weight_group));
++    }
++}

@@ -1,0 +1,249 @@
+--- /dev/null
++++ b/torch_npu/csrc/core/npu/NPUCopyAllocationGuard.h
+@@ -0,0 +1,19 @@
++#pragma once
++
++#include <c10/core/Allocator.h>
++#include <acl/acl_rt.h>
++
++namespace c10_npu {
++class NPUStream;
++namespace NPUCachingAllocator {
++
++enum class CopyAllocationStream { Invalid, Same, Other };
++CopyAllocationStream copyAllocationStream(const c10::DataPtr& data, aclrtStream raw);
++void recordOtherStreamCopySource(const c10::DataPtr& data, const c10_npu::NPUStream& stream);
++
++
++// The caller must keep the storage alive through publication of the copy.
++bool ownsCopyAllocationOnStream(const c10::DataPtr& data, aclrtStream stream);
++
++} // namespace NPUCachingAllocator
++} // namespace c10_npu
+--- a/torch_npu/csrc/core/npu/NPUCachingAllocator.cpp
++++ b/torch_npu/csrc/core/npu/NPUCachingAllocator.cpp
+@@ -17,6 +17,7 @@
+ 
+ #include <acl/acl_base.h>
+ #include <acl/acl_rt.h>
++#include "torch_npu/csrc/core/npu/NPUCopyAllocationGuard.h"
+ #include "torch_npu/csrc/core/npu/interface/AsyncTaskQueueInterface.h"
+ #include "torch_npu/csrc/core/npu/NPUCachingAllocator.h"
+ #include "torch_npu/csrc/core/npu/NPUAllocatorConfig.h"
+@@ -1042,6 +1043,9 @@
+     // mapping from block to a stream_set, containing streams on which the block
+     // was used while npugraph capturing
+     std::unordered_map<Block *, stream_set> block_to_npugraph_stream_uses;
++    // An HCCL Work may erase its own ordinary record on the same stream.
++    // Keep opt-in copy users protected until the allocator has completed free.
++    std::unordered_map<Block *, stream_set> protected_copy_streams;
+ 
+ public:
+     DeviceCachingAllocator() : large_blocks(false), small_blocks(true), alloc_trace(new std::vector<TraceEntry>())
+@@ -1585,6 +1589,19 @@
+         return ShareableHandle{offset, ss.str()};
+     }
+ 
++    void protectCopyStream(Block *block, c10_npu::NPUStream stream)
++    {
++        std::lock_guard<std::recursive_mutex> lock(mutex);
++        protected_copy_streams[block].insert(stream);
++    }
++
++    bool hasProtectedCopyStream(Block *block, c10_npu::NPUStream stream) const
++    {
++        // Caller holds the allocator mutex.
++        auto it = protected_copy_streams.find(block);
++        return it != protected_copy_streams.end() && it->second.count(stream) != 0;
++    }
++
+     void recordStream(Block *block, c10_npu::NPUStream stream)
+     {
+         std::lock_guard<std::recursive_mutex> lock(mutex);
+@@ -1598,6 +1615,9 @@
+     {
+         std::shared_ptr<c10::GatheredContext> context = maybeGatherContext(RecordContext::ALL);
+         std::lock_guard<std::recursive_mutex> lock(mutex);
++        if (hasProtectedCopyStream(block, stream)) {
++            return;
++        }
+         block->stream_uses.erase(stream);
+ 
+         // free block, lazy destroy block related events
+@@ -2401,6 +2421,9 @@
+         record_trace(TraceEntry::FREE_COMPLETED, int64_t(block->ptr), block->requested_size, block->stream,
+             block->device, context ? context : block->context_when_allocated);
+ 
++        if (!protected_copy_streams.empty()) {
++            protected_copy_streams.erase(block);
++        }
+         block->context_when_allocated = nullptr;
+         block->hccl_work_ptr = nullptr;
+         size_t original_block_size = block->size;
+@@ -3036,7 +3059,8 @@
+             stream_set streams(std::move(block->stream_uses));
+             AT_ASSERT(block->stream_uses.empty());
+             for (auto &stream : streams) {
+-                if (block_to_npugraph_stream_uses[block].find(stream) == block_to_npugraph_stream_uses[block].end()) {
++                if (block_to_npugraph_stream_uses[block].find(stream) == block_to_npugraph_stream_uses[block].end() ||
++                    hasProtectedCopyStream(block, stream)) {
+                     block->stream_uses.insert(stream);
+                 }
+             }
+@@ -3873,6 +3897,39 @@
+ 
+ NpuCachingAllocator caching_allocator;
+ 
++CopyAllocationStream copyAllocationStream(const c10::DataPtr& data, aclrtStream raw)
++{
++    if (!data.get() || data.get_deleter() != &local_raw_delete || get() != &caching_allocator) {
++        return CopyAllocationStream::Invalid;
++    }
++    Block* block = caching_allocator.get_allocated_block(data.get());
++    if (!block) {
++        return CopyAllocationStream::Invalid;
++    }
++    if (block->stream == raw) {
++        return CopyAllocationStream::Same;
++    }
++    // Leave graph-private allocator/checkpoint lifetimes to the existing path.
++    return block->pool->owner_PrivatePool == nullptr ? CopyAllocationStream::Other : CopyAllocationStream::Invalid;
++}
++
++bool ownsCopyAllocationOnStream(const c10::DataPtr& data, aclrtStream raw)
++{
++    return copyAllocationStream(data, raw) == CopyAllocationStream::Same;
++}
++
++void recordOtherStreamCopySource(const c10::DataPtr& data, const c10_npu::NPUStream& stream)
++{
++    // The caller holds the source storage throughout publication.
++    Block* block = caching_allocator.get_allocated_block(data.get());
++    TORCH_INTERNAL_ASSERT(block != nullptr && get() == &caching_allocator);
++    caching_allocator.device_allocator[block->device]->protectCopyStream(block, stream);
++    // Canonical native record, including tracing, stream-use deduplication,
++    // allocator capture bookkeeping and the normal per-block free event.
++    caching_allocator.recordStream(data, stream);
++}
++
++
+ REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &caching_allocator);
+ 
+ 
+--- a/torch_npu/csrc/aten/ops/op_api/CopyKernelOpApi.cpp
++++ b/torch_npu/csrc/aten/ops/op_api/CopyKernelOpApi.cpp
+@@ -14,6 +14,16 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+ #include <ATen/core/CachingHostAllocator.h>
++#include <ATen/record_function.h>
++#include <cstdint>
++#include <cstdlib>
++#include <cstring>
++
++#include "torch_npu/csrc/core/npu/NPUCopyAllocationGuard.h"
++#include "torch_npu/csrc/core/npu/NPUGraphsUtils.h"
++#include "torch_npu/csrc/core/npu/NPUStreamUtils.h"
++#include "torch_npu/csrc/core/npu/register/OptionsManager.h"
++#include "torch_npu/csrc/framework/FormatHelper.h"
+ 
+ #include "torch_npu/csrc/core/npu/NPUGuard.h"
+ #include "torch_npu/csrc/core/npu/NPUPeerToPeerAccess.h"
+@@ -74,6 +84,62 @@
+     }
+ }
+ 
++namespace {
++
++bool d2dExperimentEnabled(const char* name)
++{
++    const char* value = std::getenv(name);
++    return value != nullptr && std::strcmp(value, "1") == 0;
++}
++
++bool validCopyExtent(const at::Tensor& tensor)
++{
++    const auto item_size = tensor.element_size();
++    const auto capacity = tensor.storage().nbytes() / item_size;
++    const auto offset = tensor.storage_offset();
++    return offset >= 0 && static_cast<uint64_t>(offset) <= capacity &&
++           static_cast<uint64_t>(tensor.numel()) <= capacity - offset;
++}
++
++bool matchesQueuedD2D(const at::Tensor& dst, const at::Tensor& src,
++                      const c10_npu::NPUStream& stream, bool allow_other_source, bool& other_source)
++{
++    const auto dtype = src.scalar_type();
++    if ((dtype != at::kBFloat16 && dtype != at::kFloat) || dtype != dst.scalar_type() ||
++        !src.sizes().equals(dst.sizes()) || src.numel() == 0 ||
++        src.is_neg() || dst.is_neg() || !src.is_contiguous() || !dst.is_contiguous() ||
++        FormatHelper::GetFormat(src) != ACL_FORMAT_ND || FormatHelper::GetFormat(dst) != ACL_FORMAT_ND ||
++        src.storage().unsafeGetStorageImpl() == dst.storage().unsafeGetStorageImpl() ||
++        !validCopyExtent(src) || !validCopyExtent(dst)) {
++        return false;
++    }
++    constexpr uintptr_t alignment = 64;
++    if (src.nbytes() % alignment != 0 ||
++        reinterpret_cast<uintptr_t>(src.data_ptr()) % alignment != 0 ||
++        reinterpret_cast<uintptr_t>(dst.data_ptr()) % alignment != 0) {
++        return false;
++    }
++    if (c10_npu::option::OptionsManager::GetTaskQueueEnable() != 1 ||
++        c10_npu::detail::isExternalStream(stream) || stream.isSyncLaunchStream() ||
++        c10_npu::currentStreamCaptureStatusMayInitCtx() != c10_npu::CaptureStatus::None) {
++        return false;
++    }
++    // The native allocator only reuses each block on its allocation stream.
++    // Queue publication precedes any later same-stream reuse. Foreign,
++    // shared-storage and cross-stream allocations keep the ACLNN contract.
++    const auto raw = stream.stream(false);
++    const auto& src_ptr = src.storage().data_ptr();
++    const auto& dst_ptr = dst.storage().data_ptr();
++    if (src_ptr.get() == dst_ptr.get()) return false;
++    using c10_npu::NPUCachingAllocator::CopyAllocationStream;
++    const auto src_stream = c10_npu::NPUCachingAllocator::copyAllocationStream(src_ptr, raw);
++    other_source = src_stream == CopyAllocationStream::Other;
++    return (src_stream == CopyAllocationStream::Same || (allow_other_source && other_source)) &&
++        c10_npu::NPUCachingAllocator::ownsCopyAllocationOnStream(dst_ptr, raw);
++}
++
++} // namespace
++
+ // the format of dst and src is baseformat now, copy d2d
+ void copy_d2d_baseformat_opapi(at::Tensor& dst, const at::Tensor& src, bool non_blocking)
+ {
+@@ -86,6 +152,34 @@
+     c10::SmallVector<at::Tensor, N> outputs = {dst};
+     CalcuOpUtil::CheckMemoryOverLaps(inputs, outputs);
+ 
++    static const bool use_memcpy = d2dExperimentEnabled("NPU_EXPERIMENT_GUARDED_D2D");
++    static const bool mark_reference = d2dExperimentEnabled("NPU_EXPERIMENT_D2D_MATCH_MARK");
++    static const bool extend_source = d2dExperimentEnabled("NPU_EXPERIMENT_D2D_RECORD_SRC");
++    static const bool mark_source = d2dExperimentEnabled("NPU_EXPERIMENT_D2D_RECORD_SRC_MARK");
++    if (use_memcpy || mark_reference) {
++        const auto stream = c10_npu::getCurrentNPUStream();
++        bool other_source = false;
++        if (matchesQueuedD2D(dst, src, stream, use_memcpy && (extend_source || mark_source), other_source)) {
++            if (other_source) {
++                RECORD_FUNCTION(extend_source ? "NPU44GuardedSourceD2D" : "NPU44MatchedSourceD2D",
++                                std::vector<c10::IValue>({}));
++                if (extend_source) {
++                    c10_npu::NPUCachingAllocator::recordOtherStreamCopySource(src.storage().data_ptr(), stream);
++                    copy_d2d_by_memcpy(dst, src, src.numel());
++                } else {
++                    EXEC_NPU_CMD(aclnnInplaceCopy, dst, src);
++                }
++            } else {
++                RECORD_FUNCTION(use_memcpy ? "NPU42GuardedD2D" : "NPU42MatchedD2D", std::vector<c10::IValue>({}));
++                if (use_memcpy) {
++                    copy_d2d_by_memcpy(dst, src, src.numel());
++                } else {
++                    EXEC_NPU_CMD(aclnnInplaceCopy, dst, src);
++                }
++            }
++            return;
++        }
++    }
+     EXEC_NPU_CMD(aclnnInplaceCopy, dst, src);
+ }
+ 
