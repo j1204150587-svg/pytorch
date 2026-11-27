@@ -33,3 +33,5 @@ python3 late_profile.py run --runner runner-late --recipe cache-limit.json --ord
 
 本轮逐项性能、适用条件及证据入口见[动态 NPU8 优化台账](动态NPU8优化台账.md)。在主机上保留完整 trace、原始 profiler CSV 和运行日志。Git 分支收录工作量、命令、逐腿计时和官方 step CSV，可离线运行 `python reporting/recompute_recipe.py cache-limit` 等命令复算八列。原始大文件以[证据索引](evidence/source-index.json)中的宿主路径、文件大小及 SHA-256 定位。
 
+分支中每腿的 `slot-verification.json` 提取运行前后的目标逻辑卡号、板/芯片映射、健康状态、目标占用进程数和原始卡况 SHA-256。同板其他芯片的进程留在宿主原始回执。外部进程占用逻辑 8 导致的无效配对有独立记录，恢复时沿用同一共享锁、使用新的运行目录，再从第一腿开始。[无效记录](provenance/interrupted-pairs.json) · [恢复控制器](resume_pairs.py)
+

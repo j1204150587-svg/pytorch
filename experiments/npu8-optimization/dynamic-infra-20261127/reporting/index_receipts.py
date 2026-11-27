@@ -8,6 +8,7 @@ RAW_FILES = {
     "metrics.json", "trace_view.json", "trace_view.json.gz", "step_trace_time.csv",
     "command.json", "dynamic_shapes_npu8.json", "comparison.json", "native_activation.json",
     "semantic.json", "micro.json", "scheduler.csv", "scheduler.json", "target.json", "clock.jsonl",
+    "before.card.json", "after.card.json", "runtime.json", "model_summary.json",
 }
 
 
@@ -24,7 +25,9 @@ def main():
         rows = json.loads(p.read_text(encoding="utf-8"))
         for row in rows:
             member = row["member"]
-            if Path(member).name in RAW_FILES:
+            file = Path(member)
+            raw_profile_table = file.suffix == ".csv" and "profile" in file.parts
+            if file.name in RAW_FILES or raw_profile_table:
                 if member in records and records[member]["sha256"] != row["sha256"]:
                     raise ValueError(f"conflicting receipts for {member}")
                 records[member] = row
