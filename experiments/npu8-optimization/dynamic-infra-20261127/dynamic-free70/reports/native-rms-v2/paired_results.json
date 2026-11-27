@@ -1,0 +1,1816 @@
+{
+  "recipe": {
+    "stage": [
+      "side_tables",
+      "side_slab",
+      "partition_hints",
+      "partition_pack",
+      "flat_stats_stage",
+      "side_publish",
+      "rms_native"
+    ],
+    "common": {
+      "RECSYS_DYNAMIC_PARTITION": "1",
+      "RECSYS_DYNAMIC_NORM": "1",
+      "ACLNN_CACHE_LIMIT": "65536",
+      "NPU_DYNAMIC_GROUPED_SIDE": "1",
+      "NPU_DYNAMIC_SIDE_SLAB": "1",
+      "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+      "NPU_DYNAMIC_PARTITION_PACK": "1",
+      "RECSYS_DYNAMIC_FLAT_STATS": "both",
+      "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+      "NPU_DYNAMIC_DIRECT_SIDE": "1"
+    },
+    "A": {
+      "NPU_DYNAMIC_NATIVE_RMS": "0"
+    },
+    "B": {
+      "NPU_DYNAMIC_NATIVE_RMS": "1"
+    },
+    "activation": [
+      {
+        "file": "grouped_side_counts.json",
+        "A": {
+          "hits": "$steps",
+          "fallbacks": 0
+        },
+        "B": {
+          "hits": "$steps",
+          "fallbacks": 0
+        }
+      },
+      {
+        "file": "eager_partition_pack.json",
+        "A": {
+          "hits": "$steps",
+          "fallbacks": 0
+        },
+        "B": {
+          "hits": "$steps",
+          "fallbacks": 0
+        }
+      },
+      {
+        "file": "flat_stats_counts.json",
+        "A": {
+          "overflow": "$steps",
+          "norm_fallback": 0,
+          "overflow_fallback": 0
+        },
+        "B": {
+          "overflow": "$steps",
+          "norm_fallback": 0,
+          "overflow_fallback": 0
+        }
+      },
+      {
+        "file": "side_slab_counts.json",
+        "A": {
+          "direct_partitions": "$steps"
+        },
+        "B": {
+          "direct_partitions": "$steps"
+        }
+      },
+      {
+        "file": "native_rms_total.json",
+        "A": {
+          "enabled": false,
+          "all_expected": true
+        },
+        "B": {
+          "enabled": true,
+          "all_expected": true
+        }
+      }
+    ]
+  },
+  "schedule": "working\\evidence\\grouped-side-v1-no-profiler-ab\\workspace\\configs\\dynamic_shapes_npu8.json",
+  "pairs": [
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "l0",
+      "directory": "receipts-1732\\evidence\\native-rms-v2-l0-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "receipts-1732\\evidence\\native-rms-v2-l0-ab\\01-A",
+          "metrics": "receipts-1732\\evidence\\native-rms-v2-l0-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:57:02+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:57:35+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_DYNAMIC_NATIVE_RMS": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 8,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782556533813477,
+            "3": 28.95204734802246,
+            "7": 29.098705291748047
+          },
+          "csv": "receipts-1732\\evidence\\native-rms-v2-l0-ab\\01-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 23.99938000000006,
+              "stage_ms": 27.29825,
+              "computing_ms": 3.227720000000002,
+              "communication_not_overlapped_ms": 0.07122,
+              "cpu_marker_ms": 27.05506,
+              "cpu_marker_minus_stage_ms": -0.24318999999999846
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 23.905140000000042,
+              "stage_ms": 27.32125,
+              "computing_ms": 3.359000000000003,
+              "communication_not_overlapped_ms": 0.05698,
+              "cpu_marker_ms": 26.98931,
+              "cpu_marker_minus_stage_ms": -0.33193999999999946
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 21.337760000000063,
+              "stage_ms": 25.16375,
+              "computing_ms": 3.7539000000000016,
+              "communication_not_overlapped_ms": 0.07214,
+              "cpu_marker_ms": 27.11526,
+              "cpu_marker_minus_stage_ms": 1.951509999999999
+            }
+          ],
+          "free_ms": 23.080760000000055,
+          "stage_ms": 26.594416666666664,
+          "computing_ms": 3.4468733333333357,
+          "communication_not_overlapped_ms": 0.06678,
+          "free_fraction": 0.8678799121369482,
+          "first_two_steps_free_fraction_diagnostic": 0.8770589258415054
+        },
+        {
+          "variant": "B",
+          "directory": "receipts-1732\\evidence\\native-rms-v2-l0-ab\\02-B",
+          "metrics": "receipts-1732\\evidence\\native-rms-v2-l0-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:57:39+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T08:58:11+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_DYNAMIC_NATIVE_RMS": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 8,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098711013793945
+          },
+          "csv": "receipts-1732\\evidence\\native-rms-v2-l0-ab\\02-B\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 22.199420000000046,
+              "stage_ms": 25.528,
+              "computing_ms": 3.27216,
+              "communication_not_overlapped_ms": 0.056400000000000006,
+              "cpu_marker_ms": 25.32265,
+              "cpu_marker_minus_stage_ms": -0.20534999999999926
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 21.884880000000038,
+              "stage_ms": 25.27775,
+              "computing_ms": 3.339380000000001,
+              "communication_not_overlapped_ms": 0.0534,
+              "cpu_marker_ms": 24.98064,
+              "cpu_marker_minus_stage_ms": -0.29711
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 19.52478000000003,
+              "stage_ms": 23.33825,
+              "computing_ms": 3.754320000000001,
+              "communication_not_overlapped_ms": 0.05922,
+              "cpu_marker_ms": 25.15613,
+              "cpu_marker_minus_stage_ms": 1.8178800000000024
+            }
+          ],
+          "free_ms": 21.203026666666705,
+          "stage_ms": 24.71466666666667,
+          "computing_ms": 3.4552866666666673,
+          "communication_not_overlapped_ms": 0.05634,
+          "free_fraction": 0.8579127104013825,
+          "first_two_steps_free_fraction_diagnostic": 0.8677029666917638
+        }
+      ],
+      "changed_environment": {
+        "NPU_DYNAMIC_NATIVE_RMS": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 5.7220458984375e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_free_ms": 1.8777333333333495,
+      "free_fraction_gain": 0.011484540195225601
+    },
+    {
+      "series": "r1",
+      "order": "BA",
+      "mode": "l0",
+      "directory": "receipts-1732\\evidence\\native-rms-v2-l0-ba",
+      "legs": [
+        {
+          "variant": "B",
+          "directory": "receipts-1732\\evidence\\native-rms-v2-l0-ba\\01-B",
+          "metrics": "receipts-1732\\evidence\\native-rms-v2-l0-ba\\01-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:13:35+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:14:08+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_DYNAMIC_NATIVE_RMS": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 8,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098711013793945
+          },
+          "csv": "receipts-1732\\evidence\\native-rms-v2-l0-ba\\01-B\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 22.21844000000004,
+              "stage_ms": 25.53675,
+              "computing_ms": 3.26722,
+              "communication_not_overlapped_ms": 0.05126,
+              "cpu_marker_ms": 25.31975,
+              "cpu_marker_minus_stage_ms": -0.2170000000000023
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 22.213200000000064,
+              "stage_ms": 25.61975,
+              "computing_ms": 3.356160000000005,
+              "communication_not_overlapped_ms": 0.05046,
+              "cpu_marker_ms": 25.29737,
+              "cpu_marker_minus_stage_ms": -0.322379999999999
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 19.678240000000052,
+              "stage_ms": 23.498,
+              "computing_ms": 3.7639600000000075,
+              "communication_not_overlapped_ms": 0.05564,
+              "cpu_marker_ms": 25.3927,
+              "cpu_marker_minus_stage_ms": 1.8947000000000003
+            }
+          ],
+          "free_ms": 21.369960000000052,
+          "stage_ms": 24.884833333333333,
+          "computing_ms": 3.4624466666666707,
+          "communication_not_overlapped_ms": 0.05245333333333333,
+          "free_fraction": 0.858754395247442,
+          "first_two_steps_free_fraction_diagnostic": 0.8685433913578939
+        },
+        {
+          "variant": "A",
+          "directory": "receipts-1732\\evidence\\native-rms-v2-l0-ba\\02-A",
+          "metrics": "receipts-1732\\evidence\\native-rms-v2-l0-ba\\02-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:14:12+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:14:44+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_DYNAMIC_NATIVE_RMS": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 8,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098705291748047
+          },
+          "csv": "receipts-1732\\evidence\\native-rms-v2-l0-ba\\02-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 24.74752000000002,
+              "stage_ms": 28.05075,
+              "computing_ms": 3.237900000000002,
+              "communication_not_overlapped_ms": 0.0654,
+              "cpu_marker_ms": 27.81409,
+              "cpu_marker_minus_stage_ms": -0.23666000000000054
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 24.47556000000001,
+              "stage_ms": 27.871,
+              "computing_ms": 3.3373000000000035,
+              "communication_not_overlapped_ms": 0.0582,
+              "cpu_marker_ms": 27.57616,
+              "cpu_marker_minus_stage_ms": -0.2948399999999971
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 22.087780000000027,
+              "stage_ms": 25.901,
+              "computing_ms": 3.7582200000000032,
+              "communication_not_overlapped_ms": 0.05496,
+              "cpu_marker_ms": 27.7943,
+              "cpu_marker_minus_stage_ms": 1.8933
+            }
+          ],
+          "free_ms": 23.77028666666668,
+          "stage_ms": 27.27425,
+          "computing_ms": 3.4444733333333364,
+          "communication_not_overlapped_ms": 0.059519999999999997,
+          "free_fraction": 0.8715285174355549,
+          "first_two_steps_free_fraction_diagnostic": 0.88021351263149
+        }
+      ],
+      "changed_environment": {
+        "NPU_DYNAMIC_NATIVE_RMS": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 5.7220458984375e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_free_ms": 2.400326666666629,
+      "free_fraction_gain": 0.014657147680835925
+    },
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "no-profiler",
+      "directory": "receipts-1732\\evidence\\native-rms-v2-no-profiler-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "receipts-1732\\evidence\\native-rms-v2-no-profiler-ab\\01-A",
+          "metrics": "receipts-1732\\evidence\\native-rms-v2-no-profiler-ab\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:05:00+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:05:28+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_DYNAMIC_NATIVE_RMS": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 60,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "9": 29.218069076538086,
+            "19": 26.2725887298584,
+            "29": 25.244102478027344,
+            "39": 22.707324981689453,
+            "49": 21.029186248779297,
+            "59": 18.37959861755371
+          },
+          "ms_per_step": 23.073154620360583,
+          "samples_per_s": 117.8859174115608,
+          "tokens_per_s": 2595.2237994868606,
+          "elapsed_s": 1.1536577310180292,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            22.310564992949367,
+            24.274823954328895,
+            23.148199077695608,
+            22.04225503373891,
+            24.821365950629115,
+            23.76768400426954,
+            22.22202194388956,
+            22.45046105235815,
+            20.518682897090912,
+            22.536254953593016,
+            23.43066001776606,
+            24.626308004371822,
+            23.432109970599413,
+            23.941201041452587,
+            24.601006996817887,
+            21.01974410470575,
+            25.06777597591281,
+            21.87634794972837,
+            23.530374048277736,
+            22.142367903143167,
+            25.336217018775642,
+            24.415069026872516,
+            23.523562937043607,
+            22.547194035723805,
+            22.34561601653695,
+            20.467841997742653,
+            23.062914959155023,
+            24.513693992048502,
+            22.065836004912853,
+            20.18758002668619,
+            22.605467005632818,
+            22.520223981700838,
+            22.74428296368569,
+            22.620398085564375,
+            23.435369948856533,
+            24.747532908804715,
+            22.288575069978833,
+            22.42544002365321,
+            23.082065978087485,
+            24.052615044638515,
+            22.571144974790514,
+            23.78969406709075,
+            23.772323969751596,
+            22.729511954821646,
+            21.028412971645594,
+            23.212281987071037,
+            23.944680928252637,
+            23.63142801914364,
+            24.39137897454202,
+            23.578176042065024
+          ]
+        },
+        {
+          "variant": "B",
+          "directory": "receipts-1732\\evidence\\native-rms-v2-no-profiler-ab\\02-B",
+          "metrics": "receipts-1732\\evidence\\native-rms-v2-no-profiler-ab\\02-B\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:05:32+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T09:06:01+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_DYNAMIC_NATIVE_RMS": "1"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 60,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "9": 29.218067169189453,
+            "19": 26.2725887298584,
+            "29": 25.244102478027344,
+            "39": 22.707324981689453,
+            "49": 21.0291805267334,
+            "59": 18.379600524902344
+          },
+          "ms_per_step": 20.550611959770322,
+          "samples_per_s": 132.3561558811312,
+          "tokens_per_s": 2913.781843441962,
+          "elapsed_s": 1.027530597988516,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            19.913468975573778,
+            22.062105941586196,
+            21.042334963567555,
+            19.911748939193785,
+            19.828975899145007,
+            21.39565791003406,
+            20.335595938377082,
+            20.62653796747327,
+            18.61622801516205,
+            20.530104055069387,
+            21.060995990410447,
+            21.762332995422184,
+            20.102006965316832,
+            20.900649018585682,
+            21.36059699114412,
+            18.109597032889724,
+            21.91166894044727,
+            19.21076199505478,
+            20.860756980255246,
+            18.718082108534873,
+            20.796504919417202,
+            21.67825005017221,
+            21.115347975865006,
+            20.319945993833244,
+            19.913219031877816,
+            18.268793006427586,
+            20.544634899124503,
+            22.148699034005404,
+            19.69264098443091,
+            17.897638026624918,
+            20.230271969921887,
+            19.90931900218129,
+            20.41621005628258,
+            20.46717202756554,
+            20.90058894827962,
+            20.97823191434145,
+            19.27030400838703,
+            20.194590906612575,
+            20.664068986661732,
+            21.8158959178254,
+            20.38605895359069,
+            21.970601985231042,
+            21.706960978917778,
+            20.590726053342223,
+            18.803795101121068,
+            20.91561001725495,
+            21.878488012589514,
+            21.607188042253256,
+            22.489962982945144,
+            21.47291204892099
+          ]
+        }
+      ],
+      "changed_environment": {
+        "NPU_DYNAMIC_NATIVE_RMS": [
+          "0",
+          "1"
+        ]
+      },
+      "sampled_loss_max_difference": 5.7220458984375e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_ms_per_step": 2.522542660590261,
+      "step_gain": 0.1093280352034861,
+      "host_step_pairs": [
+        {
+          "step": 10,
+          "batch_size": 1,
+          "seq_len": 26,
+          "host_a_ms": 22.310564992949367,
+          "host_b_ms": 19.913468975573778,
+          "host_a_minus_b_ms": 2.3970960173755884
+        },
+        {
+          "step": 11,
+          "batch_size": 4,
+          "seq_len": 29,
+          "host_a_ms": 24.274823954328895,
+          "host_b_ms": 22.062105941586196,
+          "host_a_minus_b_ms": 2.212718012742698
+        },
+        {
+          "step": 12,
+          "batch_size": 4,
+          "seq_len": 17,
+          "host_a_ms": 23.148199077695608,
+          "host_b_ms": 21.042334963567555,
+          "host_a_minus_b_ms": 2.105864114128053
+        },
+        {
+          "step": 13,
+          "batch_size": 1,
+          "seq_len": 25,
+          "host_a_ms": 22.04225503373891,
+          "host_b_ms": 19.911748939193785,
+          "host_a_minus_b_ms": 2.130506094545126
+        },
+        {
+          "step": 14,
+          "batch_size": 1,
+          "seq_len": 12,
+          "host_a_ms": 24.821365950629115,
+          "host_b_ms": 19.828975899145007,
+          "host_a_minus_b_ms": 4.992390051484108
+        },
+        {
+          "step": 15,
+          "batch_size": 3,
+          "seq_len": 31,
+          "host_a_ms": 23.76768400426954,
+          "host_b_ms": 21.39565791003406,
+          "host_a_minus_b_ms": 2.37202609423548
+        },
+        {
+          "step": 16,
+          "batch_size": 4,
+          "seq_len": 13,
+          "host_a_ms": 22.22202194388956,
+          "host_b_ms": 20.335595938377082,
+          "host_a_minus_b_ms": 1.886426005512476
+        },
+        {
+          "step": 17,
+          "batch_size": 4,
+          "seq_len": 15,
+          "host_a_ms": 22.45046105235815,
+          "host_b_ms": 20.62653796747327,
+          "host_a_minus_b_ms": 1.823923084884882
+        },
+        {
+          "step": 18,
+          "batch_size": 2,
+          "seq_len": 26,
+          "host_a_ms": 20.518682897090912,
+          "host_b_ms": 18.61622801516205,
+          "host_a_minus_b_ms": 1.9024548819288611
+        },
+        {
+          "step": 19,
+          "batch_size": 3,
+          "seq_len": 15,
+          "host_a_ms": 22.536254953593016,
+          "host_b_ms": 20.530104055069387,
+          "host_a_minus_b_ms": 2.0061508985236287
+        },
+        {
+          "step": 20,
+          "batch_size": 3,
+          "seq_len": 24,
+          "host_a_ms": 23.43066001776606,
+          "host_b_ms": 21.060995990410447,
+          "host_a_minus_b_ms": 2.3696640273556113
+        },
+        {
+          "step": 21,
+          "batch_size": 4,
+          "seq_len": 28,
+          "host_a_ms": 24.626308004371822,
+          "host_b_ms": 21.762332995422184,
+          "host_a_minus_b_ms": 2.8639750089496374
+        },
+        {
+          "step": 22,
+          "batch_size": 2,
+          "seq_len": 18,
+          "host_a_ms": 23.432109970599413,
+          "host_b_ms": 20.102006965316832,
+          "host_a_minus_b_ms": 3.330103005282581
+        },
+        {
+          "step": 23,
+          "batch_size": 3,
+          "seq_len": 22,
+          "host_a_ms": 23.941201041452587,
+          "host_b_ms": 20.900649018585682,
+          "host_a_minus_b_ms": 3.0405520228669047
+        },
+        {
+          "step": 24,
+          "batch_size": 3,
+          "seq_len": 27,
+          "host_a_ms": 24.601006996817887,
+          "host_b_ms": 21.36059699114412,
+          "host_a_minus_b_ms": 3.240410005673766
+        },
+        {
+          "step": 25,
+          "batch_size": 2,
+          "seq_len": 13,
+          "host_a_ms": 21.01974410470575,
+          "host_b_ms": 18.109597032889724,
+          "host_a_minus_b_ms": 2.910147071816027
+        },
+        {
+          "step": 26,
+          "batch_size": 4,
+          "seq_len": 26,
+          "host_a_ms": 25.06777597591281,
+          "host_b_ms": 21.91166894044727,
+          "host_a_minus_b_ms": 3.1561070354655385
+        },
+        {
+          "step": 27,
+          "batch_size": 4,
+          "seq_len": 14,
+          "host_a_ms": 21.87634794972837,
+          "host_b_ms": 19.21076199505478,
+          "host_a_minus_b_ms": 2.6655859546735883
+        },
+        {
+          "step": 28,
+          "batch_size": 3,
+          "seq_len": 16,
+          "host_a_ms": 23.530374048277736,
+          "host_b_ms": 20.860756980255246,
+          "host_a_minus_b_ms": 2.6696170680224895
+        },
+        {
+          "step": 29,
+          "batch_size": 2,
+          "seq_len": 30,
+          "host_a_ms": 22.142367903143167,
+          "host_b_ms": 18.718082108534873,
+          "host_a_minus_b_ms": 3.424285794608295
+        },
+        {
+          "step": 30,
+          "batch_size": 2,
+          "seq_len": 31,
+          "host_a_ms": 25.336217018775642,
+          "host_b_ms": 20.796504919417202,
+          "host_a_minus_b_ms": 4.5397120993584394
+        },
+        {
+          "step": 31,
+          "batch_size": 4,
+          "seq_len": 27,
+          "host_a_ms": 24.415069026872516,
+          "host_b_ms": 21.67825005017221,
+          "host_a_minus_b_ms": 2.736818976700306
+        },
+        {
+          "step": 32,
+          "batch_size": 3,
+          "seq_len": 23,
+          "host_a_ms": 23.523562937043607,
+          "host_b_ms": 21.115347975865006,
+          "host_a_minus_b_ms": 2.408214961178601
+        },
+        {
+          "step": 33,
+          "batch_size": 2,
+          "seq_len": 20,
+          "host_a_ms": 22.547194035723805,
+          "host_b_ms": 20.319945993833244,
+          "host_a_minus_b_ms": 2.2272480418905616
+        },
+        {
+          "step": 34,
+          "batch_size": 1,
+          "seq_len": 20,
+          "host_a_ms": 22.34561601653695,
+          "host_b_ms": 19.913219031877816,
+          "host_a_minus_b_ms": 2.4323969846591353
+        },
+        {
+          "step": 35,
+          "batch_size": 3,
+          "seq_len": 12,
+          "host_a_ms": 20.467841997742653,
+          "host_b_ms": 18.268793006427586,
+          "host_a_minus_b_ms": 2.199048991315067
+        },
+        {
+          "step": 36,
+          "batch_size": 4,
+          "seq_len": 16,
+          "host_a_ms": 23.062914959155023,
+          "host_b_ms": 20.544634899124503,
+          "host_a_minus_b_ms": 2.51828006003052
+        },
+        {
+          "step": 37,
+          "batch_size": 4,
+          "seq_len": 31,
+          "host_a_ms": 24.513693992048502,
+          "host_b_ms": 22.148699034005404,
+          "host_a_minus_b_ms": 2.3649949580430984
+        },
+        {
+          "step": 38,
+          "batch_size": 1,
+          "seq_len": 21,
+          "host_a_ms": 22.065836004912853,
+          "host_b_ms": 19.69264098443091,
+          "host_a_minus_b_ms": 2.373195020481944
+        },
+        {
+          "step": 39,
+          "batch_size": 1,
+          "seq_len": 28,
+          "host_a_ms": 20.18758002668619,
+          "host_b_ms": 17.897638026624918,
+          "host_a_minus_b_ms": 2.2899420000612736
+        },
+        {
+          "step": 40,
+          "batch_size": 2,
+          "seq_len": 15,
+          "host_a_ms": 22.605467005632818,
+          "host_b_ms": 20.230271969921887,
+          "host_a_minus_b_ms": 2.375195035710931
+        },
+        {
+          "step": 41,
+          "batch_size": 1,
+          "seq_len": 22,
+          "host_a_ms": 22.520223981700838,
+          "host_b_ms": 19.90931900218129,
+          "host_a_minus_b_ms": 2.610904979519546
+        },
+        {
+          "step": 42,
+          "batch_size": 2,
+          "seq_len": 23,
+          "host_a_ms": 22.74428296368569,
+          "host_b_ms": 20.41621005628258,
+          "host_a_minus_b_ms": 2.3280729074031115
+        },
+        {
+          "step": 43,
+          "batch_size": 1,
+          "seq_len": 27,
+          "host_a_ms": 22.620398085564375,
+          "host_b_ms": 20.46717202756554,
+          "host_a_minus_b_ms": 2.153226057998836
+        },
+        {
+          "step": 44,
+          "batch_size": 3,
+          "seq_len": 19,
+          "host_a_ms": 23.435369948856533,
+          "host_b_ms": 20.90058894827962,
+          "host_a_minus_b_ms": 2.5347810005769134
+        },
+        {
+          "step": 45,
+          "batch_size": 3,
+          "seq_len": 21,
+          "host_a_ms": 24.747532908804715,
+          "host_b_ms": 20.97823191434145,
+          "host_a_minus_b_ms": 3.769300994463265
+        },
+        {
+          "step": 46,
+          "batch_size": 3,
+          "seq_len": 28,
+          "host_a_ms": 22.288575069978833,
+          "host_b_ms": 19.27030400838703,
+          "host_a_minus_b_ms": 3.018271061591804
+        },
+        {
+          "step": 47,
+          "batch_size": 1,
+          "seq_len": 14,
+          "host_a_ms": 22.42544002365321,
+          "host_b_ms": 20.194590906612575,
+          "host_a_minus_b_ms": 2.230849117040634
+        },
+        {
+          "step": 48,
+          "batch_size": 3,
+          "seq_len": 14,
+          "host_a_ms": 23.082065978087485,
+          "host_b_ms": 20.664068986661732,
+          "host_a_minus_b_ms": 2.4179969914257526
+        },
+        {
+          "step": 49,
+          "batch_size": 4,
+          "seq_len": 23,
+          "host_a_ms": 24.052615044638515,
+          "host_b_ms": 21.8158959178254,
+          "host_a_minus_b_ms": 2.2367191268131137
+        },
+        {
+          "step": 50,
+          "batch_size": 1,
+          "seq_len": 29,
+          "host_a_ms": 22.571144974790514,
+          "host_b_ms": 20.38605895359069,
+          "host_a_minus_b_ms": 2.1850860211998224
+        },
+        {
+          "step": 51,
+          "batch_size": 3,
+          "seq_len": 30,
+          "host_a_ms": 23.78969406709075,
+          "host_b_ms": 21.970601985231042,
+          "host_a_minus_b_ms": 1.8190920818597078
+        },
+        {
+          "step": 52,
+          "batch_size": 4,
+          "seq_len": 22,
+          "host_a_ms": 23.772323969751596,
+          "host_b_ms": 21.706960978917778,
+          "host_a_minus_b_ms": 2.065362990833819
+        },
+        {
+          "step": 53,
+          "batch_size": 3,
+          "seq_len": 13,
+          "host_a_ms": 22.729511954821646,
+          "host_b_ms": 20.590726053342223,
+          "host_a_minus_b_ms": 2.138785901479423
+        },
+        {
+          "step": 54,
+          "batch_size": 2,
+          "seq_len": 32,
+          "host_a_ms": 21.028412971645594,
+          "host_b_ms": 18.803795101121068,
+          "host_a_minus_b_ms": 2.2246178705245256
+        },
+        {
+          "step": 55,
+          "batch_size": 3,
+          "seq_len": 17,
+          "host_a_ms": 23.212281987071037,
+          "host_b_ms": 20.91561001725495,
+          "host_a_minus_b_ms": 2.2966719698160887
+        },
+        {
+          "step": 56,
+          "batch_size": 4,
+          "seq_len": 25,
+          "host_a_ms": 23.944680928252637,
+          "host_b_ms": 21.878488012589514,
+          "host_a_minus_b_ms": 2.066192915663123
+        },
+        {
+          "step": 57,
+          "batch_size": 3,
+          "seq_len": 26,
+          "host_a_ms": 23.63142801914364,
+          "host_b_ms": 21.607188042253256,
+          "host_a_minus_b_ms": 2.024239976890385
+        },
+        {
+          "step": 58,
+          "batch_size": 4,
+          "seq_len": 30,
+          "host_a_ms": 24.39137897454202,
+          "host_b_ms": 22.489962982945144,
+          "host_a_minus_b_ms": 1.9014159915968776
+        },
+        {
+          "step": 59,
+          "batch_size": 4,
+          "seq_len": 19,
+          "host_a_ms": 23.578176042065024,
+          "host_b_ms": 21.47291204892099,
+          "host_a_minus_b_ms": 2.1052639931440353
+        }
+      ],
+      "training_loop_wall_delta_ms": {
+        "min": 1.8190920818597078,
+        "p10": 1.9024548819288611,
+        "median": 2.367329492699355,
+        "p90": 3.240410005673766,
+        "max": 4.992390051484108
+      }
+    }
+  ],
+  "eight_column_rows": [
+    {
+      "series": "r1",
+      "order": "AB",
+      "cells": [
+        23.073154620360583,
+        20.550611959770322,
+        0.1093280352034861,
+        23.080760000000055,
+        0.8678799121369482,
+        21.203026666666705,
+        0.8579127104013825,
+        0.011484540195225601
+      ]
+    }
+  ],
+  "variation": {
+    "step_gain": {
+      "n": 1,
+      "min": 0.1093280352034861,
+      "max": 0.1093280352034861,
+      "range": 0.0,
+      "median": 0.1093280352034861
+    },
+    "saved_ms_per_step": {
+      "n": 1,
+      "min": 2.522542660590261,
+      "max": 2.522542660590261,
+      "range": 0.0,
+      "median": 2.522542660590261
+    }
+  },
+  "target": {
+    "weighted_B_Free_share_below_0.70_both_orders": null,
+    "unprofiled_e2e_faster_both_orders": null,
+    "absolute_Free_time_lower_both_orders": null,
+    "paired_measurements_meet_free_and_e2e_target": null
+  }
+}

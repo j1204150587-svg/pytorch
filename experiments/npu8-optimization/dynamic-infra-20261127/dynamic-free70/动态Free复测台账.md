@@ -92,6 +92,36 @@ AB 整步缩短 6.458 ms。样本/s 为 94.933 → 122.554，token/s 为 2089.91
 
 [分步 Stage、Computing 和完整同步窗口](reports/direct-publish-v1/measurement.md) · [同轮未舍入数值](reports/direct-publish-v1/paired_results.json) · [实际启动配方](working/registries/direct-publish-v1/recipe.json)
 
+### 原始 01 上合并 ZeRO IPG 的连续梯度复制
+
+两腿只开 01 分块 overflow，不依赖侧表打包。候选在归约桶满足数据类型、storage、顺序和范围守卫时，把 1,052 段源和目标作为一次区间复制，随后按原序发布梯度。8 步训练门每步比对全部 1,052 个梯度，三个溢出步均跳过更新，其余五步都更新，最大 loss 绝对差 3.815×10⁻⁶。正序 Level1 中 [1,19]、[2,14] 的物理流 44 均从 1,052 笔 SDMA 变为一笔 TensorMove，另一笔新增控制事件使 PTA 队列项净少 1,050。相同流和工作端点之间的全设备空档分别少 34.362、33.559 ms。首见和再见形状的独立 stock profile 都有 1,052 笔复制。当前八列来自正式正序。[具体实现与首次/再见](ipg_range_copy/README.md) · [两步按物理端点归因](ipg_range_copy/paired/RESULTS.md) · [逐步语义门](receipts-1732/gates/ipg-range-v1/gate-attempt-g3inwqmp/comparison.json)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 612.634 ms/步 | 542.284 ms/步 | +11.48% | 730.855 ms/步 | 93.42% | 514.313 ms/步 | 90.96% | +2.63% |
+
+[实际样本/s、token/s、Stage 和 Computing](reports/ipg-range-v1/measurement.md)
+
+### C++ eager RMSNorm v2
+
+直接发布等共同前置保持一致。v2 在 C++ autograd 节点上保留两条输入边，维持原反向累加次序。独立 16 组算子和四个完整 block 对照通过，8 步训练门每步核对全部 1,052 个梯度。两序 Level0 中，每步前向都发 54 个物理工作，反向范围内都发 139 个；反向有 54→9 个 autograd 节点，同时 device 工作类型发生替换。反序 Level0 的 Free 为 23.770→21.370 ms/步，当前八列含已完成的正序同步窗口。[实现、位级门和任务类型](rms_native/README.md) · [训练门](receipts-1732/gates/native-rms-v2/gate-attempt-j06xttw9/comparison.json)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 23.073 ms/步 | 20.551 ms/步 | +10.93% | 23.081 ms/步 | 86.79% | 21.203 ms/步 | 85.79% | +1.15% |
+
+[两序各步 Free、Stage、Computing 和已完成的同步窗口](reports/native-rms-v2/measurement.md)
+
+## 从原始 01 到组合配置的实测
+
+A 为原始 01，B 同时启用分组侧表、连续梯度叶、分区与打包、flat overflow/norm、直接发布、缓存及 eager fold 适配。两腿按各自配方运行同一动态形状序列。下表直接比较两个端点，步时变化包含设备工作量、框架循环和下发次数的改变。当前窗口为正序。[两端配方](receipts-1732/registries/stock01-to-direct-pr-v1/recipe.json) · [8 步 gate](receipts-1732/gates/stock01-to-direct-pr-v1/gate-attempt-f82xl_r0/comparison.json)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 635.654 ms/步 | 22.186 ms/步 | +96.51% | 566.919 ms/步 | 91.48% | 22.907 ms/步 | 86.55% | +5.39% |
+
+[原始视角的吞吐与三步 Level0 时间](reports/stock01-to-direct-pr-v1/measurement.md)
+
 ## GitCode !42634 的真实触发范围
 
 上游功能提交 b1c30ebd，PR head 为 2701f7b3。实现面向 Inductor 生成的 NPU Triton Python Wrapper，稳定 launcher 可以创建并复用 C++ FastLaunchPlan。stock 2.10.0.post6 构建所用 PTA 为 38e483ee，隔离包将上游绑定注册到 torch_npu._C。两腿均加载同一路径且具有真实 plan 和 submit 符号。[源码与构建](../pr42634/overlay/README.md) · [上游固定提交](https://gitcode.com/Ascend/pytorch/commit/2701f7b3e8d89625752edbde10e42c2b2172272c)
@@ -141,6 +171,17 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 ## 尝试无优化路径
 
+### 将四个输入字段打包成一次 H2D
+
+直接发布基线上，按相同 RNG 顺序把整步所需的四段 int64 数据放入一个 Host 缓冲区，搬到 NPU 后拆成实际 shape 的视图。8 步语义门通过，两个 60 步 B 腿均每步命中。Level1 #4、#5 的输入范围内，`aclrtMemcpy` 和 `aclrtSynchronizeStream` 都从每步 4 次降至 1 次。包含生成、拼装及传输的 Host 区间则为 693.01→698.72、939.87→779.86 μs，两个完整训练同步窗都变慢。[实现](input_transfer/packed_inputs.py) · [训练门](receipts-1732/gates/input-transfer-v1/gate-attempt-89dcaafs/comparison.json) · [从原始 trace 统计范围与每笔 ACL 耗时](input_transfer/paired-scope.json) · [统计脚本](input_transfer/paired_scope.py)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 21.637 ms/步 | 21.937 ms/步 | -1.39% | 23.425 ms/步 | 86.95% | 22.355 ms/步 | 86.42% | +0.60% |
+| 21.455 ms/步 | 21.806 ms/步 | -1.64% | 23.444 ms/步 | 86.96% | 23.933 ms/步 | 87.13% | -0.20% |
+
+[每步三类设备时间、实际吞吐和配对波动](reports/input-transfer-v1/measurement.md)
+
 - **因果 mask 改为 BF16 tril。** 12 个微测样例的输出和梯度逐位一致，四个微测窗口节省 19.17%–31.18%。完整训练正序 21.208 → 22.588 ms/步，慢 6.51%，该轮 Free 占比 88.43% → 86.51%。[微测](working/diagnostics/tril-micro/micro.json) · [整步八列](reports/causal-tril-v1/measurement.md)
 
 - **融合 causal SiLU attention。** 完整融合的 14 个 NPU 逐位样例均出现差异。保留原矩阵乘和 SiLU、只融合掩码和除 L 的实现通过 14/14 例，但四个前反向同步窗口均慢 22.83%–40.01%。[完整融合原始差异](working/diagnostics/attention-full/micro.json) · [局部融合实测](working/diagnostics/attention-partial/micro.json)
@@ -155,6 +196,8 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 ## 仍需训练窗口验证的 Host 开销
 
+C++ eager HSTUBlock 调度与直接发布配置的侧表 native guard 均已通过独立的 8 步训练门，含三个非有限值跳步、五次权重更新和每步 1,052 个梯度对照。[HSTUBlock 训练门](receipts-1732/gates/host-block-v1/gate-attempt-ab5lxx_8/comparison.json) · [直接发布侧表 guard 训练门](receipts-1732/gates/direct-native-slab-guard/gate-attempt-23tk9rom/comparison.json)
+
 flat_stats.eligible 对每个 1,052 片梯度重新核对视图根、真实 storage、dtype、shape、连续性和 offset。实机独立微测的 Python/C++ Host 中位为 2,031.527/56.593 μs，p95 为 2,055.543/69.222 μs，5 次 native guard 未产生 ATen 事件。缩短 Host 检查能否提前后续有效提交仍取决于同一步、同流的空档和正式 A/B。[实机微测](working/diagnostics/native-guard-micro/micro.json) · [实现与守卫](native_guard/README.md)
 
 在 packed 梯度上进一步改为直接计算 norm，已完成的正序 Level0 中 Free 占比 91.32% → 92.76%；缺少同配置同步计时，不能判断整步收益。[Level0 分项](reports/flat-norm-v1/measurement.md)
@@ -162,6 +205,8 @@ flat_stats.eligible 对每个 1,052 片梯度重新核对视图根、真实 stor
 ## 代码、原始回执与复算
 
 每项代码和实机索引按本轮独立分支归档，早期动态 D01–D05 位于上一层台账。当前快照含 3,738 个原始条目的 SHA-256，涵盖 workspace、runner、设备前后检查、同步窗口、官方 CSV、归因摘要和数值门。[代码分支](https://github.com/j1204150587-svg/pytorch/tree/codex/npu8-dynamic-eager-pr42634-20261127) · [实现与原始证据提交](https://github.com/j1204150587-svg/pytorch/commit/ecae80312b4c5cc84615807637bf0c870237ea6a) · [收据清单](working/receipt-sha256.json) · [宿主 trace 清单](working/trace-index.json) · [32 份原始 profiler trace](../pr42634/raw-traces) · [89,258,711 字节逐文件 SHA-256 和 gzip CRC 核验清单](../pr42634/raw-traces.csv) · [独立核验脚本](../pr42634/verify_trace_archive.py)
+
+17:32 实机快照另含 1,981 条带 SHA-256 的原收据，16 份原始 Level0/Level1 trace 合计 51,868,063 字节。[新增原始回执与注册表](receipts-1732) · [新增 trace 逐文件核验](receipts-1732/raw-traces.csv)
 
 在 dynamic-free70 目录复算一项对照。代码从对应 session 的实际命令、计数、shape、CSV 和指标读取数值。
 

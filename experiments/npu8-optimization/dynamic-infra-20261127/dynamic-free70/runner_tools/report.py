@@ -29,7 +29,8 @@ def validate_controls(leg,recipe):
                       f"{path}: batched norm counters")
             else:
                 check(obj["partition"]==steps,f"{path}: partition count")
-    verify_activation(recipe,leg["variant"],rank,steps)
+    if recipe.get("comparison") != "stock01-to-combination" or leg["variant"] == "B":
+        verify_activation(recipe,leg["variant"],rank,steps)
 
 
 def main():
@@ -56,7 +57,14 @@ def main():
     pairs=[]
     for e in entries:
         order=e["order"] if e["order"]!="baseline" else "a"
-        pair=parse_pair(f'r1/{order}/{e["mode"]}={e["directory"]}',shapes,switch)
+        endpoint = recipe.get("comparison") == "stock01-to-combination"
+        pair = parse_pair(f'r1/{order}/{e["mode"]}={e["directory"]}',shapes,None if endpoint else switch)
+        if endpoint and len(pair["legs"]) > 1:
+            before, after = recipe["A"], recipe["B"] if order != "aa" else recipe["A"]
+            expected_changes = {key: [before.get(key), after.get(key)] for key in before.keys() | after.keys()
+                                if before.get(key) != after.get(key)}
+            check(pair["changed_environment"] == expected_changes,
+                  f'{e["directory"]}: environment differences must match the declared endpoint recipe')
         for leg in pair["legs"]:
             validate_controls(leg,recipe)
         pairs.append(pair)

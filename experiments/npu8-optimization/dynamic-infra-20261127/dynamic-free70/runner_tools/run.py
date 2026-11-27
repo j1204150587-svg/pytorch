@@ -89,7 +89,7 @@ if __name__=="__main__":
     return bundle
 
 
-def materialize_runner(source, dest, stage_source=None):
+def materialize_runner(source, dest, stage_source=None, endpoint=False):
     root = dest / "runner"
     root.mkdir(exist_ok=True)
     hashes = {}
@@ -111,6 +111,21 @@ def materialize_runner(source, dest, stage_source=None):
             src = src.replace(anchor,'''    from free70_validation import verify_activation
     verify_activation(read_json(out / "recipe.json"), variant, out / "rank000", flags["steps"])
 ''' + anchor)
+            if endpoint:
+                mark = '            package = HERE / "stage_code"\n'
+                check(src.count(mark) == 1, "expected one candidate workspace")
+                src = src.replace(mark, '''            plain = session / "workspace-01"
+            shutil.copytree(workspace, plain)
+            plain_hashes = files_sha256(plain)
+            write_sha256(session / "workspace-01.sha256", plain_hashes)
+''' + mark)
+                mark = 'artifacts, workspace, hashes,\n                                container, init_pid, args, variant)'
+                check(src.count(mark) == 1, "expected one measured pair dispatch")
+                src = src.replace(mark, 'artifacts, plain if variant == "A" else workspace,\n'
+                    '                                plain_hashes if variant == "A" else hashes,\n'
+                    '                                container, init_pid, args, variant)')
+                src = src.replace('    verify_activation(read_json(out / "recipe.json"), variant,',
+                                  '    if variant == "B":\n        verify_activation(read_json(out / "recipe.json"), variant,')
             data = src.encode()
         target = root / name
         if target.exists():
@@ -158,6 +173,11 @@ def recipe_info(path):
             check(k not in ("RECSYS_ZERO2_BATCH_OVERFLOW","TASK_QUEUE_ENABLE","RECSYS_DYNAMIC_STATE_AUDIT")
                   and "REPLAY" not in k and "GRAPH" not in k, f"fixed eager training setting: {k}")
     changed = [k for k in recipe["A"].keys() | recipe["B"].keys() if recipe["A"].get(k)!=recipe["B"].get(k)]
+    if recipe.get("comparison") == "stock01-to-combination":
+        check(recipe["common"] == {} and recipe["A"] == {"NPU_DYNAMIC_ENDPOINT": "0"}
+              and recipe["B"].get("NPU_DYNAMIC_ENDPOINT") == "1",
+              "endpoint A must be the original chunk-overflow-only baseline")
+        changed = ["NPU_DYNAMIC_ENDPOINT"]
     check(len(changed) <= 1, "only one experimental switch may change")
     check(re.fullmatch("[a-zA-Z0-9_-]+", path.stem), "unsafe recipe name")
     return recipe, (changed[0] if changed else None)
@@ -169,6 +189,7 @@ def gate(work, runner, recipe, workspace):
         return
     check(workspace and workspace.is_dir(), "semantic gate needs --workspace or a prior baseline-mode run")
     attempt = Path(tempfile.mkdtemp(prefix="gate-attempt-", dir=work)) / "gate"
+    original_workspace = workspace
     if recipe.get("stage"):
         code = runner/"stage_code"
         prior = workspace.parent/"inputs/stage_code"
@@ -181,7 +202,21 @@ def gate(work, runner, recipe, workspace):
             shutil.copytree(workspace,clean,ignore=shutil.ignore_patterns("__pycache__","*.pyc"))
             subprocess.run([sys.executable,"-B",str(code/"stage.py"),str(clean)],check=True)
             workspace = clean
-    subprocess.run([sys.executable, str(STUDY/"semantic/run_semantic_pair.py"),
+    validator = STUDY/"semantic/run_semantic_pair.py"
+    if recipe.get("comparison") == "stock01-to-combination":
+        check(original_workspace != workspace, "endpoint needs a clean base workspace")
+        script = validator.read_text()
+        mark = "    stage(source, work)\n"
+        check(script.count(mark) == 1 and script.count('inner(work),') == 1, "unexpected semantic runner")
+        script = script.replace(mark, mark + '    plain = output / "workspace-01"\n'
+            + '    stage(Path(' + repr(str(original_workspace)) + '), plain)\n'
+            + '    write(output / "workspace-01.sha256.json", {str(p.relative_to(plain)): sha(p) '
+            + 'for p in sorted(plain.rglob("*")) if p.is_file()})\n')
+        script = script.replace("inner(work),", 'inner(plain if variant == "A" else work),')
+        validator = attempt.parent/"endpoint_semantic.py"
+        validator.write_text(script)
+        shutil.copyfile(STUDY/"semantic/dynamic_semantic.py", attempt.parent/"dynamic_semantic.py")
+    subprocess.run([sys.executable, str(validator),
                     "--workspace",str(workspace), "--runner-dir",str(runner),"--output",str(attempt),
                     "--common-env",json.dumps(recipe["common"]),"--env-a",json.dumps(recipe["A"]),
                     "--env-b",json.dumps(recipe["B"])], check=True)
@@ -189,7 +224,7 @@ def gate(work, runner, recipe, workspace):
     for leg in sorted(attempt.glob("0*-*")):
         env = read(leg/"command.json")["env"]
         rank = leg/"rank000"
-        if recipe.get("activation"):
+        if recipe.get("activation") and (recipe.get("comparison") != "stock01-to-combination" or leg.name[-1] == "B"):
             from verify import verify_activation
             verify_activation(recipe,leg.name[-1],rank,8)
         for name, file in (("PARTITION","fast_partition.json"),("NORM","norm_stats.json")):
@@ -225,7 +260,8 @@ def main():
         else:
             save(spec,recipe)
         stage = pipeline(work,recipe.get("stage"))
-        runner = materialize_runner(args.runner.resolve(strict=True),work,stage)
+        runner = materialize_runner(args.runner.resolve(strict=True),work,stage,
+                                    recipe.get("comparison") == "stock01-to-combination")
         os.environ["DYNAMIC_INFRA_RECIPE"] = str(spec)
         sys.path.insert(0,str(runner))
         from run_suite import run_pair
