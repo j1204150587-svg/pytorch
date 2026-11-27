@@ -30,6 +30,9 @@ def main():
         result_file.write_text(json.dumps(entries, indent=2))
         if r["exit"]:
             raise SystemExit(r["exit"])
+        if recipe.stem in ("meta-views", "meta-check"):
+            from reporting.host_windows import update
+            update(recipe.stem)
 
 if __name__ == "__main__":
     main()

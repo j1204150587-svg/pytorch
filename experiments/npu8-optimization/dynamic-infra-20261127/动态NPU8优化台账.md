@@ -72,6 +72,8 @@ TorchNPU 包安装时为 `torch._utils._unflatten_dense_tensors` 增加窄适配
 
 14:11（UTC+8）复核时，板 4 芯片 0 仍有两个外部进程，SGLang 调度进程占显存 45,107 MiB。训练容器仅有原来的 `sleep`，共享锁已释放。恢复控制器在宿主等待，缺少本配方的无 profiler 反序、Level0 正反序以及独立无 profiler A/A、A/B、B/A。以本轮每个完整配对 137–157 秒计，合计约需 15 分钟独占时间。[卡况快照](evidence/occupied-slot.json) · [两次无效运行的原始回执索引](provenance/interrupted-pairs.json)
 
+恢复后每完成一对，宿主都从成功的运行目录重算并写入 `/data/recsys-gr-ds019-host88/artifacts/dynamic-infra-20261127/reporting/meta-views/measurement.md`、`eight_columns.md` 与 `paired_results.json`。已用完成的第一对和 Level1 验证该入口，当前只产生一对稳态结果，待同序 Level0 补齐后才生成相应八列。[宿主复算器](reporting/host_windows.py)
+
 ## 尝试无优化路径
 
 ### D04 跨分配流直接 SDMA 提交，整步收益未复现
