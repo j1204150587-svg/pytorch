@@ -96,9 +96,35 @@ AB 整步缩短 6.458 ms。样本/s 为 94.933 → 122.554，token/s 为 2089.91
 
 上游功能提交 b1c30ebd，PR head 为 2701f7b3。实现面向 Inductor 生成的 NPU Triton Python Wrapper，稳定 launcher 可以创建并复用 C++ FastLaunchPlan。stock 2.10.0.post6 构建所用 PTA 为 38e483ee，隔离包将上游绑定注册到 torch_npu._C。两腿均加载同一路径且具有真实 plan 和 submit 符号。[源码与构建](../pr42634/overlay/README.md) · [上游固定提交](https://gitcode.com/Ascend/pytorch/commit/2701f7b3e8d89625752edbde10e42c2b2172272c)
 
-原始 01 动态 eager 本轮正序两腿各 60 步，入口计数均为零，torch_npu._inductor.config 和 patch 模块均未加载。开关从 0 变为 1 时同步窗口实际从 565.304 变为 605.396 ms/步。这个区间反映未激活配置的波动。Level0 的 A/B、B/A 已分别归档，反序同步窗口未成功完成。原始 Level1 的第 4、5 步各有 9,892、9,893 次 ACLNN enqueue，匹配的 Inductor wrapper 调用名均为零。[A 腿计数](working/evidence/pr42634-original-no-profiler-ab/01-A/rank000/pr42634_receipt.json) · [B 腿计数](working/evidence/pr42634-original-no-profiler-ab/02-B/rank000/pr42634_receipt.json) · [两序 Level0 与已完成的同步窗口](reports/pr42634-original/measurement.md) · [原始 Level1](../pr42634/eligibility/stock-level1.json)
+### 原版开关在原始动态 eager HSTU 中的对照
+
+原始 01 动态 eager 的正反两序均已完成。四个无 profiler 进程各执行 60 步，均加载包含真实 C++ plan、submit 符号的同一隔离包，`torch_npu._inductor.config` 和 patch 模块均未加载，创建计划与提交的计数均为零。下表记录未激活时的波动。开关 B 相对 A 的步时变化在两序相差 9.13 个百分点。原始 Level1 的第 4、5 步各有 9,892、9,893 次 ACLNN enqueue，匹配的 Inductor wrapper 调用名均为零。[四腿运行收据](../pr42634/original-final/evidence) · [逐腿数值、吞吐和配对波动](reports/pr42634-original/measurement.md) · [Level1 计数](../pr42634/eligibility/stock-level1.json)
+
+| 优化前端到端 | 优化后端到端 | 端到端提升比例 | 优化前 Free | 优化前 Free 占比 | 优化后 Free | 优化后 Free 占比 | Free 占比提升比例 |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 565.304 ms/步 | 605.396 ms/步 | −7.09% | 557.826 ms/步 | 91.59% | 575.908 ms/步 | 91.71% | −0.12% |
+| 574.322 ms/步 | 562.621 ms/步 | +2.04% | 625.350 ms/步 | 92.39% | 568.366 ms/步 | 91.86% | +0.58% |
+
+### 生成 wrapper 的前端加载核验
+
+同一隔离包在独立进程成功导入上游前端，patch 已安装，三个 C++ 符号均可见。此检查只覆盖加载。生成 wrapper 的提交次数和耗时需要独立编译用例记录。[前端加载结果](../pr42634/isolated3/dynamic-free70/isolated-pr-frontend-v3-1795769819467234540/micro.json) · [运行命令](../pr42634/isolated3/dynamic-free70/isolated-pr-frontend-v3-1795769819467234540/command.json)
+
+### Eager fold 显式适配器的训练门与局部效率
 
 另行适配的 eager fold 对 E01 每步一次的有序累加调用显式提供 ABI 和资源信息。8 步训练门 B 腿建立 1 个计划，首调用走普通 Triton，3 步因物理 grid 上限回退，4 步真实进入并返回 C++ 提交，对应 [1,24]、[1,18]、[1,19]、[2,14]；A/B 输入、梯度、权重、优化器状态及非有限跳步通过。该项独立于原版 wrapper 自动触发路径。训练门给出等价性和命中次数，正式比较另取无 profiler 及 Level0。[适配源码](pr42634_eager_fold) · [动态逐步命中](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/02-B/rank000/eager_fold_plan.json) · [语义对照](working/gates/pr42634-eager-v3/gate-attempt-5taqpl7q/comparison.json)
+
+v3 独立微测在两个 stream 上覆盖 [1,19]、[2,14]、[2,22]、[4,31]，并切换 stream 重测 [2,14]。五个输出均逐位相同，三次走 C++，两次因物理 grid 超限走普通 Triton，额外注入 CPU profiler 时回退一次。在 [1,19] 上，各段独立调用 40 次，Host 返回时间如下。C++ 行仅计已准备好参数的一次调用，布局和 stream 等检查在完整适配器行内。
+
+| [1,19] 的 Host 调用区间 | p50（μs） | p95（μs） |
+|---|---:|---:|
+| 普通 Triton fold 整个调用 | 49.002 | 56.022 |
+| 显式 eager 适配器整个调用 | 11.571 | 13.310 |
+| 参数已准备好的 PR C++ 提交 | 2.995 | 6.121 |
+| 检查当前 hooks（已缓存对象） | 0.306 | 0.400 |
+| 检查布局、设备、类型和对齐 | 2.965 | 4.010 |
+| 读取当前 raw stream | 0.430 | 0.541 |
+
+在五种输入/流组合上轮换，每腿连续调用 32 次，首尾同步。四轮按 AB、BA、AB、BA 排列，A→B 的同步均摊时间依次为 123.023→121.206、122.583→120.949、122.134→121.344、122.629→120.614 μs/次，缩短 0.65%–1.64%。各轮的 Host 返回中位数范围为 A 47.947–49.932、B 15.926–17.111 μs。另测的旧版本重复导入检查中位数 254.395 μs，仅用于解释适配器的实现迭代。[含全部 Host 样本的真实输出](../pr42634/isolated3/dynamic-free70/isolated-pr-fold-native-v3-1795769571519970211/micro.json) · [启动命令](../pr42634/isolated3/dynamic-free70/isolated-pr-fold-native-v3-1795769571519970211/command.json)
 
 ### Eager fold 显式适配器的整步对照
 
@@ -111,7 +137,7 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 同步窗口分别节省 0.503 和 1.749 ms/步。正序吞吐为 125.063 → 128.025 样本/s、2,753.218 → 2,818.440 token/s，反序为 115.829 → 125.151 样本/s、2,549.942 → 2,755.165 token/s。两序步时降幅相差 5.14 个百分点。B 在每个 50 步窗口均为 16 步命中、34 步因物理 grid 上限走原路径。Level0 的 [1,19]、[2,14] 命中，[2,22] 回退。
 
-对同一步的物理 stream 45、47 核对有序任务名、类型和任务 ID。两个命中步分别各有 636、637 笔设备任务，A/B 完全一致；ordered_64 均在 stream 47 只提交一次。Level0 三步中，整个 fold Host 区间与官方 Free 的交集每步平均只减少 0.0440、0.0552 ms。第 6 步两腿都走原 launcher，该步总 Free 在两个顺序仍减少 3.427、4.449 ms。单次 fold 暴露的局部减少与几个毫秒的整步差值不能等同。整步配对证明真实命中及观察值，单次 Host 加快还要结合独立下发测量。[逐步任务、物理流与 Host 阶段](pr42634_eager_fold/paired-attribution.json) · [原始 trace 复算脚本](pr42634_eager_fold/paired_attribution.py) · [同步窗口逐步配对](pr42634_eager_fold/paired-controls.json) · [双序官方数据与吞吐](reports/pr42634-eager-v3/measurement.md) · [实际路径计数](../pr42634/eager-paired/evidence/pr42634-eager-v3-no-profiler-ab/02-B/rank000/eager_fold_plan.json) · [真实配方](../pr42634/eager-paired/registries/pr42634-eager-v3/recipe.json) · [逐笔原始文件与 SHA-256](../pr42634/eager-paired/receipt-sha256.json) · [同轮 6 份原始 trace 的 SHA-256 与 gzip 校验](../pr42634/eager-paired/raw-traces.csv)
+对同一步的物理 stream 45、47 核对有序任务名、类型和任务 ID。两个命中步分别各有 636、637 笔设备任务，A/B 完全一致；ordered_64 均在 stream 47 只提交一次。Level0 三步中，整个 fold Host 区间与官方 Free 的交集每步平均只减少 0.0440、0.0552 ms。第 6 步两腿都走原 launcher，该步总 Free 在两个顺序仍减少 3.427、4.449 ms。单次 fold 暴露的局部减少与几个毫秒的整步差值不能等同。整步配对证明真实命中及观察值，局部 Host 返回加速见上表的 40 次独立下发测量。[逐步任务、物理流与 Host 阶段](pr42634_eager_fold/paired-attribution.json) · [原始 trace 复算脚本](pr42634_eager_fold/paired_attribution.py) · [同步窗口逐步配对](pr42634_eager_fold/paired-controls.json) · [双序官方数据与吞吐](reports/pr42634-eager-v3/measurement.md) · [实际路径计数](../pr42634/eager-paired/evidence/pr42634-eager-v3-no-profiler-ab/02-B/rank000/eager_fold_plan.json) · [真实配方](../pr42634/eager-paired/registries/pr42634-eager-v3/recipe.json) · [逐笔原始文件与 SHA-256](../pr42634/eager-paired/receipt-sha256.json) · [同轮 6 份原始 trace 的 SHA-256 与 gzip 校验](../pr42634/eager-paired/raw-traces.csv)
 
 ## 尝试无优化路径
 
