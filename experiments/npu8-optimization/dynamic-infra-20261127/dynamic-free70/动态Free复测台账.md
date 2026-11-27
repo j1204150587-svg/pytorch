@@ -111,7 +111,7 @@ A、B 都保留已优化的侧表处理、分区提示、打包梯度、flat ove
 
 同步窗口分别节省 0.503 和 1.749 ms/步。正序吞吐为 125.063 → 128.025 样本/s、2,753.218 → 2,818.440 token/s，反序为 115.829 → 125.151 样本/s、2,549.942 → 2,755.165 token/s。两序步时降幅相差 5.14 个百分点。B 在每个 50 步窗口均为 16 步命中、34 步因物理 grid 上限走原路径。Level0 的 [1,19]、[2,14] 命中，[2,22] 回退。
 
-前序完整 trace 中，每步仅有一次 fold，下发前可见的设备空档为百微秒量级。观察到的整步差值大于单次 fold 的暴露预算。该配对证明动态 eager 可以实际调用上游 C++ 提交，整步差值还包含系统波动，归因为单次 Host 加快需要独立的下发测量。[双序官方数据与吞吐](reports/pr42634-eager-v3/measurement.md) · [实际路径计数](../pr42634/eager-paired/evidence/pr42634-eager-v3-no-profiler-ab/02-B/rank000/eager_fold_plan.json) · [真实配方](../pr42634/eager-paired/registries/pr42634-eager-v3/recipe.json) · [逐笔原始文件与 SHA-256](../pr42634/eager-paired/receipt-sha256.json)
+对同一步的物理 stream 45、47 核对有序任务名、类型和任务 ID。两个命中步分别各有 636、637 笔设备任务，A/B 完全一致；ordered_64 均在 stream 47 只提交一次。Level0 三步中，整个 fold Host 区间与官方 Free 的交集每步平均只减少 0.0440、0.0552 ms。第 6 步两腿都走原 launcher，该步总 Free 在两个顺序仍减少 3.427、4.449 ms。单次 fold 暴露的局部减少与几个毫秒的整步差值不能等同。整步配对证明真实命中及观察值，单次 Host 加快还要结合独立下发测量。[逐步任务、物理流与 Host 阶段](pr42634_eager_fold/paired-attribution.json) · [原始 trace 复算脚本](pr42634_eager_fold/paired_attribution.py) · [同步窗口逐步配对](pr42634_eager_fold/paired-controls.json) · [双序官方数据与吞吐](reports/pr42634-eager-v3/measurement.md) · [实际路径计数](../pr42634/eager-paired/evidence/pr42634-eager-v3-no-profiler-ab/02-B/rank000/eager_fold_plan.json) · [真实配方](../pr42634/eager-paired/registries/pr42634-eager-v3/recipe.json) · [逐笔原始文件与 SHA-256](../pr42634/eager-paired/receipt-sha256.json) · [同轮 6 份原始 trace 的 SHA-256 与 gzip 校验](../pr42634/eager-paired/raw-traces.csv)
 
 ## 尝试无优化路径
 
