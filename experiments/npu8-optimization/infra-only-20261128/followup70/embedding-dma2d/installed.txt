@@ -1,0 +1,39 @@
+22c603cb80ab582006d4f26697ceb14c059d7f3613cf13b3c72aeb0d3d36e3c1  include/acl/acl_rt.h
+123d67c313f743e5d6f2e856f40c24d5edac376975cf0a7a1019e079b4171480  lib64/libascendcl.so
+7bc2b610dff552df2f114c95701156b4aba43ffcba24e06e3c249e1cf57bbc21  lib64/libruntime.so
+ab4b573989e6b76e129204cf329bdd916739bdd16092a0efcfa88d8ba011d689  lib64/libruntime_v100.so
+   142	} aclrtCallbackBlockType;
+   143	
+   144	typedef enum aclrtMemcpyKind {
+   145	    ACL_MEMCPY_HOST_TO_HOST,
+   146	    ACL_MEMCPY_HOST_TO_DEVICE,
+   147	    ACL_MEMCPY_DEVICE_TO_HOST,
+   148	    ACL_MEMCPY_DEVICE_TO_DEVICE,
+   149	    ACL_MEMCPY_DEFAULT,
+   150	    ACL_MEMCPY_HOST_TO_BUF_TO_DEVICE,
+   151	    ACL_MEMCPY_INNER_DEVICE_TO_DEVICE,
+   152	    ACL_MEMCPY_INTER_DEVICE_TO_DEVICE,
+  2367	/**
+  2368	 * @ingroup AscendCL
+  2369	 * @brief asynchronous memory replication of two-dimensional matrix between host and device
+  2370	 *
+  2371	 * @param dst [IN]       destination address pointer
+  2372	 * @param dpitch [IN]    pitch of destination memory
+  2373	 * @param src [IN]       source address pointer
+  2374	 * @param spitch [IN]    pitch of source memory
+  2375	 * @param width [IN]     width of matrix transfer
+  2376	 * @param height [IN]    height of matrix transfer
+  2377	 * @param kind [IN]      memcpy type
+  2378	 * @param stream [IN]    asynchronized task stream
+  2379	 *
+  2380	 * @retval ACL_SUCCESS The function is successfully executed.
+  2381	 * @retval OtherValues Failure
+  2382	 */
+  2383	ACL_FUNC_VISIBILITY aclError aclrtMemcpy2dAsync(void *dst,
+  2384	                                                size_t dpitch,
+  2385	                                                const void *src,
+  2386	                                                size_t spitch,
+  2387	                                                size_t width,
+  2388	                                                size_t height,
+  2389	                                                aclrtMemcpyKind kind,
+  2390	                                                aclrtStream stream);

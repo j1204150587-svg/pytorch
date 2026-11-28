@@ -1,0 +1,168 @@
+--- a/op_plugin/ops/opapi/EmbeddingKernelNpuOpApi.cpp
++++ b/op_plugin/ops/opapi/EmbeddingKernelNpuOpApi.cpp
+@@ -17,6 +17,7 @@
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
+ #include "op_plugin/utils/dynamic_embedding_scope.h"
++#include "op_plugin/utils/embedding_workspace_handle.h"
+ 
+ namespace op_api {
+ 
+@@ -43,7 +44,9 @@
+     at::Tensor result = npu_preparation::apply_tensor_without_format(output_size, weight.options());
+     // calculate the output resugt of the NPU
+     dynamic_embedding_rebase::Scope scope(weight, indices);
++#define hit_cache hit_cache_embedding_workspace
+     EXEC_NPU_CMD(aclnnEmbedding, weight, indices, result);
++#undef hit_cache
+     return result;
+ }
+ } // namespace op_api
+--- a/op_plugin/ops/opapi/StructKernelNpuOpApi.cpp
++++ b/op_plugin/ops/opapi/StructKernelNpuOpApi.cpp
+@@ -18,6 +18,7 @@
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
+ #include "op_plugin/utils/dynamic_embedding_scope.h"
++#include "op_plugin/utils/embedding_workspace_handle.h"
+ 
+ namespace op_api {
+ using npu_preparation = at_npu::native::OpPreparation;
+@@ -1148,7 +1149,9 @@
+     at::Tensor out = npu_preparation::apply_tensor_without_format(output_size_0,
+                                                                 grad_output.options().dtype(output_dtype_0));
+     dynamic_embedding_rebase::Scope scope(indices);
++#define hit_cache hit_cache_embedding_workspace
+     EXEC_NPU_CMD(aclnnEmbeddingDenseBackward, grad_output, indices, num_weights, padding_idx, scale_grad_by_freq, out);
++#undef hit_cache
+     return out;
+ }
+ 
+--- /dev/null
++++ b/op_plugin/utils/embedding_workspace_handle.h
+@@ -0,0 +1,125 @@
++#pragma once
++
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <limits>
++#include "torch_npu/csrc/core/npu/NPUCachingAllocator.h"
++#include "torch_npu/csrc/core/npu/NPUGraphsUtils.h"
++#include "torch_npu/csrc/framework/utils/OpPreparation.h"
++#ifndef BUILD_LIBTORCH
++#include "torch_npu/csrc/profiler/utils.h"
++#endif
++
++namespace embedding_workspace {
++inline bool flag(const char *name)
++{
++    const char *value = std::getenv(name);
++    return value && std::strcmp(value, "1") == 0;
++}
++
++struct Counters {
++    std::atomic<uint64_t> raw{0}, tensor{0}, zero{0}, bytes{0};
++    ~Counters()
++    {
++        std::fprintf(stderr, "EMBED_WORKSPACE raw=%llu tensor=%llu zero=%llu bytes=%llu\n",
++            static_cast<unsigned long long>(raw.load()), static_cast<unsigned long long>(tensor.load()),
++            static_cast<unsigned long long>(zero.load()), static_cast<unsigned long long>(bytes.load()));
++    }
++};
++
++inline void record(bool raw, uint64_t size)
++{
++    static const bool audit = flag("NPU_EMBED_WS_COUNT");
++    if (!audit) {
++        return;
++    }
++    static Counters counters;
++    (size == 0 ? counters.zero : raw ? counters.raw : counters.tensor).fetch_add(1, std::memory_order_relaxed);
++    counters.bytes.fetch_add(size, std::memory_order_relaxed);
++}
++
++class Workspace {
++public:
++    void *allocate(uint64_t size)
++    {
++        if (size == 0) {
++            record(false, 0);
++            return nullptr;
++        }
++        static const bool enabled = flag("NPU_EMBED_WS_DATAPTR");
++        if (enabled && size <= static_cast<uint64_t>(std::numeric_limits<int64_t>::max())
++            && c10_npu::option::OptionsManager::GetTaskQueueEnable() == 1
++            && c10_npu::currentStreamCaptureStatusMayInitCtx() == c10_npu::CaptureStatus::None) {
++#ifndef BUILD_LIBTORCH
++            torch_npu::profiler::NPURecordFunction guard;
++#endif
++            raw_ = c10_npu::NPUCachingAllocator::get()->allocate(size);
++            if (raw_.get() != nullptr) {
++                record(true, size);
++                return raw_.get();
++            }
++        }
++        tensor_ = at_npu::native::OpPreparation::unsafe_empty_workspace(size);
++        record(false, size);
++        return const_cast<void *>(tensor_.storage().data());
++    }
++
++private:
++    c10::DataPtr raw_;
++    at::Tensor tensor_;
++};
++} // namespace embedding_workspace
++
++template <typename... Args> bool hit_cache_embedding_workspace(aclrtStream acl_stream, const char *aclnn_api, void *phrase2, Args &&...args)
++{
++    static const auto ptaGetExecCacheAddr = GetOpApiFuncAddr("PTAGetExecCache");
++    static const auto initPTACacheThreadLocalAddr = GetOpApiFuncAddr("InitPTACacheThreadLocal");
++    static const auto setPTAHashKeyAddr = GetOpApiFuncAddr("SetPTAHashKey");
++    static const auto canUsePTACacheAddr = GetOpApiFuncAddr("CanUsePTACache");
++    PTAGetExecCache ptaGetExecCacheFunc = reinterpret_cast<PTAGetExecCache>(ptaGetExecCacheAddr);
++    InitPTACacheThreadLocal initPTACacheThreadLocalFunc =
++        reinterpret_cast<InitPTACacheThreadLocal>(initPTACacheThreadLocalAddr);
++    SetPTAHashKey setPTAHashKeyFunc = reinterpret_cast<SetPTAHashKey>(setPTAHashKeyAddr);
++    CanUsePTACache canUsePTACacheFunc = reinterpret_cast<CanUsePTACache>(canUsePTACacheAddr);
++    bool has_func = ptaGetExecCacheFunc && initPTACacheThreadLocalFunc && setPTAHashKeyFunc;
++    bool can_use = canUsePTACacheFunc && canUsePTACacheFunc(aclnn_api);
++    if (!has_func || !can_use) {
++        return false;
++    }
++    uint64_t workspace_size = 0;
++    uint64_t *workspace_size_addr = &workspace_size;
++    initPTACacheThreadLocalFunc();
++    g_hash_offset = 0;
++    auto deterministic = at::globalContext().deterministicAlgorithms();
++    if (c10_npu::is_core_control_enabled()) {
++        auto aic_num = c10_npu::GetResInCurrentThread(c10_npu::acl::ACL_RT_DEV_RES_CUBE_CORE);
++        auto aiv_num = c10_npu::GetResInCurrentThread(c10_npu::acl::ACL_RT_DEV_RES_VECTOR_CORE);
++        add_param_to_buf(aic_num);
++        add_param_to_buf(aiv_num);
++    }
++    auto device = c10_npu::current_device();
++    add_param_to_buf(deterministic);
++    add_param_to_buf(std::string(aclnn_api), args...);
++    add_param_to_buf(device);
++    add_param_to_buf((uintptr_t)acl_stream);
++    uint64_t hashId = calc_hash_id();
++    setPTAHashKeyFunc(hashId);
++    aclOpExecutor *executor = ptaGetExecCacheFunc(hashId, workspace_size_addr);
++    if (executor == nullptr) {
++        return false;
++    }
++    embedding_workspace::Workspace workspace;
++    void *workspace_addr = workspace.allocate(workspace_size);
++    auto acl_call = [workspace_addr, workspace_size, acl_stream, executor, phrase2]()->int {
++        OpApiFunc opApiFunc = reinterpret_cast<OpApiFunc>(phrase2);
++        auto api_ret = opApiFunc(workspace_addr, workspace_size, executor, acl_stream);
++        NPU_CHECK_ERROR(api_ret, "call failed");
++        return api_ret;
++    };
++    at_npu::native::OpCommand::RunOpApiV2(aclnn_api, acl_call);
++    UnInitCacheThreadLocal();
++    return true;
++}
++

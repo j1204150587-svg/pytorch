@@ -1,0 +1,309 @@
+/usr/bin/readelf
+/usr/bin/objdump
+/usr/bin/nm
+GNU readelf (GNU Binutils) 2.37
+308dda461704a6e5f70de6e0eac4495e9829b9cec3328563b75a5b382c6e438b  /proc/3499057/root/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libnnopbase.so
+5a6518505ef66688f02b4bde97517ba217212f29304d59b3a6ef0db14ded6c83  /proc/3499057/root/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libacl_rt.so
+4595d4cf50f064cc9d6a97688eecf5e95ef92a4291911e26dd301091997c37ee  /proc/3499057/root/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libacl_rt_impl.so
+7bc2b610dff552df2f114c95701156b4aba43ffcba24e06e3c249e1cf57bbc21  /proc/3499057/root/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libruntime.so
+ab4b573989e6b76e129204cf329bdd916739bdd16092a0efcfa88d8ba011d689  /proc/3499057/root/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libruntime_v100.so
+556:    ACL_STREAM_ATTR_CACHE_OP_INFO        = 4,
+764ab489af2c2e77b23c1ca9bc0c64ef96d1cd65a6e4f77fd71e6ff3bf25f78c  src/runtime/core/src/api_impl/api_error.cc
+65382e32eebe453eac4bec57d4f98c73f9730c7f43b0ef8fe4ec9d1e9cb4a931  src/runtime/core/src/api_impl/api_impl.cc
+7557c5f9fd4c44aa9896ce4009b728754496bbfdfc5591aebdd279b4e287de5e  src/runtime/core/src/runtime.cc
+fd33cded4d30bd6d84abeae16d521b667927b0fe1a9f31ccd65ff958ad578f36  src/runtime/core/inc/runtime.hpp
+fee2983ce8e3d1e38d2d1fcd3980ac6249da73308e16360b32fa048dd12b8cc6  src/runtime/api/api_c_stream.cc
+            break;
+        }
+        case RT_STREAM_ATTR_CACHE_OP_INFO: {
+            error = apiInstance->SetStreamCacheOpInfoSwitch(exeStream, attrValue->cacheOpInfoSwitch);
+            break;
+        }
+        case RT_STREAM_ATTR_PRIORITY: {
+            error = apiInstance->SetStreamPriorityValue(exeStream, attrValue->streamPriority);
+            break;
+        }
+            break;
+        }
+        case RT_STREAM_ATTR_CACHE_OP_INFO: {
+            error = apiInstance->GetStreamCacheOpInfoSwitch(exeStream, &attrValue->cacheOpInfoSwitch);
+            break;
+        }
+        case RT_STREAM_ATTR_PRIORITY: {
+            error = apiInstance->GetStreamPriorityValue(exeStream, &attrValue->streamPriority);
+            break;
+        }
+        default: 
+            RT_LOG_OUTER_MSG_INVALID_PARAM(stmAttrId,
+    if (cacheOpInfoSwitch != 0U && cacheOpInfoSwitch != 1U) {
+        return RT_ERROR_INVALID_VALUE;
+    }
+    
+    return impl_->SetStreamCacheOpInfoSwitch(curStm, cacheOpInfoSwitch);
+}
+
+rtError_t ApiErrorDecorator::GetStreamCacheOpInfoSwitch(const Stream * const stm, uint32_t * const cacheOpInfoSwitch)
+{
+    Stream *curStm = Runtime::Instance()->GetCurStream(const_cast<Stream *>(stm));
+    NULL_PTR_RETURN_MSG_OUTER_WITH_FUNC_DESC(curStm, RT_ERROR_INVALID_VALUE, "Querying whether the operator information is cached");
+    NULL_PTR_RETURN_MSG_OUTER_WITH_FUNC_DESC(cacheOpInfoSwitch, RT_ERROR_INVALID_VALUE, "Querying whether the operator information is cached");
+ 
+    return impl_->GetStreamCacheOpInfoSwitch(curStm, cacheOpInfoSwitch);
+}
+    if (stm->IsCapturing() && stm->GetCaptureStream() != nullptr && stm->GetCaptureStream()->IsOrigCaptureStream()) {
+        CaptureModel *mdl = dynamic_cast<CaptureModel *>(stm->GetCaptureStream()->Model_());
+        RT_LOG(RT_LOG_INFO, "set cache op info switch status, model_id = %u, steam_id=%u, status=%u.",
+            mdl->Id_(), stm->Id_(), cacheOpInfoSwitch);
+        mdl->SetModelCacheOpInfoSwitch(cacheOpInfoSwitch);
+    }
+
+    return RT_ERROR_NONE;
+}
+
+rtError_t ApiImpl::GetStreamCacheOpInfoSwitch(const Stream * const stm, uint32_t * const cacheOpInfoSwitch)
+{
+    // The ctx is not checked for performance.
+    // main stream is not closed & this stream is opened
+    *cacheOpInfoSwitch = stm->GetStreamCacheOpInfoSwitch();
+
+    return RT_ERROR_NONE;
+}
+    // Singleton instance.
+    static Runtime *Instance()
+    {
+#if RUNTIME_API || STATIC_RT_LIB
+        if (runtime_ == nullptr) {
+            runtime_ = RuntimeKeeperGetRuntime();
+        }
+#endif
+        return runtime_;
+    }
+
+Stream *Runtime::GetCurStream(Stream * const stm) const
+{
+    if (stm == nullptr && 
+        IS_SUPPORT_CHIP_FEATURE(GetChipType(), RtOptionalFeatureType::RT_FEATURE_DEVICE_CTRL_SQ)) {
+        Context *curCtx = CurrentContext();
+        CHECK_CONTEXT_VALID_WITH_RETURN(curCtx, nullptr);
+        return curCtx->DefaultStream_();
+    }
+    return stm;
+}
+}  // namespace runtime
+}  // namespace cce
+0000000000000f80  0000020300000101 R_AARCH64_ABS64        000000000002ba80 cce::runtime::ApiErrorDecorator::GetStreamCacheOpInfoSwitch(cce::runtime::Stream const*, unsigned int*) + 0
+0000000000000f80  000000de00000101 R_AARCH64_ABS64        0000000000000184 cce::runtime::ApiImpl::GetStreamCacheOpInfoSwitch(cce::runtime::Stream const*, unsigned int*) + 0
+
+api_impl/api_error.cc.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+000000000002ba80 <cce::runtime::ApiErrorDecorator::GetStreamCacheOpInfoSwitch(cce::runtime::Stream const*, unsigned int*)>:
+   2ba80:	d10183ff 	sub	sp, sp, #0x60
+   2ba84:	90000004 	adrp	x4, 0 <cce::runtime::Runtime::runtime_>
+			2ba84: R_AARCH64_ADR_GOT_PAGE	cce::runtime::Runtime::runtime_
+   2ba88:	90000003 	adrp	x3, 0 <__stack_chk_guard>
+			2ba88: R_AARCH64_ADR_GOT_PAGE	__stack_chk_guard
+   2ba8c:	a9037bfd 	stp	x29, x30, [sp, #48]
+   2ba90:	9100c3fd 	add	x29, sp, #0x30
+   2ba94:	f9400084 	ldr	x4, [x4]
+			2ba94: R_AARCH64_LD64_GOT_LO12_NC	cce::runtime::Runtime::runtime_
+   2ba98:	a90453f3 	stp	x19, x20, [sp, #64]
+   2ba9c:	aa0003f4 	mov	x20, x0
+   2baa0:	f9400063 	ldr	x3, [x3]
+			2baa0: R_AARCH64_LD64_GOT_LO12_NC	__stack_chk_guard
+   2baa4:	aa0203f3 	mov	x19, x2
+   2baa8:	f9400080 	ldr	x0, [x4]
+   2baac:	f9400062 	ldr	x2, [x3]
+   2bab0:	f90017e2 	str	x2, [sp, #40]
+   2bab4:	d2800002 	mov	x2, #0x0                   	// #0
+   2bab8:	94000000 	bl	0 <cce::runtime::Runtime::GetCurStream(cce::runtime::Stream*) const>
+			2bab8: R_AARCH64_CALL26	cce::runtime::Runtime::GetCurStream(cce::runtime::Stream*) const
+   2babc:	aa0003e1 	mov	x1, x0
+   2bac0:	b4000240 	cbz	x0, 2bb08 <cce::runtime::ApiErrorDecorator::GetStreamCacheOpInfoSwitch(cce::runtime::Stream const*, unsigned int*)+0x88>
+   2bac4:	b4000a93 	cbz	x19, 2bc14 <cce::runtime::ApiErrorDecorator::GetStreamCacheOpInfoSwitch(cce::runtime::Stream const*, unsigned int*)+0x194>
+   2bac8:	90000002 	adrp	x2, 0 <__stack_chk_guard>
+			2bac8: R_AARCH64_ADR_GOT_PAGE	__stack_chk_guard
+   2bacc:	f9400680 	ldr	x0, [x20, #8]
+   2bad0:	f9400042 	ldr	x2, [x2]
+			2bad0: R_AARCH64_LD64_GOT_LO12_NC	__stack_chk_guard
+   2bad4:	f94017e4 	ldr	x4, [sp, #40]
+   2bad8:	f9400043 	ldr	x3, [x2]
+   2badc:	eb030084 	subs	x4, x4, x3
+   2bae0:	d2800003 	mov	x3, #0x0                   	// #0
+   2bae4:	54001341 	b.ne	2bd4c <cce::runtime::ApiErrorDecorator::GetStreamCacheOpInfoSwitch(cce::runtime::Stream const*, unsigned int*)+0x2cc>  // b.any
+   2bae8:	f9400003 	ldr	x3, [x0]
+   2baec:	aa1303e2 	mov	x2, x19
+   2baf0:	a9437bfd 	ldp	x29, x30, [sp, #48]
+   2baf4:	a94453f3 	ldp	x19, x20, [sp, #64]
+   2baf8:	f947b863 	ldr	x3, [x3, #3952]
+   2bafc:	910183ff 	add	sp, sp, #0x60
+   2bb00:	aa0303f0 	mov	x16, x3
+   2bb04:	d61f0200 	br	x16
+
+api_impl/api_impl.cc.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000000184 <cce::runtime::ApiImpl::GetStreamCacheOpInfoSwitch(cce::runtime::Stream const*, unsigned int*)>:
+     184:	b94e5421 	ldr	w1, [x1, #3668]
+     188:	52800000 	mov	w0, #0x0                   	// #0
+     18c:	b9000041 	str	w1, [x2]
+     190:	d65f03c0 	ret
+0000000000674778  0000000000000403 R_AARCH64_RELATIVE                        59f930
+0000000000674790  0000000000000403 R_AARCH64_RELATIVE                        674770
+0000000000675708  0000000000000403 R_AARCH64_RELATIVE                        61bd0
+0000000000675830  0000000000000403 R_AARCH64_RELATIVE                        59fe50
+0000000000675848  0000000000000403 R_AARCH64_RELATIVE                        675828
+00000000006767c0  0000000000000403 R_AARCH64_RELATIVE                        1079b8
+000000000067fdf8  0000000000000403 R_AARCH64_RELATIVE                        681a58
+ 59f930 N3cce7runtime7ApiImplE
+ 59fe50 N3cce7runtime17ApiErrorDecoratorE
+
+libnnopbase.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000001b6d90 <_ZN2op8internal20GetCacheOpInfoSwitchERKPv@@Base>:
+  1b6d90:	d10183ff 	sub	sp, sp, #0x60
+  1b6d94:	a9017bfd 	stp	x29, x30, [sp, #16]
+  1b6d98:	910043fd 	add	x29, sp, #0x10
+  1b6d9c:	a90253f3 	stp	x19, x20, [sp, #32]
+  1b6da0:	b00013d3 	adrp	x19, 42f000 <_ZTVNSt3_V214error_categoryE@@Base+0x5310>
+  1b6da4:	a903ffbf 	stp	xzr, xzr, [x29, #56]
+  1b6da8:	f9421a61 	ldr	x1, [x19, #1072]
+  1b6dac:	f9400000 	ldr	x0, [x0]
+  1b6db0:	f9400022 	ldr	x2, [x1]
+  1b6db4:	f90027a2 	str	x2, [x29, #72]
+  1b6db8:	d2800002 	mov	x2, #0x0                   	// #0
+  1b6dbc:	b4000260 	cbz	x0, 1b6e08 <_ZN2op8internal20GetCacheOpInfoSwitchERKPv@@Base+0x78>
+  1b6dc0:	9100e3a2 	add	x2, x29, #0x38
+  1b6dc4:	52800081 	mov	w1, #0x4                   	// #4
+  1b6dc8:	97fb2606 	bl	805e0 <aclrtGetStreamAttribute@plt>
+  1b6dcc:	35000660 	cbnz	w0, 1b6e98 <_ZN2op8internal20GetCacheOpInfoSwitchERKPv@@Base+0x108>
+
+libnnopbase.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000303630 <NnopbaseReportCacheOpInfo@@Base+0x30>:
+  303630:	f90057a1 	str	x1, [x29, #168]
+  303634:	d2800001 	mov	x1, #0x0                   	// #0
+  303638:	b4002243 	cbz	x3, 303a80 <NnopbaseReportCacheOpInfo@@Base+0x480>
+  30363c:	f9001bb7 	str	x23, [x29, #48]
+  303640:	52800081 	mov	w1, #0x4                   	// #4
+  303644:	aa0303e0 	mov	x0, x3
+  303648:	2a0203f7 	mov	w23, w2
+  30364c:	910263a2 	add	x2, x29, #0x98
+  303650:	97f5f3e4 	bl	805e0 <aclrtGetStreamAttribute@plt>
+
+libacl_rt_impl.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000050b60 <aclrtGetStreamAttributeImpl@@Base+0x30>:
+   50b60:	f9001bf7 	str	x23, [sp, #48]
+   50b64:	2a0103f7 	mov	w23, w1
+   50b68:	52800f01 	mov	w1, #0x78                  	// #120
+   50b6c:	aa1503e0 	mov	x0, x21
+   50b70:	72a00061 	movk	w1, #0x3, lsl #16
+   50b74:	97ff8121 	bl	30ff8 <_ZN3acl20AclProfilingReporterC1ENS_11AclProfTypeE@@Base>
+   50b78:	b4000294 	cbz	x20, 50bc8 <aclrtGetStreamAttributeImpl@@Base+0x98>
+   50b7c:	aa1403e2 	mov	x2, x20
+   50b80:	2a1703e1 	mov	w1, w23
+   50b84:	aa1603e0 	mov	x0, x22
+   50b88:	97ff68aa 	bl	2ae30 <rtsStreamGetAttribute@plt>
+   50b8c:	2a0003f4 	mov	w20, w0
+   50b90:	aa1503e0 	mov	x0, x21
+
+libruntime_v100.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000001079b8 <_ZN9__gnu_cxx12__to_xstringISscEET_PFiPT0_mPKS2_St9__va_listEmS5_z@@Base+0x2a998>:
+  1079b8:	a9b97bfd 	stp	x29, x30, [sp, #-112]!
+  1079bc:	90002bc3 	adrp	x3, 67f000 <_ZN3cce7runtime23GetConfigIniValueDoubleERKSsS2_Rd@Base>
+  1079c0:	910003fd 	mov	x29, sp
+  1079c4:	a90153f3 	stp	x19, x20, [sp, #16]
+  1079c8:	90002bd3 	adrp	x19, 67f000 <_ZN3cce7runtime23GetConfigIniValueDoubleERKSsS2_Rd@Base>
+  1079cc:	f946fc63 	ldr	x3, [x3, #3576]
+  1079d0:	aa0203f4 	mov	x20, x2
+  1079d4:	f90013f5 	str	x21, [sp, #32]
+  1079d8:	aa0003f5 	mov	x21, x0
+  1079dc:	f9434660 	ldr	x0, [x19, #1672]
+  1079e0:	f9400002 	ldr	x2, [x0]
+  1079e4:	f90037a2 	str	x2, [x29, #104]
+  1079e8:	d2800002 	mov	x2, #0x0                   	// #0
+  1079ec:	f9400060 	ldr	x0, [x3]
+  1079f0:	940535bc 	bl	2550e0 <_ZNSt10_HashtableIiSt4pairIKijESaIS2_ENSt8__detail10_Select1stESt8equal_toIiESt4hashIiENS4_18_Mod_range_hashingENS4_20_Default_ranged_hashENS4_20_Prime_rehash_policyENS4_17_Hashtable_traitsILb0ELb0ELb1EEEE21_M_insert_unique_nodeEmmPNS4_10_Hash_nodeIS2_Lb0EEE@@Base+0x18db0>
+  1079f4:	b4000ae0 	cbz	x0, 107b50 <_ZN9__gnu_cxx12__to_xstringISscEET_PFiPT0_mPKS2_St9__va_listEmS5_z@@Base+0x2ab30>
+  1079f8:	b4000254 	cbz	x20, 107a40 <_ZN9__gnu_cxx12__to_xstringISscEET_PFiPT0_mPKS2_St9__va_listEmS5_z@@Base+0x2aa20>
+  1079fc:	f94006a3 	ldr	x3, [x21, #8]
+  107a00:	aa0003e1 	mov	x1, x0
+  107a04:	aa1403e2 	mov	x2, x20
+  107a08:	aa0303e0 	mov	x0, x3
+  107a0c:	f9400063 	ldr	x3, [x3]
+  107a10:	f947b863 	ldr	x3, [x3, #3952]
+  107a14:	d63f0060 	blr	x3
+  107a18:	f9434673 	ldr	x19, [x19, #1672]
+  107a1c:	f94037a2 	ldr	x2, [x29, #104]
+  107a20:	f9400261 	ldr	x1, [x19]
+  107a24:	ca010041 	eor	x1, x2, x1
+  107a28:	b50014c1 	cbnz	x1, 107cc0 <_ZN9__gnu_cxx12__to_xstringISscEET_PFiPT0_mPKS2_St9__va_listEmS5_z@@Base+0x2aca0>
+  107a2c:	a94153f3 	ldp	x19, x20, [sp, #16]
+  107a30:	f94013f5 	ldr	x21, [sp, #32]
+  107a34:	a8c77bfd 	ldp	x29, x30, [sp], #112
+  107a38:	d65f03c0 	ret
+
+libruntime_v100.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000002550e0 <_ZNSt10_HashtableIiSt4pairIKijESaIS2_ENSt8__detail10_Select1stESt8equal_toIiESt4hashIiENS4_18_Mod_range_hashingENS4_20_Default_ranged_hashENS4_20_Prime_rehash_policyENS4_17_Hashtable_traitsILb0ELb0ELb1EEEE21_M_insert_unique_nodeEmmPNS4_10_Hash_nodeIS2_Lb0EEE@@Base+0x18db0>:
+  2550e0:	a9ba7bfd 	stp	x29, x30, [sp, #-96]!
+  2550e4:	910003fd 	mov	x29, sp
+  2550e8:	a90153f3 	stp	x19, x20, [sp, #16]
+  2550ec:	d0002153 	adrp	x19, 67f000 <_ZN3cce7runtime23GetConfigIniValueDoubleERKSsS2_Rd@Base>
+  2550f0:	f90013f5 	str	x21, [sp, #32]
+  2550f4:	aa0003f5 	mov	x21, x0
+  2550f8:	f9434660 	ldr	x0, [x19, #1672]
+  2550fc:	aa0103f4 	mov	x20, x1
+  255100:	f9400001 	ldr	x1, [x0]
+  255104:	f9002fa1 	str	x1, [x29, #88]
+  255108:	d2800001 	mov	x1, #0x0                   	// #0
+  25510c:	b4000174 	cbz	x20, 255138 <_ZNSt10_HashtableIiSt4pairIKijESaIS2_ENSt8__detail10_Select1stESt8equal_toIiESt4hashIiENS4_18_Mod_range_hashingENS4_20_Default_ranged_hashENS4_20_Prime_rehash_policyENS4_17_Hashtable_traitsILb0ELb0ELb1EEEE21_M_insert_unique_nodeEmmPNS4_10_Hash_nodeIS2_Lb0EEE@@Base+0x18e08>
+  255110:	f9434673 	ldr	x19, [x19, #1672]
+  255114:	aa1403e0 	mov	x0, x20
+  255118:	f9402fa2 	ldr	x2, [x29, #88]
+  25511c:	f9400261 	ldr	x1, [x19]
+  255120:	ca010041 	eor	x1, x2, x1
+  255124:	b5000be1 	cbnz	x1, 2552a0 <_ZNSt10_HashtableIiSt4pairIKijESaIS2_ENSt8__detail10_Select1stESt8equal_toIiESt4hashIiENS4_18_Mod_range_hashingENS4_20_Default_ranged_hashENS4_20_Prime_rehash_policyENS4_17_Hashtable_traitsILb0ELb0ELb1EEEE21_M_insert_unique_nodeEmmPNS4_10_Hash_nodeIS2_Lb0EEE@@Base+0x18f70>
+  255128:	a94153f3 	ldp	x19, x20, [sp, #16]
+  25512c:	f94013f5 	ldr	x21, [sp, #32]
+  255130:	a8c67bfd 	ldp	x29, x30, [sp], #96
+  255134:	d65f03c0 	ret
+  255138:	f90017b6 	str	x22, [x29, #40]
+  25513c:	97f7b449 	bl	42260 <_ZN3cce7runtime13DevInfoManage8InstanceEv@plt>
+  255140:	aa0003f6 	mov	x22, x0
+  255144:	97f7b873 	bl	43310 <_ZN3cce7runtime15GlobalContainer13GetRtChipTypeEv@plt>
+  255148:	7100541f 	cmp	w0, #0x15
+  25514c:	54000160 	b.eq	255178 <_ZNSt10_HashtableIiSt4pairIKijESaIS2_ENSt8__detail10_Select1stESt8equal_toIiESt4hashIiENS4_18_Mod_range_hashingENS4_20_Default_ranged_hashENS4_20_Prime_rehash_policyENS4_17_Hashtable_traitsILb0ELb0ELb1EEEE21_M_insert_unique_nodeEmmPNS4_10_Hash_nodeIS2_Lb0EEE@@Base+0x18e48>  // b.none
+  255150:	97f7b870 	bl	43310 <_ZN3cce7runtime15GlobalContainer13GetRtChipTypeEv@plt>
+
+libruntime_v100.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000061bd0 <_ZNSsC1EPKcRKSaIcE@@Base+0x5830>:
+   61bd0:	b94e5421 	ldr	w1, [x1, #3668]
+   61bd4:	52800000 	mov	w0, #0x0                   	// #0
+   61bd8:	b9000041 	str	w1, [x2]
+   61bdc:	d65f03c0 	ret

@@ -1,0 +1,206 @@
+CANN runtime v9.1.0 commit 0b4af8a31c75a1f1f43638a8f75b9e3c6182e031
+a6edf92f049d3e22d39fc0a97d503bd40f4234c917ce5fb78b47ff99eb92691e  src/acl/aclrt_impl/memory.cpp
+38a6c5fdac120a6c4c4b19623b0717d75f45bf7b8acff0c0dc822852acb98656  src/runtime/api/api_c.cc
+764ab489af2c2e77b23c1ca9bc0c64ef96d1cd65a6e4f77fd71e6ff3bf25f78c  src/runtime/core/src/api_impl/api_error.cc
+65382e32eebe453eac4bec57d4f98c73f9730c7f43b0ef8fe4ec9d1e9cb4a931  src/runtime/core/src/api_impl/api_impl.cc
+925ea737fe8d707e8605ac3dd6166400f9d8862885704a8ef4018b0cece9e87c  src/runtime/core/src/launch/memcpy_stars.cc
+5988710bae70d7ca922fe0120991bf8fc38a65e2e5de81e44bb6997adc7c9d02  src/runtime/core/src/task/task_info/memory/memory_task.cc
+   154	    }
+   155	    switch (kind) {
+   156	        case ACL_MEMCPY_HOST_TO_DEVICE: {
+   157	            rtKind = RT_MEMCPY_HOST_TO_DEVICE;
+   158	            break;
+   159	        }
+   160	        case ACL_MEMCPY_DEVICE_TO_HOST: {
+   161	            rtKind = RT_MEMCPY_DEVICE_TO_HOST;
+   162	            break;
+   163	        }
+   164	        case ACL_MEMCPY_DEVICE_TO_DEVICE: {
+   165	            rtKind = RT_MEMCPY_DEVICE_TO_DEVICE;
+   166	            break;
+   167	        }
+   168	        case ACL_MEMCPY_DEFAULT: {
+   169	            rtKind = RT_MEMCPY_DEFAULT;
+   170	            break;
+   171	        }
+   945	                                size_t dpitch,
+   946	                                const void *src,
+   947	                                size_t spitch,
+   948	                                size_t width,
+   949	                                size_t height,
+   950	                                aclrtMemcpyKind kind,
+   951	                                aclrtStream stream)
+   952	{
+   953	    ACL_PROFILING_REG(acl::AclProfType::AclrtMemcpy2dAsync);
+   954	    ACL_LOG_DEBUG("start to execute aclrtMemcpy2dAsync, dpitch = %zu, spitch = %zu, width = %zu, height = %zu,"
+   955	        " kind = %d", dpitch, spitch, width, height, static_cast<int32_t>(kind));
+   956	
+   957	    rtMemcpyKind_t rtKindVal = RT_MEMCPY_RESERVED;
+   958	    const aclError ret = CheckMemcpy2dParam(dst, dpitch, src, spitch, width, height, kind, rtKindVal);
+   959	    if (ret != ACL_SUCCESS) {
+   960	        return ret;
+   961	    }
+   962	
+   963	    ACL_REQUIRES_RTS_OK_WARN_NOT_SUPPORT(rtMemcpy2dAsync(dst, dpitch, src, spitch, width, height, rtKindVal, stream),
+   964	                             rtMemcpy2dAsync);
+   965	
+   966	    ACL_LOG_DEBUG("Successfuly execute aclrtMemcpy2dAsync, dpitch = %zu, spitch = %zu, width = %zu, height = %zu, "
+   967	        "kind = %d", dpitch, spitch, width, height, static_cast<int32_t>(kind));
+  1268	rtError_t rtMemcpy2dAsync(void *dst, uint64_t dstPitch, const void *src, uint64_t srcPitch, uint64_t width,
+  1269	                          uint64_t height, rtMemcpyKind_t kind, rtStream_t stm)
+  1270	{
+  1271	    if (IsZeroSizeMemcpy2d(width, height)) {
+  1272	        return ACL_RT_SUCCESS;
+  1273	    }
+  1274	    GLOBAL_STATE_WAIT_IF_LOCKED();
+  1275	    Api * const apiInstance = Api::Instance();
+  1276	    NULL_RETURN_ERROR_WITH_EXT_ERRCODE(apiInstance);
+  1277	    RT_VALIDATE_AND_UNWRAP_OBJECT(stm, Stream, exeStream);
+  1278	
+  1279	    const rtError_t error = apiInstance->MemCopy2DAsync(dst, dstPitch, src, srcPitch, width, height, exeStream, kind);
+  1280	    COND_RETURN_WITH_NOLOG(error == RT_ERROR_FEATURE_NOT_SUPPORT, ACL_ERROR_RT_FEATURE_NOT_SUPPORT);
+  1281	    ERROR_RETURN_WITH_EXT_ERRCODE(error);
+  1282	
+  1283	    return ACL_RT_SUCCESS;
+  2448	rtError_t ApiErrorDecorator::MemCopy2DAsync(void * const dst, const uint64_t dstPitch, const void * const src,
+  2449	    const uint64_t srcPitch, const uint64_t width, const uint64_t height, Stream * const stm,
+  2450	    const rtMemcpyKind_t kind, const rtMemcpyKind newKind)
+  2451	{
+  2452	    Stream *curStm = Runtime::Instance()->GetCurStream(stm);
+  2453	    NULL_PTR_RETURN_MSG_OUTER_WITH_FUNC_DESC(curStm, RT_ERROR_INVALID_VALUE, "Asynchronous 2D memory copy");
+  2454	    rtMemcpyKind_t copyKind = GetMemCpyKind(kind, newKind);
+  2455	    rtError_t error = MemCopy2DCheckParam(dst, dstPitch, src, srcPitch, width, height, copyKind);
+  2456	    COND_RETURN_WITH_NOLOG(error == RT_ERROR_FEATURE_NOT_SUPPORT, RT_ERROR_FEATURE_NOT_SUPPORT);
+  2457	    ERROR_RETURN_MSG_CALL(ERR_MODULE_GE, error, "check memcpy2d param failure, retCode=%#x.", static_cast<uint32_t>(error));
+  2458	
+  2459	    bool isD2HorH2DInvolvePageableMemory = false;
+  2460	    error = MemcpyAsyncCheckLocation(true, copyKind, src, dst, false, isD2HorH2DInvolvePageableMemory);  /* 会更新copykind */
+  2461	    COND_RETURN_ERROR_MSG_INNER(error != RT_ERROR_NONE, error,
+  2462	        "MemcpyAsync check src or dst location failed, stream_id=%d.", curStm->Id_());
+  2463	    COND_RETURN_AND_MSG_OUTER((error != RT_ERROR_NONE) ||
+  2464	        ((copyKind != RT_MEMCPY_HOST_TO_DEVICE) &&
+  2465	        (copyKind != RT_MEMCPY_DEVICE_TO_HOST) &&
+  2466	        (copyKind != RT_MEMCPY_DEVICE_TO_DEVICE)),
+  2467	        RT_ERROR_INVALID_VALUE, ErrorCode::EE1017, "Asynchronous 2D memory copy", "kind or newKind",
+  2468	        RtFmtMsg("Memcpy2dAsync supports only H2D, D2H, or D2D. Parameter kind is %s, and reviseKind is %s",
+  2469	                 MemcpyKindToString(kind).c_str(), MemcpyKindToString(copyKind).c_str()));
+  2470	
+  2471	    COND_RETURN_WARN(((copyKind != RT_MEMCPY_HOST_TO_DEVICE) && (copyKind != RT_MEMCPY_DEVICE_TO_HOST) && (copyKind != RT_MEMCPY_DEVICE_TO_DEVICE)),
+  2472	        RT_ERROR_FEATURE_NOT_SUPPORT, "Only H2D, D2H, or D2D are supported");
+  2473	
+  6539	rtError_t ApiImpl::MemCopy2DAsync(void * const dst, const uint64_t dstPitch, const void * const src,
+  6540	    const uint64_t srcPitch, const uint64_t width, const uint64_t height, Stream * const stm,
+  6541	    const rtMemcpyKind_t kind, const rtMemcpyKind newKind)
+  6542	{
+  6543	    (void)newKind;
+  6544	    RT_LOG(RT_LOG_DEBUG, "sync memcpy2d, dstPitch=%" PRIu64 ", srcPitch=%" PRIu64 ", width=%" PRIu64
+  6545	           ", height=%" PRIu64 ", kind=%d.", dstPitch, srcPitch, width, height, kind);
+  6546	    rtError_t error = RT_ERROR_NONE;
+  6547	    uint64_t remainSize = width * height;
+  6548	    uint64_t realSize = 0UL;
+  6549	    uint64_t fixedSize = 0UL;
+  6550	    uint64_t srcoffset = 0UL;
+  6551	    uint64_t dstoffset = 0UL;
+  6552	    Context * const curCtx = CurrentContext();
+  6553	    CHECK_CONTEXT_VALID_WITH_RETURN(curCtx, RT_ERROR_CONTEXT_NULL);
+  6554	
+  6555	    Stream *curStm = stm;
+  6556	    if (curStm == nullptr) {
+  6557	        curStm = curCtx->DefaultStream_();
+  6558	        NULL_STREAM_PTR_RETURN_MSG(curStm);
+  6559	    }
+  6560	    COND_RETURN_AND_MSG_INVALID_CONTEXT_STREAM(curStm, curCtx, RT_ERROR_STREAM_CONTEXT);
+  6561	
+  6562	    while (remainSize > 0UL) {
+  6563	        if (kind == RT_MEMCPY_DEVICE_TO_DEVICE) {
+  6564	            error = Memcpy2DAsync((static_cast<char_t *>(dst)) + dstoffset, dstPitch,
+  6565	                (static_cast<const char_t *>(src)) + srcoffset, srcPitch, width, height, kind,
+  6566	                &realSize, curStm, fixedSize);
+  6567	            dstoffset += dstPitch;
+  6568	            srcoffset += srcPitch;
+  6569	        } else {
+  6570	            error = Memcpy2DAsync(dst, dstPitch, src, srcPitch, width, height, kind, &realSize, curStm, fixedSize);
+  6571	        }
+  6572	        if (error != RT_ERROR_NONE) {
+  6573	            return error;
+  6574	        }
+  6575	        fixedSize += realSize;
+  6576	        remainSize -= realSize;
+  6577	    }
+  6578	    return error;
+   119	rtError_t Memcpy2DAsync(void * const dst, const uint64_t dstPitch, const void * const src,
+   120	    const uint64_t srcPitch, const uint64_t width, const uint64_t height, const rtMemcpyKind_t kind,
+   121	    uint64_t * const realSize, Stream * const stm, const uint64_t fixedSize)
+   122	{
+   123	    TaskInfo submitTask = {};
+   124	    rtError_t errorReason;
+   125	    rtTaskGenCallback callback = nullptr;
+   126	
+   127	    if (stm == nullptr) {
+   128	        return RT_ERROR_STREAM_NULL;
+   129	    }
+   130	
+   131	    TaskInfo *taskAsync2d = stm->AllocTask(&submitTask, TS_TASK_TYPE_MEMCPY, errorReason);
+   132	    NULL_PTR_RETURN_MSG(taskAsync2d, errorReason);
+   133	    const auto recycleTask = [&stm, &taskAsync2d]() {
+   134	        (void)stm->Device_()->GetTaskFactory()->Recycle(taskAsync2d);
+   135	    };
+   136	
+   137	    rtError_t error = MemcpyAsyncTaskInitV2(taskAsync2d, dst, dstPitch, src, srcPitch, width, height, kind, fixedSize);
+   138	    if (error != RT_ERROR_NONE) {
+   139	        RT_LOG(RT_LOG_ERROR, "invoke taskAsync2d Init error code:%#x", error);
+   140	        recycleTask();
+   141	        return error;
+   142	    }
+   143	    *realSize = taskAsync2d->u.memcpyAsyncTaskInfo.size;
+   144	
+   145	    callback = (stm->Context_() == nullptr) ? nullptr : stm->Context_()->TaskGenCallback_();
+   146	    error = stm->Device_()->SubmitTask(taskAsync2d, callback);
+   147	    if (error != RT_ERROR_NONE) {
+   148	        RT_LOG(RT_LOG_ERROR, "invoke device_ SubmitTask error code:%#x", error);
+   149	        recycleTask();
+   150	        return error;
+   151	    }
+   152	
+   153	    GET_THREAD_TASKID_AND_STREAMID(taskAsync2d, stm->AllocTaskStreamId());
+   154	    return RT_ERROR_NONE;
+   155	}
+   156	    
+   157	rtError_t MemcopyAsync(
+   531	rtError_t MemcpyAsyncTaskInitV2(TaskInfo * const taskInfo, void *const dst, const uint64_t dstPitch,
+   532	                                const void *const srcAddr, const uint64_t srcPitch, const uint64_t width,
+   533	                                const uint64_t height, const uint32_t kind, const uint64_t fixedSize)
+   534	{
+   535	    rtError_t error = MemcpyAsyncTaskCommonInit(taskInfo);
+   536	    ERROR_RETURN_MSG_INNER(error, "MemcpyAsyncTaskCommonInit V2 failed, retCode=%#x.", error);
+   537	
+   538	    MemcpyAsyncTaskInfo *memcpyAsyncTaskInfo = &(taskInfo->u.memcpyAsyncTaskInfo);
+   539	    Stream * const stream = taskInfo->stream;
+   540	    Driver * const driver = taskInfo->stream->Device_()->Driver_();
+   541	
+   542	    if (kind == RT_MEMCPY_HOST_TO_DEVICE) {
+   543	        memcpyAsyncTaskInfo->copyType = RT_MEMCPY_DIR_H2D;
+   544	    } else if (kind == RT_MEMCPY_DEVICE_TO_HOST) {
+   545	        memcpyAsyncTaskInfo->copyType = RT_MEMCPY_DIR_D2H;
+   546	    } else if (kind == RT_MEMCPY_DEVICE_TO_DEVICE){
+   547	        error = ConvertCpyType(taskInfo, kind, srcAddr, dst);
+   548	        ERROR_RETURN_MSG_INNER(error, "Failed to convert the D2D asynchronous copy typeD2D, retCode=%#x, kind=%s.", error,
+   549	        MemcpyKindToString(static_cast<rtMemcpyKind_t>(kind)).c_str());
+   550	    } else {
+   551	        // reserve
+   552	    }
+   553	
+   554	    memcpyAsyncTaskInfo->dmaAddr.offsetAddr.devid = static_cast<uint32_t>(stream->Device_()->Id_());
+   555	    const uint32_t copyType = memcpyAsyncTaskInfo->copyType;
+   556	    // d2d copy data convert
+   557	    if ((copyType == RT_MEMCPY_DIR_D2D_SDMA) || (copyType == RT_MEMCPY_DIR_D2D_HCCs) || (copyType == RT_MEMCPY_DIR_D2D_PCIe)) {
+   558	        memcpyAsyncTaskInfo->src = const_cast<void *>(srcAddr);
+   559	        memcpyAsyncTaskInfo->destPtr = dst;
+   560	        RT_LOG(RT_LOG_DEBUG, "MemcpyAsync2dTask Init, dstPitch=%" PRIu64 ", srcPitch=%" PRIu64
+   561	        ", width=%" PRIu64 ", height=%" PRIu64 ", fixedSize:%" PRIu64 ", copyType=%u.",
+   562	        dstPitch, srcPitch, width, height, fixedSize, memcpyAsyncTaskInfo->copyType);
+   563	        // copy one line data once time
+   564	        memcpyAsyncTaskInfo->size = width;
+   565	        return RT_ERROR_NONE;
+   566	    } else {
+   567	        // david UB 单算子场景 走 UB Doorbell模式
