@@ -1,0 +1,97 @@
+{
+  "stage": [
+    "side_tables",
+    "side_slab",
+    "partition_hints",
+    "partition_pack",
+    "flat_stats_stage",
+    "side_publish",
+    "wide_norm",
+    "next28/norm_by_shape"
+  ],
+  "common": {
+    "RECSYS_DYNAMIC_PARTITION": "1",
+    "RECSYS_DYNAMIC_NORM": "1",
+    "ACLNN_CACHE_LIMIT": "65536",
+    "NPU_DYNAMIC_GROUPED_SIDE": "1",
+    "NPU_DYNAMIC_SIDE_SLAB": "1",
+    "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+    "NPU_DYNAMIC_PARTITION_PACK": "1",
+    "RECSYS_DYNAMIC_FLAT_STATS": "both",
+    "NPU_DYNAMIC_DIRECT_SIDE": "1",
+    "NPU_DYNAMIC_WIDE_NORM": "join"
+  },
+  "A": {
+    "NPU_DYNAMIC_NORM_LAYOUT": "original"
+  },
+  "B": {
+    "NPU_DYNAMIC_NORM_LAYOUT": "nocast"
+  },
+  "activation": [
+    {
+      "file": "grouped_side_counts.json",
+      "A": {
+        "hits": "$steps",
+        "fallbacks": 0
+      },
+      "B": {
+        "hits": "$steps",
+        "fallbacks": 0
+      }
+    },
+    {
+      "file": "eager_partition_pack.json",
+      "A": {
+        "hits": "$steps",
+        "fallbacks": 0
+      },
+      "B": {
+        "hits": "$steps",
+        "fallbacks": 0
+      }
+    },
+    {
+      "file": "flat_stats_counts.json",
+      "A": {
+        "overflow": "$steps",
+        "norm_fallback": 0,
+        "overflow_fallback": 0
+      },
+      "B": {
+        "overflow": "$steps",
+        "norm_fallback": 0,
+        "overflow_fallback": 0
+      }
+    },
+    {
+      "file": "side_slab_counts.json",
+      "A": {
+        "direct_partitions": "$steps"
+      },
+      "B": {
+        "direct_partitions": "$steps"
+      }
+    },
+    {
+      "file": "wide_norm_counts.json",
+      "A": {
+        "mode": "join",
+        "fallback": 0,
+        "max_wide_bytes": 17522176,
+        "layout": "original",
+        "layout_fallback": 0,
+        "groups_per_call": 25,
+        "wide_dtype": "torch.float32"
+      },
+      "B": {
+        "mode": "join",
+        "fallback": 0,
+        "max_wide_bytes": 17522176,
+        "layout": "nocast",
+        "layout_fallback": 0,
+        "groups_per_call": 25,
+        "wide_dtype": "torch.float32"
+      }
+    }
+  ]
+}

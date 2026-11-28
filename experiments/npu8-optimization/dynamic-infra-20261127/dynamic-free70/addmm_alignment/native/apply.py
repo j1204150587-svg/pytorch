@@ -20,19 +20,24 @@ def apply(root):
     ops=ops[:start]+once(ops[start:end],target,"        projection_rebase::Scope scope(self, mat1, mat2);\n"+target)+ops[end:]
     include='#include "op_plugin/utils/op_api_common.h"'
     kernel.write_text(once(ops,include,include+'\n#include "op_plugin/utils/addmm_rebase.h"'))
-    common.with_name("addmm_rebase.h").write_bytes((here/"addmm_rebase.h").read_bytes())
+    patch_common(common, here, "addmm_rebase", "0x4144444D4D313238ULL")
+
+
+def patch_common(common, here, scope_file, domain):
+    header = scope_file + ".h"
+    common.with_name(header).write_bytes((here / header).read_bytes())
     source=common.read_text()
     include='#include "op_api_common.h"'
-    source=once(source,include,include+"\n"+(here/"addmm_rebase.inc").read_text())
+    source=once(source,include,include+"\n"+(here/(scope_file+".inc")).read_text())
     start=source.index("void add_param_to_buf(const at::Tensor &at_tensor)")
     end=source.index("void add_param_to_buf(const at::Scalar &",start)
     keys=once(source[start:end],"auto so = at_tensor.storage_offset();",'''const auto *projection = projection_rebase::lookup(at_tensor);
     if (projection) {
         projection_rebase::keys.fetch_add(1, std::memory_order_relaxed);
-        const uint64_t domain = 0x4144444D4D313238ULL;
+        const uint64_t domain = PROJECTION_DOMAIN_ID;
         MEMCPY_TO_BUF(&domain, sizeof(domain));
     }
-    auto so = projection ? 0 : at_tensor.storage_offset();''')
+    auto so = projection ? 0 : at_tensor.storage_offset();'''.replace("PROJECTION_DOMAIN_ID",domain))
     size="at_tensor.storage().nbytes() / at_tensor.itemsize()"
     address="const_cast<void*>(at_tensor.storage().data())"
     keys=once(keys,"storageDims.push_back("+size+");","storageDims.push_back(projection ? projection->elements : "+size+");")
