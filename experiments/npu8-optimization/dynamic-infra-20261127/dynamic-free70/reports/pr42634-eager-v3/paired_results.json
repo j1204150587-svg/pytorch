@@ -90,14 +90,425 @@
   "pairs": [
     {
       "series": "r1",
-      "order": "AB",
+      "order": "AA",
       "mode": "l0",
-      "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ab",
+      "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-aa",
       "legs": [
         {
           "variant": "A",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ab\\01-A",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ab\\01-A\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-aa\\01-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-aa\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:56:42+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:57:14+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_EAGER_FOLD_PLAN": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 8,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098711013793945
+          },
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-aa\\01-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 25.836299999999987,
+              "stage_ms": 29.1465,
+              "computing_ms": 3.255500000000002,
+              "communication_not_overlapped_ms": 0.05465999999999999,
+              "cpu_marker_ms": 28.91593,
+              "cpu_marker_minus_stage_ms": -0.23057000000000016
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 25.178980000000024,
+              "stage_ms": 28.648,
+              "computing_ms": 3.4223600000000025,
+              "communication_not_overlapped_ms": 0.046479999999999994,
+              "cpu_marker_ms": 28.34981,
+              "cpu_marker_minus_stage_ms": -0.2981899999999982
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 26.51166000000005,
+              "stage_ms": 30.38025,
+              "computing_ms": 3.793700000000001,
+              "communication_not_overlapped_ms": 0.07498,
+              "cpu_marker_ms": 32.19418,
+              "cpu_marker_minus_stage_ms": 1.8139300000000027
+            }
+          ],
+          "free_ms": 25.84231333333335,
+          "stage_ms": 29.391583333333333,
+          "computing_ms": 3.490520000000002,
+          "communication_not_overlapped_ms": 0.058706666666666664,
+          "free_fraction": 0.8792419598581233,
+          "first_two_steps_free_fraction_diagnostic": 0.8827012951059359
+        },
+        {
+          "variant": "A",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-aa\\02-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-aa\\02-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:57:19+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:57:53+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_EAGER_FOLD_PLAN": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 8,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 4,
+            "steady_warmup_steps": 0,
+            "steady_measure_steps": 0,
+            "profile": true,
+            "profile_active": 3,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 8,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 8,
+            "calls": 8,
+            "fast_calls": 8,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 8,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "3": 28.95204734802246,
+            "7": 29.098705291748047
+          },
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-aa\\02-A\\step_trace_time.csv",
+          "per_step": [
+            {
+              "step": 4,
+              "batch_size": 1,
+              "seq_len": 19,
+              "device_id": "0",
+              "free_ms": 28.629819999999988,
+              "stage_ms": 31.87175,
+              "computing_ms": 3.180500000000004,
+              "communication_not_overlapped_ms": 0.06148,
+              "cpu_marker_ms": 31.59892,
+              "cpu_marker_minus_stage_ms": -0.272829999999999
+            },
+            {
+              "step": 5,
+              "batch_size": 2,
+              "seq_len": 14,
+              "device_id": "0",
+              "free_ms": 28.51148000000006,
+              "stage_ms": 31.9005,
+              "computing_ms": 3.335860000000004,
+              "communication_not_overlapped_ms": 0.05316,
+              "cpu_marker_ms": 31.5633,
+              "cpu_marker_minus_stage_ms": -0.3371999999999993
+            },
+            {
+              "step": 6,
+              "batch_size": 2,
+              "seq_len": 22,
+              "device_id": "0",
+              "free_ms": 25.877679999999998,
+              "stage_ms": 29.71,
+              "computing_ms": 3.7648800000000042,
+              "communication_not_overlapped_ms": 0.0673,
+              "cpu_marker_ms": 31.78258,
+              "cpu_marker_minus_stage_ms": 2.0725799999999985
+            }
+          ],
+          "free_ms": 27.67299333333335,
+          "stage_ms": 31.160749999999997,
+          "computing_ms": 3.4270800000000037,
+          "communication_not_overlapped_ms": 0.06064666666666666,
+          "free_fraction": 0.8880721206432243,
+          "first_two_steps_free_fraction_diagnostic": 0.8960213886133866
+        }
+      ],
+      "changed_environment": {},
+      "sampled_loss_max_difference": 5.7220458984375e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_free_ms": -1.8306799999999974,
+      "free_fraction_gain": -0.010042924687677424
+    },
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "l0",
+      "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ab\\01-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ab\\01-A\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -247,7 +658,7 @@
             "3": 28.95204734802246,
             "7": 29.098705291748047
           },
-          "csv": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ab\\01-A\\step_trace_time.csv",
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ab\\01-A\\step_trace_time.csv",
           "per_step": [
             {
               "step": 4,
@@ -295,8 +706,8 @@
         },
         {
           "variant": "B",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ab\\02-B",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ab\\02-B\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ab\\02-B",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ab\\02-B\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -446,7 +857,7 @@
             "3": 28.95204734802246,
             "7": 29.098709106445312
           },
-          "csv": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ab\\02-B\\step_trace_time.csv",
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ab\\02-B\\step_trace_time.csv",
           "per_step": [
             {
               "step": 4,
@@ -508,12 +919,12 @@
       "series": "r1",
       "order": "BA",
       "mode": "l0",
-      "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ba",
+      "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ba",
       "legs": [
         {
           "variant": "B",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ba\\01-B",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ba\\01-B\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ba\\01-B",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ba\\01-B\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -663,7 +1074,7 @@
             "3": 28.95204734802246,
             "7": 29.098711013793945
           },
-          "csv": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ba\\01-B\\step_trace_time.csv",
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ba\\01-B\\step_trace_time.csv",
           "per_step": [
             {
               "step": 4,
@@ -711,8 +1122,8 @@
         },
         {
           "variant": "A",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ba\\02-A",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ba\\02-A\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ba\\02-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ba\\02-A\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -862,7 +1273,7 @@
             "3": 28.952043533325195,
             "7": 29.098711013793945
           },
-          "csv": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l0-ba\\02-A\\step_trace_time.csv",
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l0-ba\\02-A\\step_trace_time.csv",
           "per_step": [
             {
               "step": 4,
@@ -924,12 +1335,12 @@
       "series": "r1",
       "order": "AB",
       "mode": "l1",
-      "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l1-ab",
+      "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l1-ab",
       "legs": [
         {
           "variant": "A",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l1-ab\\01-A",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l1-ab\\01-A\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l1-ab\\01-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l1-ab\\01-A\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -1079,7 +1490,7 @@
             "3": 28.95204734802246,
             "7": 29.098709106445312
           },
-          "csv": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l1-ab\\01-A\\step_trace_time.csv",
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l1-ab\\01-A\\step_trace_time.csv",
           "per_step": [
             {
               "step": 4,
@@ -1114,8 +1525,8 @@
         },
         {
           "variant": "B",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l1-ab\\02-B",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l1-ab\\02-B\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-l1-ab\\02-B",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-l1-ab\\02-B\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -1265,7 +1676,7 @@
             "3": 28.95204734802246,
             "7": 29.098709106445312
           },
-          "csv": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-l1-ab\\02-B\\step_trace_time.csv",
+          "csv": "receipts28-pr\\evidence\\pr42634-eager-v3-l1-ab\\02-B\\step_trace_time.csv",
           "per_step": [
             {
               "step": 4,
@@ -1312,14 +1723,870 @@
     },
     {
       "series": "r1",
-      "order": "AB",
+      "order": "AA",
       "mode": "no-profiler",
-      "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ab",
+      "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-aa",
       "legs": [
         {
           "variant": "A",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ab\\01-A",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ab\\01-A\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-aa\\01-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-aa\\01-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:44:41+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:45:09+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_EAGER_FOLD_PLAN": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 60,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.78255271911621,
+            "9": 29.21807098388672,
+            "19": 26.272584915161133,
+            "29": 25.244098663330078,
+            "39": 22.707324981689453,
+            "49": 21.029186248779297,
+            "59": 18.37959861755371
+          },
+          "ms_per_step": 21.669032340869308,
+          "samples_per_s": 125.52475612258375,
+          "tokens_per_s": 2763.390586992763,
+          "elapsed_s": 1.0834516170434654,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            20.27401200029999,
+            22.33647496905178,
+            21.149866981431842,
+            20.389957004226744,
+            20.179899060167372,
+            21.730090025812387,
+            21.00334200076759,
+            21.285902010276914,
+            19.32916499208659,
+            21.03807299863547,
+            21.42973802983761,
+            22.13852701243013,
+            20.82496404182166,
+            21.30960300564766,
+            21.639866987243295,
+            19.045362947508693,
+            22.934719105251133,
+            20.010821986943483,
+            21.87950606457889,
+            20.15262795612216,
+            22.096415050327778,
+            22.8266449412331,
+            22.332023945637047,
+            21.889426978304982,
+            21.34354505687952,
+            19.74131108727306,
+            22.50541199464351,
+            23.4400590416044,
+            21.19339897762984,
+            19.223620067350566,
+            21.26850199420005,
+            21.11557498574257,
+            21.562504000030458,
+            21.49574097711593,
+            22.28120295330882,
+            23.389796959236264,
+            20.745400921441615,
+            22.01318193692714,
+            22.428728989325464,
+            23.142897058278322,
+            22.10425492376089,
+            23.35851499810815,
+            23.009021999314427,
+            22.320043994113803,
+            20.402178051881492,
+            22.464629961177707,
+            23.086823988705873,
+            22.90280698798597,
+            23.686749045737088,
+            23.73568096663803
+          ]
+        },
+        {
+          "variant": "A",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-aa\\02-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-aa\\02-A\\rank000\\metrics.json",
+          "runtime": {
+            "rank": 0,
+            "world_size": 1,
+            "local_rank": 0,
+            "device": "npu:0",
+            "python": "3.12.13",
+            "torch": "2.10.0+cpu",
+            "torch_npu": "2.10.0.post6",
+            "deepspeed": "0.19.0",
+            "deepspeed_file": "/usr/local/python3.12.13/lib/python3.12/site-packages/deepspeed/__init__.py"
+          },
+          "model": {
+            "config": {
+              "num_tables": 1024,
+              "table_rows": 64,
+              "features_per_table": 4,
+              "vocab_size": 1024,
+              "seq_len": 32,
+              "embedding_dim": 64,
+              "num_heads": 4,
+              "hidden_dim": 16,
+              "attention_dim": 16,
+              "num_layers": 4,
+              "dropout": 0.0,
+              "num_user_groups": 32
+            },
+            "trainable_parameter_tensors": 1052,
+            "trainable_parameter_elements": 4380544,
+            "embedding_table_tensors": 1027,
+            "side_embedding_elements": 4194304
+          },
+          "card_at_boundaries": {
+            "before": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:45:13+00:00"
+            },
+            "after": {
+              "logical_device": 8,
+              "board": 4,
+              "chip": 0,
+              "physical_id": 8,
+              "health": "OK",
+              "target_process_count": 0,
+              "has_orphan_context": false,
+              "utc": "2026-11-27T10:45:43+00:00"
+            }
+          },
+          "environment": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "RECSYS_ZERO2_BATCH_OVERFLOW": "1",
+            "TASK_QUEUE_ENABLE": "1",
+            "RECSYS_DYNAMIC_PARTITION": "1",
+            "RECSYS_DYNAMIC_NORM": "1",
+            "ACLNN_CACHE_LIMIT": "65536",
+            "NPU_DYNAMIC_GROUPED_SIDE": "1",
+            "NPU_DYNAMIC_SIDE_SLAB": "1",
+            "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+            "NPU_DYNAMIC_PARTITION_PACK": "1",
+            "RECSYS_DYNAMIC_FLAT_STATS": "both",
+            "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1",
+            "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+            "NPU_DYNAMIC_DIRECT_SIDE": "1",
+            "NPU_EAGER_FOLD_PLAN": "0"
+          },
+          "arguments": {
+            "model_config": "configs/model_many_tables.json",
+            "deepspeed_config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+            "dry_run": false,
+            "steps": 60,
+            "micro_batch_size": 2,
+            "shape_schedule": "configs/dynamic_shapes_npu8.json",
+            "learning_rate": 0.001,
+            "weight_decay": 0.01,
+            "seed": 1234,
+            "log_interval": 10,
+            "steady_warmup_steps": 10,
+            "steady_measure_steps": 50,
+            "profile": false,
+            "profile_active": 5,
+            "profile_stack": false,
+            "profile_level1": false,
+            "save_checkpoint": false,
+            "local_rank": -1,
+            "num_tables": null,
+            "table_rows": null,
+            "features_per_table": null,
+            "seq_len": null,
+            "embedding_dim": null,
+            "num_layers": null
+          },
+          "deepspeed": {
+            "train_micro_batch_size_per_gpu": 2,
+            "gradient_accumulation_steps": 1,
+            "bf16": {
+              "enabled": true,
+              "check_grad_overflow": true
+            },
+            "fp16": {
+              "enabled": false
+            },
+            "zero_optimization": {
+              "stage": 2,
+              "contiguous_gradients": true,
+              "overlap_comm": true,
+              "reduce_scatter": true,
+              "reduce_bucket_size": 50000000,
+              "allgather_bucket_size": 50000000
+            },
+            "gradient_clipping": 1.0,
+            "steps_per_print": 100,
+            "wall_clock_breakdown": false,
+            "train_batch_size": 2
+          },
+          "shape_count": 60,
+          "overflow_scan": {
+            "training_completed": true,
+            "valid": true,
+            "expected_steps": 60,
+            "calls": 60,
+            "fast_calls": 60,
+            "fallback_calls": 0,
+            "errors": 0,
+            "chunks": 60,
+            "reasons": {},
+            "first_shards": [
+              {
+                "dtype": "torch.bfloat16",
+                "device": "npu:0",
+                "layout": "torch.strided",
+                "count": 1052
+              }
+            ],
+            "first_npu_formats": {
+              "2": 1052
+            }
+          },
+          "sampled_loss": {
+            "0": 30.782554626464844,
+            "9": 29.218067169189453,
+            "19": 26.272584915161133,
+            "29": 25.244102478027344,
+            "39": 22.707326889038086,
+            "49": 21.029186248779297,
+            "59": 18.379600524902344
+          },
+          "ms_per_step": 21.878913838882,
+          "samples_per_s": 124.3206139038843,
+          "tokens_per_s": 2736.8817502075703,
+          "elapsed_s": 1.0939456919441,
+          "window_samples": 136,
+          "window_tokens": 2994,
+          "window_steps": 50,
+          "host_step_ms": [
+            21.426948020234704,
+            26.075054076500237,
+            22.505311062559485,
+            21.44420810509473,
+            21.051821997389197,
+            22.605143953114748,
+            21.77636104170233,
+            22.402166039682925,
+            20.115804974921048,
+            21.900736959651113,
+            22.35964499413967,
+            23.135227034799755,
+            21.55800291802734,
+            22.404356976039708,
+            22.600715048611164,
+            19.305432913824916,
+            22.916067042388022,
+            19.787493045441806,
+            21.618794999085367,
+            19.894667086191475,
+            21.995350951328874,
+            22.93450804427266,
+            22.26161095313728,
+            21.46935008931905,
+            21.004730951972306,
+            19.437198992818594,
+            21.90566703211516,
+            23.397746961563826,
+            21.04529191274196,
+            19.19955899938941,
+            21.32950397208333,
+            21.153577021323144,
+            21.460468997247517,
+            21.608665003441274,
+            22.143066045828164,
+            22.199578932486475,
+            20.45093895867467,
+            21.444268990308046,
+            21.950207999907434,
+            23.010901059024036,
+            21.55436296015978,
+            22.93144806753844,
+            22.81244401820004,
+            21.736999973654747,
+            20.102064940147102,
+            22.121126065030694,
+            23.112945025786757,
+            22.854475071653724,
+            23.639146937057376,
+            24.496690020896494
+          ]
+        }
+      ],
+      "changed_environment": {},
+      "sampled_loss_max_difference": 3.814697265625e-06,
+      "sampled_losses_close_1e_6": true,
+      "saved_ms_per_step": -0.20988149801269174,
+      "step_gain": -0.009685780828193158,
+      "host_step_pairs": [
+        {
+          "step": 10,
+          "batch_size": 1,
+          "seq_len": 26,
+          "host_a_ms": 20.27401200029999,
+          "host_b_ms": 21.426948020234704,
+          "host_a_minus_b_ms": -1.1529360199347138
+        },
+        {
+          "step": 11,
+          "batch_size": 4,
+          "seq_len": 29,
+          "host_a_ms": 22.33647496905178,
+          "host_b_ms": 26.075054076500237,
+          "host_a_minus_b_ms": -3.7385791074484587
+        },
+        {
+          "step": 12,
+          "batch_size": 4,
+          "seq_len": 17,
+          "host_a_ms": 21.149866981431842,
+          "host_b_ms": 22.505311062559485,
+          "host_a_minus_b_ms": -1.3554440811276436
+        },
+        {
+          "step": 13,
+          "batch_size": 1,
+          "seq_len": 25,
+          "host_a_ms": 20.389957004226744,
+          "host_b_ms": 21.44420810509473,
+          "host_a_minus_b_ms": -1.0542511008679867
+        },
+        {
+          "step": 14,
+          "batch_size": 1,
+          "seq_len": 12,
+          "host_a_ms": 20.179899060167372,
+          "host_b_ms": 21.051821997389197,
+          "host_a_minus_b_ms": -0.8719229372218251
+        },
+        {
+          "step": 15,
+          "batch_size": 3,
+          "seq_len": 31,
+          "host_a_ms": 21.730090025812387,
+          "host_b_ms": 22.605143953114748,
+          "host_a_minus_b_ms": -0.8750539273023605
+        },
+        {
+          "step": 16,
+          "batch_size": 4,
+          "seq_len": 13,
+          "host_a_ms": 21.00334200076759,
+          "host_b_ms": 21.77636104170233,
+          "host_a_minus_b_ms": -0.7730190409347415
+        },
+        {
+          "step": 17,
+          "batch_size": 4,
+          "seq_len": 15,
+          "host_a_ms": 21.285902010276914,
+          "host_b_ms": 22.402166039682925,
+          "host_a_minus_b_ms": -1.116264029406011
+        },
+        {
+          "step": 18,
+          "batch_size": 2,
+          "seq_len": 26,
+          "host_a_ms": 19.32916499208659,
+          "host_b_ms": 20.115804974921048,
+          "host_a_minus_b_ms": -0.7866399828344584
+        },
+        {
+          "step": 19,
+          "batch_size": 3,
+          "seq_len": 15,
+          "host_a_ms": 21.03807299863547,
+          "host_b_ms": 21.900736959651113,
+          "host_a_minus_b_ms": -0.8626639610156417
+        },
+        {
+          "step": 20,
+          "batch_size": 3,
+          "seq_len": 24,
+          "host_a_ms": 21.42973802983761,
+          "host_b_ms": 22.35964499413967,
+          "host_a_minus_b_ms": -0.929906964302063
+        },
+        {
+          "step": 21,
+          "batch_size": 4,
+          "seq_len": 28,
+          "host_a_ms": 22.13852701243013,
+          "host_b_ms": 23.135227034799755,
+          "host_a_minus_b_ms": -0.9967000223696232
+        },
+        {
+          "step": 22,
+          "batch_size": 2,
+          "seq_len": 18,
+          "host_a_ms": 20.82496404182166,
+          "host_b_ms": 21.55800291802734,
+          "host_a_minus_b_ms": -0.7330388762056828
+        },
+        {
+          "step": 23,
+          "batch_size": 3,
+          "seq_len": 22,
+          "host_a_ms": 21.30960300564766,
+          "host_b_ms": 22.404356976039708,
+          "host_a_minus_b_ms": -1.0947539703920484
+        },
+        {
+          "step": 24,
+          "batch_size": 3,
+          "seq_len": 27,
+          "host_a_ms": 21.639866987243295,
+          "host_b_ms": 22.600715048611164,
+          "host_a_minus_b_ms": -0.9608480613678694
+        },
+        {
+          "step": 25,
+          "batch_size": 2,
+          "seq_len": 13,
+          "host_a_ms": 19.045362947508693,
+          "host_b_ms": 19.305432913824916,
+          "host_a_minus_b_ms": -0.26006996631622314
+        },
+        {
+          "step": 26,
+          "batch_size": 4,
+          "seq_len": 26,
+          "host_a_ms": 22.934719105251133,
+          "host_b_ms": 22.916067042388022,
+          "host_a_minus_b_ms": 0.018652062863111496
+        },
+        {
+          "step": 27,
+          "batch_size": 4,
+          "seq_len": 14,
+          "host_a_ms": 20.010821986943483,
+          "host_b_ms": 19.787493045441806,
+          "host_a_minus_b_ms": 0.22332894150167704
+        },
+        {
+          "step": 28,
+          "batch_size": 3,
+          "seq_len": 16,
+          "host_a_ms": 21.87950606457889,
+          "host_b_ms": 21.618794999085367,
+          "host_a_minus_b_ms": 0.2607110654935241
+        },
+        {
+          "step": 29,
+          "batch_size": 2,
+          "seq_len": 30,
+          "host_a_ms": 20.15262795612216,
+          "host_b_ms": 19.894667086191475,
+          "host_a_minus_b_ms": 0.25796086993068457
+        },
+        {
+          "step": 30,
+          "batch_size": 2,
+          "seq_len": 31,
+          "host_a_ms": 22.096415050327778,
+          "host_b_ms": 21.995350951328874,
+          "host_a_minus_b_ms": 0.10106409899890423
+        },
+        {
+          "step": 31,
+          "batch_size": 4,
+          "seq_len": 27,
+          "host_a_ms": 22.8266449412331,
+          "host_b_ms": 22.93450804427266,
+          "host_a_minus_b_ms": -0.1078631030395627
+        },
+        {
+          "step": 32,
+          "batch_size": 3,
+          "seq_len": 23,
+          "host_a_ms": 22.332023945637047,
+          "host_b_ms": 22.26161095313728,
+          "host_a_minus_b_ms": 0.07041299249976873
+        },
+        {
+          "step": 33,
+          "batch_size": 2,
+          "seq_len": 20,
+          "host_a_ms": 21.889426978304982,
+          "host_b_ms": 21.46935008931905,
+          "host_a_minus_b_ms": 0.4200768889859319
+        },
+        {
+          "step": 34,
+          "batch_size": 1,
+          "seq_len": 20,
+          "host_a_ms": 21.34354505687952,
+          "host_b_ms": 21.004730951972306,
+          "host_a_minus_b_ms": 0.33881410490721464
+        },
+        {
+          "step": 35,
+          "batch_size": 3,
+          "seq_len": 12,
+          "host_a_ms": 19.74131108727306,
+          "host_b_ms": 19.437198992818594,
+          "host_a_minus_b_ms": 0.3041120944544673
+        },
+        {
+          "step": 36,
+          "batch_size": 4,
+          "seq_len": 16,
+          "host_a_ms": 22.50541199464351,
+          "host_b_ms": 21.90566703211516,
+          "host_a_minus_b_ms": 0.599744962528348
+        },
+        {
+          "step": 37,
+          "batch_size": 4,
+          "seq_len": 31,
+          "host_a_ms": 23.4400590416044,
+          "host_b_ms": 23.397746961563826,
+          "host_a_minus_b_ms": 0.042312080040574074
+        },
+        {
+          "step": 38,
+          "batch_size": 1,
+          "seq_len": 21,
+          "host_a_ms": 21.19339897762984,
+          "host_b_ms": 21.04529191274196,
+          "host_a_minus_b_ms": 0.14810706488788128
+        },
+        {
+          "step": 39,
+          "batch_size": 1,
+          "seq_len": 28,
+          "host_a_ms": 19.223620067350566,
+          "host_b_ms": 19.19955899938941,
+          "host_a_minus_b_ms": 0.024061067961156368
+        },
+        {
+          "step": 40,
+          "batch_size": 2,
+          "seq_len": 15,
+          "host_a_ms": 21.26850199420005,
+          "host_b_ms": 21.32950397208333,
+          "host_a_minus_b_ms": -0.061001977883279324
+        },
+        {
+          "step": 41,
+          "batch_size": 1,
+          "seq_len": 22,
+          "host_a_ms": 21.11557498574257,
+          "host_b_ms": 21.153577021323144,
+          "host_a_minus_b_ms": -0.038002035580575466
+        },
+        {
+          "step": 42,
+          "batch_size": 2,
+          "seq_len": 23,
+          "host_a_ms": 21.562504000030458,
+          "host_b_ms": 21.460468997247517,
+          "host_a_minus_b_ms": 0.10203500278294086
+        },
+        {
+          "step": 43,
+          "batch_size": 1,
+          "seq_len": 27,
+          "host_a_ms": 21.49574097711593,
+          "host_b_ms": 21.608665003441274,
+          "host_a_minus_b_ms": -0.11292402632534504
+        },
+        {
+          "step": 44,
+          "batch_size": 3,
+          "seq_len": 19,
+          "host_a_ms": 22.28120295330882,
+          "host_b_ms": 22.143066045828164,
+          "host_a_minus_b_ms": 0.1381369074806571
+        },
+        {
+          "step": 45,
+          "batch_size": 3,
+          "seq_len": 21,
+          "host_a_ms": 23.389796959236264,
+          "host_b_ms": 22.199578932486475,
+          "host_a_minus_b_ms": 1.1902180267497897
+        },
+        {
+          "step": 46,
+          "batch_size": 3,
+          "seq_len": 28,
+          "host_a_ms": 20.745400921441615,
+          "host_b_ms": 20.45093895867467,
+          "host_a_minus_b_ms": 0.29446196276694536
+        },
+        {
+          "step": 47,
+          "batch_size": 1,
+          "seq_len": 14,
+          "host_a_ms": 22.01318193692714,
+          "host_b_ms": 21.444268990308046,
+          "host_a_minus_b_ms": 0.5689129466190934
+        },
+        {
+          "step": 48,
+          "batch_size": 3,
+          "seq_len": 14,
+          "host_a_ms": 22.428728989325464,
+          "host_b_ms": 21.950207999907434,
+          "host_a_minus_b_ms": 0.4785209894180298
+        },
+        {
+          "step": 49,
+          "batch_size": 4,
+          "seq_len": 23,
+          "host_a_ms": 23.142897058278322,
+          "host_b_ms": 23.010901059024036,
+          "host_a_minus_b_ms": 0.1319959992542863
+        },
+        {
+          "step": 50,
+          "batch_size": 1,
+          "seq_len": 29,
+          "host_a_ms": 22.10425492376089,
+          "host_b_ms": 21.55436296015978,
+          "host_a_minus_b_ms": 0.5498919636011124
+        },
+        {
+          "step": 51,
+          "batch_size": 3,
+          "seq_len": 30,
+          "host_a_ms": 23.35851499810815,
+          "host_b_ms": 22.93144806753844,
+          "host_a_minus_b_ms": 0.42706693056970835
+        },
+        {
+          "step": 52,
+          "batch_size": 4,
+          "seq_len": 22,
+          "host_a_ms": 23.009021999314427,
+          "host_b_ms": 22.81244401820004,
+          "host_a_minus_b_ms": 0.1965779811143875
+        },
+        {
+          "step": 53,
+          "batch_size": 3,
+          "seq_len": 13,
+          "host_a_ms": 22.320043994113803,
+          "host_b_ms": 21.736999973654747,
+          "host_a_minus_b_ms": 0.5830440204590559
+        },
+        {
+          "step": 54,
+          "batch_size": 2,
+          "seq_len": 32,
+          "host_a_ms": 20.402178051881492,
+          "host_b_ms": 20.102064940147102,
+          "host_a_minus_b_ms": 0.30011311173439026
+        },
+        {
+          "step": 55,
+          "batch_size": 3,
+          "seq_len": 17,
+          "host_a_ms": 22.464629961177707,
+          "host_b_ms": 22.121126065030694,
+          "host_a_minus_b_ms": 0.3435038961470127
+        },
+        {
+          "step": 56,
+          "batch_size": 4,
+          "seq_len": 25,
+          "host_a_ms": 23.086823988705873,
+          "host_b_ms": 23.112945025786757,
+          "host_a_minus_b_ms": -0.02612103708088398
+        },
+        {
+          "step": 57,
+          "batch_size": 3,
+          "seq_len": 26,
+          "host_a_ms": 22.90280698798597,
+          "host_b_ms": 22.854475071653724,
+          "host_a_minus_b_ms": 0.04833191633224487
+        },
+        {
+          "step": 58,
+          "batch_size": 4,
+          "seq_len": 30,
+          "host_a_ms": 23.686749045737088,
+          "host_b_ms": 23.639146937057376,
+          "host_a_minus_b_ms": 0.04760210867971182
+        },
+        {
+          "step": 59,
+          "batch_size": 4,
+          "seq_len": 19,
+          "host_a_ms": 23.73568096663803,
+          "host_b_ms": 24.496690020896494,
+          "host_a_minus_b_ms": -0.7610090542584658
+        }
+      ],
+      "training_loop_wall_delta_ms": {
+        "min": -3.7385791074484587,
+        "p10": -1.0947539703920484,
+        "median": 0.044957094360142946,
+        "p90": 0.4785209894180298,
+        "max": 1.1902180267497897
+      }
+    },
+    {
+      "series": "r1",
+      "order": "AB",
+      "mode": "no-profiler",
+      "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ab",
+      "legs": [
+        {
+          "variant": "A",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ab\\01-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ab\\01-A\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -1535,8 +2802,8 @@
         },
         {
           "variant": "B",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ab\\02-B",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ab\\02-B\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ab\\02-B",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ab\\02-B\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -2175,12 +3442,12 @@
       "series": "r1",
       "order": "BA",
       "mode": "no-profiler",
-      "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ba",
+      "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ba",
       "legs": [
         {
           "variant": "B",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ba\\01-B",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ba\\01-B\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ba\\01-B",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ba\\01-B\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
@@ -2396,8 +3663,8 @@
         },
         {
           "variant": "A",
-          "directory": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ba\\02-A",
-          "metrics": "..\\pr42634\\eager-paired\\evidence\\pr42634-eager-v3-no-profiler-ba\\02-A\\rank000\\metrics.json",
+          "directory": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ba\\02-A",
+          "metrics": "receipts28-pr\\evidence\\pr42634-eager-v3-no-profiler-ba\\02-A\\rank000\\metrics.json",
           "runtime": {
             "rank": 0,
             "world_size": 1,
