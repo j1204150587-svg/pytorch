@@ -47,6 +47,8 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 紧凑 Div 在 Level1 两步的同一个 autograd worker 上均匹配到 1,024 次除法。物理流 47 每步少 1,024 个 BroadcastTo，该组实际 ACL launch 从 2,048 降至 1,024。流 44、45 及其余工作次序一致。第 4、5 步的 producer 准备 p50 从 12.36→20.03、12.49→20.47 µs，consumer 服务从 14.95→13.91、15.28→14.25 µs，每个请求内 ACL 总时长从 8.17→6.17、8.10→6.26 µs。该组请求前的全流空档从 60.565→53.962、56.652→58.258 ms。正式 Level0 的 Computing 反而分别增加 6.59、7.42 ms/步，Free 占比的降幅同时包含分母的变化。50 步端到端正序 +8.52%、反序 −9.25%。[逐次匹配及分位数](divs/training-l1/verified.json) · [八列对照](reports/divs.md)
 
 
+在相同双向 embedding 配方的独立 Level1 中，直接在 `halSqTaskSend` 入口和返回计时。第 4、5 步分别有 17,242 和 17,243 笔成功提交，均为单 SQE，其中 17,214 和 17,215 笔与同线程 ACL、实际物理任务唯一对应。HAL 自耗时总计 21.493、21.306 ms，与对应后继设备空档的名义交集为 14.516、8.768 ms。即使按本窗允许的最早设备时钟，每步仍至少有 138.980、138.083 ms 发生在对应 HAL 返回之后。观测两腿的各物理流工作顺序和实际 ACL 提交数一致。驱动已经返回后的时间仍可能受设备队列、流依赖与固件调度影响。[实测探针](https://github.com/j1204150587-svg/pytorch/blob/4d1ad0d1526ff93653795ef35d6fa37a9e6888f9/experiments/npu8-optimization/infra-only-20261128/followup70/hal-submit/probe.cpp) · [分位数、时钟约束与原始证据](https://github.com/j1204150587-svg/pytorch/blob/4d1ad0d1526ff93653795ef35d6fa37a9e6888f9/experiments/npu8-optimization/infra-only-20261128/followup70/hal-submit/README.md)
+
 ## 有实测收益的优化
 
 每张表第一行是正序 A/B，第二行是反序 B/A。数据统一按 A→B 展示，时间单位为 ms/步。端到端提升为 1−B步时/A步时，末列为 1−B的Free占比/A的Free占比。正值表示改善。
