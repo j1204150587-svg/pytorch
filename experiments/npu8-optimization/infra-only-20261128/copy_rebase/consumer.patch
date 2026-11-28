@@ -1,0 +1,166 @@
+diff --git a/torch_npu/csrc/aten/ops/op_api/CopyKernelOpApi.cpp b/torch_npu/csrc/aten/ops/op_api/CopyKernelOpApi.cpp
+--- a/torch_npu/csrc/aten/ops/op_api/CopyKernelOpApi.cpp
++++ b/torch_npu/csrc/aten/ops/op_api/CopyKernelOpApi.cpp
+@@ -27,6 +27,131 @@
+ #ifndef BUILD_LIBTORCH
+ #include "torch_npu/csrc/sanitizer/NPUTrace.h"
+ #endif
++
++#include <array>
++#include <atomic>
++#include <cstdlib>
++#include <cstring>
++#include "torch_npu/csrc/core/npu/NPUCachingAllocator.h"
++
++namespace c10_npu::NPUCachingAllocator {
++bool ownedByCopyStream(const c10::DataPtr&, aclrtStream);
++}
++
++namespace {
++std::array<std::atomic<uint64_t>,4> consumer_copy_count{};
++
++bool consumer_copy_flag(const char* name)
++{
++    const char* value = std::getenv(name);
++    return value && std::strcmp(value,"1") == 0;
++}
++
++void count_consumer_copy(size_t index)
++{
++    static const bool enabled = consumer_copy_flag("NPU_DYNAMIC_REBASE_COUNT");
++    if (enabled) consumer_copy_count[index].fetch_add(1, std::memory_order_relaxed);
++}
++
++bool use_consumer_copy(const at::Tensor& dst, const at::Tensor& src)
++{
++    static const bool enabled = consumer_copy_flag("NPU_INPLACE_COPY_CONSUMER");
++    if (!enabled) return false;
++    bool eligible = c10_npu::option::OptionsManager::GetTaskQueueEnable() == 1 &&
++        dst.scalar_type() == at::kBFloat16 && src.scalar_type() == at::kBFloat16 &&
++        dst.dim() == 1 && src.dim() == 1 && dst.size(0) == 4096 && src.size(0) == 4096 &&
++        dst.stride(0) == 1 && src.stride(0) == 1 &&
++        !dst.is_conj() && !src.is_conj() && !dst.is_neg() && !src.is_neg() &&
++        dst.storage().unsafeGetStorageImpl() != src.storage().unsafeGetStorageImpl() &&
++        at_npu::native::FormatHelper::GetFormat(dst) == ACL_FORMAT_ND &&
++        at_npu::native::FormatHelper::GetFormat(src) == ACL_FORMAT_ND;
++    if (eligible) {
++        const auto stream = c10_npu::getCurrentNPUStream();
++        eligible = !stream.isSyncLaunchStream() &&
++            c10_npu::currentStreamCaptureStatusMayInitCtx() != c10_npu::CaptureStatus::Active &&
++            c10_npu::NPUCachingAllocator::ownedByCopyStream(dst.storage().data_ptr(), stream.stream(false)) &&
++            c10_npu::NPUCachingAllocator::ownedByCopyStream(src.storage().data_ptr(), stream.stream(false));
++    }
++    count_consumer_copy(eligible ? 0 : 1);
++    return eligible;
++}
++}
++
++extern "C" __attribute__((visibility("default"))) uint64_t npu_inplace_copy_rebase_counter(unsigned index)
++{
++    return index < consumer_copy_count.size() ? consumer_copy_count[index].load(std::memory_order_relaxed) : 0;
++}
++
++#define EXEC_OWNED_COPY_V2(aclnn_api, ...)                                                                                \
++    do {                                                                                                               \
++        static const auto getWorkspaceSizeFuncAddr = GetOpApiFuncAddr(#aclnn_api "GetWorkspaceSize");                  \
++        static const auto opApiFuncAddr = GetOpApiFuncAddr(#aclnn_api);                                                \
++        static const auto initMemAddr = GetOpApiFuncAddr("InitHugeMemThreadLocal");                                    \
++        static const auto unInitMemAddr = GetOpApiFuncAddr("UnInitHugeMemThreadLocal");                                \
++        static const auto releaseMemAddr = GetOpApiFuncAddr("ReleaseHugeMem");                                         \
++        TORCH_CHECK(getWorkspaceSizeFuncAddr != nullptr && opApiFuncAddr != nullptr, #aclnn_api, " or ",               \
++                    #aclnn_api "GetWorkspaceSize", " not in ", GetOpApiLibName(), ", or ", GetOpApiLibName(),          \
++                    " not found.", OPS_ERROR(ErrCode::PTR));                                                            \
++        auto acl_stream = c10_npu::getCurrentNPUStream().stream(false);                                                \
++        if (c10_npu::check_enqueue_need_use(acl_stream)) {                                                             \
++            c10_npu::UseStreamResInCurrentThread(acl_stream);                                                          \
++        }                                                                                                              \
++        OP_EXEC_LOG_WITH_TASK_QUEUE(#aclnn_api, "EXEC_NPU_CMD", "2", acl_stream, __VA_ARGS__);                         \
++        auto copied_params = CopyTypesV2(__VA_ARGS__); count_consumer_copy(2);                                                                 \
++        auto deterministic_status = at::globalContext().deterministicAlgorithms();                                     \
++        uint32_t aic_num = UINT32_MAX;                                                                                  \
++        uint32_t aiv_num = UINT32_MAX;                                                                                  \
++        if (c10_npu::is_core_control_enabled()) {                                                            \
++            aic_num = c10_npu::GetResInCurrentThread(c10_npu::acl::ACL_RT_DEV_RES_CUBE_CORE);                           \
++            aiv_num = c10_npu::GetResInCurrentThread(c10_npu::acl::ACL_RT_DEV_RES_VECTOR_CORE);                         \
++        }                                                                                                              \
++        auto acl_call = [copied_params, dst_owner=dst.storage(), src_owner=src.storage(), acl_stream, deterministic_status, aic_num, aiv_num]()->int { (void)dst_owner; (void)src_owner; count_consumer_copy(3);                     \
++            if (c10_npu::check_dequeue_need_use(acl_stream)) {                                                         \
++                c10_npu::UseStreamResInCurrentThread(acl_stream);                                                      \
++            }                                                                                                          \
++            uint64_t workspace_size = 0;                                                                               \
++            uint64_t *workspace_size_addr = &workspace_size;                                                           \
++            aclOpExecutor *executor = nullptr;                                                                         \
++            aclOpExecutor **executor_addr = &executor;                                                                 \
++            InitHugeMemThreadLocal initMemFunc = reinterpret_cast<InitHugeMemThreadLocal>(initMemAddr);                \
++            UnInitHugeMemThreadLocal unInitMemFunc = reinterpret_cast<UnInitHugeMemThreadLocal>(unInitMemAddr);        \
++            int api_ret = 0;                                                                                           \
++            if (hit_cache_v2(                                                                                          \
++               acl_stream, #aclnn_api, opApiFuncAddr, copied_params, &api_ret, deterministic_status, aic_num, aiv_num))  \
++            {                                                                                                          \
++                return api_ret;                                                                                        \
++            }                                                                                                          \
++            at_npu::native::SetDeterministicOps(deterministic_status);                                                 \
++            if (initMemFunc) {                                                                                         \
++                initMemFunc(nullptr, false);                                                                           \
++            }                                                                                                          \
++            auto converted_params = ConvertTypesV2(copied_params, workspace_size_addr, executor_addr);                 \
++            auto getWorkspaceSizeFunc = ConvertToOpApiFunc(converted_params, getWorkspaceSizeFuncAddr);                \
++            auto workspace_status = call(getWorkspaceSizeFunc, converted_params);                                      \
++            NPU_CHECK_ERROR(workspace_status, "call " #aclnn_api " failed");                                           \
++            void *workspace_addr = nullptr;                                                                            \
++            at::Tensor workspace_tensor;                                                                               \
++            if (workspace_size != 0) {                                                                                 \
++                workspace_tensor = at_npu::native::OpPreparation::unsafe_empty_workspace(workspace_size, acl_stream);  \
++                workspace_addr = const_cast<void *>(workspace_tensor.storage().data());                                \
++            }                                                                                                          \
++            OpApiFunc opApiFunc = reinterpret_cast<OpApiFunc>(opApiFuncAddr);                                          \
++            api_ret = opApiFunc(workspace_addr, workspace_size, executor, acl_stream);                                 \
++            NPU_CHECK_ERROR(api_ret, "call " #aclnn_api " failed");                                                    \
++            ReleaseConvertTypes(converted_params);                                                                     \
++            ReleaseHugeMem releaseMemFunc = reinterpret_cast<ReleaseHugeMem>(releaseMemAddr);                          \
++            if (releaseMemFunc) {                                                                                      \
++                releaseMemFunc(nullptr, false);                                                                        \
++            }                                                                                                          \
++            if (unInitMemFunc) {                                                                                       \
++                unInitMemFunc(nullptr, false);                                                                         \
++            }                                                                                                          \
++            UnInitCacheThreadLocal();                                                                                  \
++            return api_ret;                                                                                            \
++        };                                                                                                             \
++        at_npu::native::OpCommand::RunOpApiV2(#aclnn_api, acl_call);                                                   \
++    } while (false)
++
+ 
+ namespace at_npu {
+ namespace native {
+@@ -86,6 +211,10 @@
+     c10::SmallVector<at::Tensor, N> outputs = {dst};
+     CalcuOpUtil::CheckMemoryOverLaps(inputs, outputs);
+ 
++    if (use_consumer_copy(dst, src)) {
++        EXEC_OWNED_COPY_V2(aclnnInplaceCopy, dst, src);
++        return;
++    }
+     EXEC_NPU_CMD(aclnnInplaceCopy, dst, src);
+ }
+ 
+diff --git a/torch_npu/csrc/core/npu/NPUCachingAllocator.cpp b/torch_npu/csrc/core/npu/NPUCachingAllocator.cpp
+--- a/torch_npu/csrc/core/npu/NPUCachingAllocator.cpp
++++ b/torch_npu/csrc/core/npu/NPUCachingAllocator.cpp
+@@ -3873,6 +3873,16 @@
+ 
+ NpuCachingAllocator caching_allocator;
+ 
++bool ownedByCopyStream(const c10::DataPtr& ptr, aclrtStream stream)
++{
++    if (!ptr.get() || ptr.get_deleter() != &local_raw_delete || get() != &caching_allocator) {
++        return false;
++    }
++    const auto* block = static_cast<const Block*>(caching_allocator.getBlockPtr(ptr));
++    return block && block->stream == stream;
++}
++
++
+ REGISTER_ALLOCATOR(c10::DeviceType::PrivateUse1, &caching_allocator);
+ 
+ 
