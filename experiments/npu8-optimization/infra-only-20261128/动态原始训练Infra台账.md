@@ -1,5 +1,7 @@
 # 动态 HSTU 原始训练脚本上的 Infra 实验
 
+**最新整包结果。** 保持默认缓存，分支三个开关全开后，六轮配对步时降幅中位数为 **31.90%**，Level0 Free 从 **92.243% 降至 90.197%**。镜像原装到三项全开并使用大缓存的六轮配对步时降幅中位数为 **35.18%**。[整包实机报告](https://github.com/j1204150587-svg/pytorch/blob/8b1135db516eefc279db5f29586215515b01b642/experiments/npu8-optimization/infra-only-20261128/branch-stability-v210/publication/分支稳定性结果.md)
+
 11 月 28 日收尾。最后一轮 embedding 反向窄索引在两个实际 shape 上各减少 1,024 个物理 Cast，但其稳态步时和 Free 在正反序均变号。原装库到大缓存与双向 embedding 的直接配对仍是本轮累计收益依据。18:02 确认逻辑卡 8 空闲、两把锁可获取，训练容器运行中且只余 init。[最后一轮补丁](https://github.com/j1204150587-svg/pytorch/blob/8e0fa4364d2324971bc1204bad1cdd4c22df8ad8/experiments/npu8-optimization/infra-only-20261128/followup70/index-low-lane/index-low-lane.patch) · [完整双序结果](https://github.com/j1204150587-svg/pytorch/blob/8e0fa4364d2324971bc1204bad1cdd4c22df8ad8/experiments/npu8-optimization/infra-only-20261128/followup70/index-low-lane/README.md) · [设备回执](https://github.com/j1204150587-svg/pytorch/blob/8e0fa4364d2324971bc1204bad1cdd4c22df8ad8/experiments/npu8-optimization/infra-only-20261128/followup70/final-slot.json)
 
 原装库直接对照大缓存与双向 embedding 补丁，原训练无 profiler 步时正、反序分别从 **595.291→368.560、559.120→373.065 ms/步**，缩短 **38.09%、33.28%**。Level0 Free 占比为 **91.853%→90.572%、91.543%→89.296%**。同一完整配方在前向补丁增量实验中的 B 腿另测得 **89.20%、89.12%**。截至这两组配对，获双序端到端收益的完整配方距 70% 至少还差 **19.12 个百分点**。[直接配方对照与逐次下发](https://github.com/j1204150587-svg/pytorch/blob/79af60ca56d3e4c6dc5355b403d967107c5bc883/experiments/npu8-optimization/infra-only-20261128/followup70/stock-to-embedding/README.md) · [前向增量的逐腿复算](reports/emb-fwd.md)
@@ -50,6 +52,20 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 
 
 在相同双向 embedding 配方的独立 Level1 中，直接在 `halSqTaskSend` 入口和返回计时。第 4、5 步分别有 17,242 和 17,243 笔成功提交，均为单 SQE，其中 17,214 和 17,215 笔与同线程 ACL、实际物理任务唯一对应。HAL 自耗时总计 21.493、21.306 ms，与对应后继设备空档的名义交集为 14.516、8.768 ms。即使按本窗允许的最早设备时钟，每步仍至少有 138.980、138.083 ms 发生在对应 HAL 返回之后。观测两腿的各物理流工作顺序和实际 ACL 提交数一致。驱动已经返回后的时间仍可能受设备队列、流依赖与固件调度影响。[实测探针](https://github.com/j1204150587-svg/pytorch/blob/4d1ad0d1526ff93653795ef35d6fa37a9e6888f9/experiments/npu8-optimization/infra-only-20261128/followup70/hal-submit/probe.cpp) · [分位数、时钟约束与原始证据](https://github.com/j1204150587-svg/pytorch/blob/4d1ad0d1526ff93653795ef35d6fa37a9e6888f9/experiments/npu8-optimization/infra-only-20261128/followup70/hal-submit/README.md)
+
+## v2.10 三项合入后的稳定性复测
+
+实测源码分支为 `codex/hstu-dynamic-eager-infra-v2.10`，基于 `38e483ee7`，分支头为 `e3cda6399`。前两项通过 CMake 接入 op-plugin 的 embedding 前向和反向描述符，第三项改动 PTA 的 `Repository::Dequeue/Enqueue`。新构建的 wheel 使用原模型和训练脚本完成全部实卡测量。[反向只读索引补丁](https://github.com/j1204150587-svg/pytorch/commit/2cd525d5563cea44fb17596830c3a2367a99dff9) · [前向权重与索引补丁](https://github.com/j1204150587-svg/pytorch/commit/645b89a69c34509e28775b82a5bc478fb33ca556) · [队列仅唤醒满队列等待者](https://github.com/j1204150587-svg/pytorch/commit/e3cda6399cb194c813530222478ea018f5aca5c9)
+
+下表三行依次为同包默认缓存、同包 65,536 项缓存，以及镜像原装默认缓存到新包全开并设置 65,536 项缓存。前两行只切换分支的三个开关。每行端到端取各腿六轮的中位数，第三列按该行两中位数求降幅。Free 耗时取四次 Level0 各三步的均值，占比按全部十二步 ΣFree/ΣStage 计算。单位为 ms/步。
+
+|优化前端到端|优化后端到端|端到端提升比例|优化前 Free|优化前 Free 占比|优化后 Free|优化后 Free 占比|Free 占比提升比例|
+|---:|---:|---:|---:|---:|---:|---:|---:|
+|592.124|400.723|32.32%|615.163|92.243%|493.939|90.197%|2.22%|
+|504.213|381.241|24.39%|596.356|91.999%|462.042|89.669%|2.53%|
+|598.789|383.232|36.00%|620.827|92.316%|477.308|89.836%|2.69%|
+
+18 个无 profiler 配对全部缩短步时，12 个 Level0 配对的 Free 占比全部下降。按每个配对先求降幅再取中位数，上述三项结果依次为 31.90%、24.63%、35.18%。大缓存同包对照的正序、反序中位数分别为 18.43%、29.84%，对顺序较敏感。真实八步训练的前反向分别命中 8,192 次，两腿队列工作数相同，无等待者的 eventfd 写由 87,066 次降到 0。[整包实机报告](https://github.com/j1204150587-svg/pytorch/blob/8b1135db516eefc279db5f29586215515b01b642/experiments/npu8-optimization/infra-only-20261128/branch-stability-v210/publication/分支稳定性结果.md) · [命中与数值验证](https://github.com/j1204150587-svg/pytorch/blob/8b1135db516eefc279db5f29586215515b01b642/experiments/npu8-optimization/infra-only-20261128/branch-stability-v210/semantics/README.md) · [逐请求归因](https://github.com/j1204150587-svg/pytorch/blob/8b1135db516eefc279db5f29586215515b01b642/experiments/npu8-optimization/infra-only-20261128/branch-stability-v210/reports/side-tables.md) · [逐轮配对图](https://github.com/j1204150587-svg/pytorch/blob/8b1135db516eefc279db5f29586215515b01b642/experiments/npu8-optimization/infra-only-20261128/branch-stability-v210/reports/paired-runs.png)
 
 ## 有实测收益的优化
 
