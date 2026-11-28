@@ -30,7 +30,11 @@ def focus(data, gaps, works, step, target):
     ids = {r["queue_id"] for r in qs}
     matched = [r for r in gaps if int(r["step"]) == step and r["queue_id"] in ids]
     work = [r for r in works if int(r["step"]) == step and r["queue_id"] in ids]
+    slots={(r["stream"],r["task_id"]) for r in work}
+    physical=[r for r in gaps if int(r["step"])==step and (r["stream"],r["task_id"]) in slots]
     return {"requests":len(qs),"joined_device_tasks":len(work),"linked_gaps":len(matched),
+            "physical_preceding_gaps":len(physical),
+            "all_physical_preceding_gap_ms":round(sum(int(r["gap_ns"]) for r in physical)/1e6,6),
             "timing":{k:timings(qs,k) for k in TIME_FIELDS},
             "hardware_by_stream": dict(Counter(r["stream"] for r in work)),
             "overlap_ms":{k:round(sum(int(r[k] or 0) for r in matched)/1e6,6) for k in GAP_FIELDS}}
