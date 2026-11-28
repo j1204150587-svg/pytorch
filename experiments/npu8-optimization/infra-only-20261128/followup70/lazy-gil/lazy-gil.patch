@@ -1,0 +1,112 @@
+--- a/torch_npu/csrc/utils/LazyInit.cpp
++++ b/torch_npu/csrc/utils/LazyInit.cpp
+@@ -3,6 +3,61 @@
+ #include <torch/csrc/utils/object_ptr.h>
+ #include <torch/csrc/Exceptions.h>
+ #include "torch_npu/csrc/utils/LazyInit.h"
++
++#include <atomic>
++#include <chrono>
++#include <cinttypes>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++
++namespace {
++std::atomic<bool> pythonReady{false};
++std::atomic<uint64_t> lazyCalls{0}, lazyHits{0}, lazyWaitNs{0}, lazyMaxNs{0};
++
++bool envOn(const char* name)
++{
++    const char* value = std::getenv(name);
++    return value && std::strcmp(value, "1") == 0;
++}
++
++bool lazyEnabled()
++{
++    static const bool enabled = envOn("TORCH_NPU_LAZY_GIL_FAST");
++    return enabled;
++}
++
++bool pythonRuntimeLive()
++{
++#if PY_VERSION_HEX >= 0x030D0000
++    return Py_IsInitialized() && !Py_IsFinalizing();
++#else
++    return Py_IsInitialized() && !_Py_IsFinalizing();
++#endif
++}
++
++void reportLazy()
++{
++    std::fprintf(stderr, "PTA_LAZY_GIL enabled=%d calls=%" PRIu64 " fast=%" PRIu64
++                 " acquire_ns=%" PRIu64 " max_ns=%" PRIu64 "\n", static_cast<int>(lazyEnabled()),
++                 lazyCalls.load(), lazyHits.load(), lazyWaitNs.load(), lazyMaxNs.load());
++}
++
++bool lazyAudit()
++{
++    static const bool enabled = [] {
++        if (!envOn("TORCH_NPU_LAZY_GIL_AUDIT")) return false;
++        std::atexit(reportLazy);
++        return true;
++    }();
++    return enabled;
++}
++
++void countLazy(std::atomic<uint64_t>& count)
++{
++    count.fetch_add(1, std::memory_order_relaxed);
++}
++} // namespace
+ 
+ namespace torch_npu {
+ namespace utils {
+@@ -12,7 +67,23 @@
+ 
+ void npu_lazy_init()
+ {
++    const bool audit = lazyAudit();
++    const bool fast = lazyEnabled();
++    if (audit) countLazy(lazyCalls);
++    if (fast && pythonReady.load(std::memory_order_acquire) && pythonRuntimeLive()) {
++        if (audit) countLazy(lazyHits);
++        return;
++    }
++    const auto start = audit ? std::chrono::steady_clock::now() : std::chrono::steady_clock::time_point{};
+     pybind11::gil_scoped_acquire g;
++    if (audit) {
++        const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
++            std::chrono::steady_clock::now() - start).count();
++        lazyWaitNs.fetch_add(ns, std::memory_order_relaxed);
++        uint64_t old = lazyMaxNs.load(std::memory_order_relaxed);
++        while (old < static_cast<uint64_t>(ns) && !lazyMaxNs.compare_exchange_weak(
++            old, ns, std::memory_order_relaxed)) {}
++    }
+     // Protected by the GIL.  We don't use call_once because under ASAN it
+     // has a buggy implementation that deadlocks if an instance throws an
+     // exception.  In any case, call_once isn't necessary, because we
+@@ -28,10 +99,23 @@
+         }
+         npu_run_yet = true;
+     }
++    // A reentrant _lazy_init can return before another Python caller has
++    // completed its deferred callbacks. Only publish the committed state.
++    if (fast && pythonRuntimeLive()) {
++        PyObject* module = PyDict_GetItemString(PyImport_GetModuleDict(), "torch_npu.npu");
++        if (module && PyModule_Check(module)) {
++            PyObject* dict = PyModule_GetDict(module);
++            if (PyDict_GetItemString(dict, "_initialized") == Py_True &&
++                PyDict_GetItemString(dict, "_is_internal_in_bad_fork") == Py_False) {
++                pythonReady.store(true, std::memory_order_release);
++            }
++        }
++    }
+ }
+ 
+ void npu_set_run_yet_variable_to_false()
+ {
++    pythonReady.store(false, std::memory_order_release);
+     npu_run_yet = false;
+ }
+ 
