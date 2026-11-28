@@ -1,0 +1,2243 @@
+{
+  "comparison": "default-cache",
+  "baseline": "同一分支包，三项关闭，默认缓存",
+  "candidate": "同一分支包，三项开启，默认缓存",
+  "manifest_sha256": "f899e2c41b4d2e56b34458637a5dd4e2634571022371dbc6cd5a54797d5c280d",
+  "branch_commit": "e3cda6399cb194c813530222478ea018f5aca5c9",
+  "branch_library_sha256": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75",
+  "schedule_sha256": "2ef9fe87cad730b64f46b00a71cf1587cb8b1cb777cf899f90e01f63cd6246bf",
+  "settings": {
+    "--seed": "1234",
+    "--model-config": "configs/model_many_tables.json",
+    "--deepspeed-config": "configs/deepspeed_zero2_bf16_overflow_on.json",
+    "--shape-schedule": "configs/dynamic_shapes_npu8.json",
+    "--micro-batch-size": "2",
+    "--learning-rate": "0.001",
+    "--weight-decay": "0.01"
+  },
+  "coverage": {
+    "no-profiler": {
+      "ab": {
+        "observed": 3,
+        "planned": 3
+      },
+      "ba": {
+        "observed": 3,
+        "planned": 3
+      }
+    },
+    "l0": {
+      "ab": {
+        "observed": 2,
+        "planned": 2
+      },
+      "ba": {
+        "observed": 2,
+        "planned": 2
+      }
+    },
+    "l1": {
+      "ab": {
+        "observed": 1,
+        "planned": 1
+      },
+      "ba": {
+        "observed": 0,
+        "planned": 0
+      }
+    }
+  },
+  "design_complete": true,
+  "all_have_host_receipts": true,
+  "pairs": [
+    {
+      "id": "branch-v210-default-cache-no-profiler-01-ab",
+      "order": "ab",
+      "mode": "no-profiler",
+      "raw": "../raw/20261128T103535Z-ab-no-profiler-19lybpq9",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-no-profiler-01-ab",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "A": {
+            "worker_pid": 787517,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "3edce2fc5ba81f9c157c3269cd1cd03b623cbf7d03457f8ada478777d259f66d",
+            "worker_sha256": "7feefc01fe2d6f5db54e913a448387aaa2821e182d36509f04f91c1a1e46679c",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "B": {
+            "worker_pid": 805058,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "603f4df363e2bf5835ddfb0897b26c39178c32d25e50cd3384e9a4ecab6b5178",
+            "worker_sha256": "17bf1d8a0cc8e9d0ba6b25f30ef1d041efb3c753c0d39e7ada89569808bb65d4",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "A": {
+            "worker": 787517,
+            "samples": 10,
+            "with_worker": 7,
+            "begin": "2026-11-28T10:35:35+00:00",
+            "end": "2026-11-28T10:36:41+00:00"
+          },
+          "B": {
+            "worker": 805058,
+            "samples": 8,
+            "with_worker": 4,
+            "begin": "2026-11-28T10:36:44+00:00",
+            "end": "2026-11-28T10:37:35+00:00"
+          }
+        },
+        "chip_sha256": "76f0f9e96fc95e8b0369a4098ca355431a502c176d98c6476129474f9cff3ca8"
+      },
+      "metrics_sha256": {
+        "A": "82a3a8040d563062cbd541ff8da17631502484da3c2af71d8e5d69195117b6a8",
+        "B": "3570f46671895359455c49146d8a6df22a462f008c8b7029cd1826aff6fca1c9"
+      },
+      "plan_sha256": "20490fdaa54a42400db41126436d92f44f32f64fd62c3258a3b2071b908ca838",
+      "A": {
+        "ms": 636.2250740616582,
+        "seconds": 31.81125370308291,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 4.275216603199134,
+        "tokens_per_s": 94.11763610278093
+      },
+      "B": {
+        "ms": 373.7267824402079,
+        "seconds": 18.686339122010395,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 7.27804408942827,
+        "tokens_per_s": 160.22400002756058
+      },
+      "delta_ms": 262.49829162145033,
+      "gain_pct": 41.25871524453797
+    },
+    {
+      "id": "branch-v210-default-cache-l0-01-ab",
+      "order": "ab",
+      "mode": "l0",
+      "raw": "../raw/20261128T103739Z-ab-l0-b_md3eu0",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-l0-01-ab",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "A": {
+            "worker_pid": 816470,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "01e049896f5eafe0196ac45fc503bde6f43363a04213737798937e828d9481b1",
+            "worker_sha256": "774170e05bcbb177a91d3465192d84c4b279ca44be359c87156e0b547708d091",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "B": {
+            "worker_pid": 831255,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "a4fbb08a0df35706f48ce6a7f5ac2567495caa9cf9ace06bc1efe888b83eead7",
+            "worker_sha256": "faf01bfceb3ba47d04d2e753edd42e7e62535729f3109f60e719ddae261846e0",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "A": {
+            "worker": 816470,
+            "samples": 8,
+            "with_worker": 5,
+            "begin": "2026-11-28T10:37:39+00:00",
+            "end": "2026-11-28T10:38:33+00:00"
+          },
+          "B": {
+            "worker": 831255,
+            "samples": 8,
+            "with_worker": 4,
+            "begin": "2026-11-28T10:38:42+00:00",
+            "end": "2026-11-28T10:39:34+00:00"
+          }
+        },
+        "chip_sha256": "600f174a702edaff7c4f465c354dfbb701b38b8b92ae2f0416c3e92afa686a80"
+      },
+      "metrics_sha256": {
+        "A": "9eaa106ba69161752089d7fcc0031a9d7d8576edaa6c34f9d96423160df3942a",
+        "B": "40a0ab2c9060ab933bd58b199e75e1c5dc7917cfc1cc43edf19526e78ce998f6"
+      },
+      "plan_sha256": "e1cbd8fee75dc3f97074e27e57409bba8817df783570493eb7403e2692578e79",
+      "A": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 627.3946599999999,
+            "Stage": 683.0115,
+            "Computing": 55.51223999999993
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 658.0938800000059,
+            "Stage": 710.4455,
+            "Computing": 52.25602000000007
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 649.9472000000044,
+            "Stage": 698.4185,
+            "Computing": 48.38686000000089
+          }
+        ],
+        "free_ms": 645.1452466666701,
+        "stage_ms": 697.2918333333333,
+        "computing_ms": 52.05170666666696,
+        "free_pct": 92.52155493957505
+      },
+      "B": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 488.6266799999987,
+            "Stage": 546.1665,
+            "Computing": 57.43883999999971
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 491.67583999999795,
+            "Stage": 545.79425,
+            "Computing": 54.02279999999972
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 485.6205799999996,
+            "Stage": 535.29725,
+            "Computing": 49.583959999999934
+          }
+        ],
+        "free_ms": 488.6410333333321,
+        "stage_ms": 542.4193333333334,
+        "computing_ms": 53.68186666666645,
+        "free_pct": 90.08547507524905
+      },
+      "free_ratio_gain_pct": 2.6329862980761454
+    },
+    {
+      "id": "branch-v210-default-cache-no-profiler-02-ba",
+      "order": "ba",
+      "mode": "no-profiler",
+      "raw": "../raw/20261128T104612Z-ba-no-profiler-qk9bmidg",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-no-profiler-02-ba",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "B": {
+            "worker_pid": 943606,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "a85a12d24997dfeeaefddfeb980d97062b4e9546defd26c99d994dd2c98863aa",
+            "worker_sha256": "4c87a5551439b3796022fdfe5ac3b07e6c4536a37715096ceffec93211027237",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "A": {
+            "worker_pid": 957171,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "f4eb2686af760783590efd31af4dd0d44aef34267b4bbc5f3b8daa71f2ff7bb3",
+            "worker_sha256": "292211715f1389d516743a71479a28141ea25e0b8a48eefb5bf70ba595b73756",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "B": {
+            "worker": 943606,
+            "samples": 8,
+            "with_worker": 5,
+            "begin": "2026-11-28T10:46:12+00:00",
+            "end": "2026-11-28T10:47:04+00:00"
+          },
+          "A": {
+            "worker": 957171,
+            "samples": 10,
+            "with_worker": 6,
+            "begin": "2026-11-28T10:47:08+00:00",
+            "end": "2026-11-28T10:48:11+00:00"
+          }
+        },
+        "chip_sha256": "19dd5d09117e10f379d78584612b4cb7191f6fa88223615912c391419556a4d2"
+      },
+      "metrics_sha256": {
+        "B": "4c45eb64d375ae53618616379cac7a38fc3099a4f16d2d0b5ed5e4949cdd360d",
+        "A": "b2730d6d2fe4cd58d7df67b6d55e3cf09d5cc623ac88cf8c67063b80e318e862"
+      },
+      "plan_sha256": "adf468443f2a7233409b95c04494911718cf602fc804b31452cece5a95f49307",
+      "B": {
+        "ms": 401.28571606008336,
+        "seconds": 20.064285803004168,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 6.778212857177159,
+        "tokens_per_s": 149.22036245873835
+      },
+      "A": {
+        "ms": 595.6615556613542,
+        "seconds": 29.78307778306771,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 4.566351435892189,
+        "tokens_per_s": 100.52688381662658
+      },
+      "delta_ms": 194.37583960127085,
+      "gain_pct": 32.63192625977989
+    },
+    {
+      "id": "branch-v210-default-cache-no-profiler-03-ab",
+      "order": "ab",
+      "mode": "no-profiler",
+      "raw": "../raw/20261128T105014Z-ab-no-profiler-a38t1x_f",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-no-profiler-03-ab",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "A": {
+            "worker_pid": 1008011,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "eb04726c210c807d9b83678da2a103700b1ea9d93c9079b511c7a4f192491091",
+            "worker_sha256": "c9aee5c531c9f3a2dc60d9e846c0e83b6782312449caef80fefca7a505448cca",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "B": {
+            "worker_pid": 1027246,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "96eca95e3b4386b32dd52089c81808a64eca6e826c719340defafc5100c8ef0a",
+            "worker_sha256": "4444e2a78e1d656f56b2f7c1fe20680aa836fb5e8c9a2f074ccc6332d27577b7",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "A": {
+            "worker": 1008011,
+            "samples": 10,
+            "with_worker": 6,
+            "begin": "2026-11-28T10:50:14+00:00",
+            "end": "2026-11-28T10:51:16+00:00"
+          },
+          "B": {
+            "worker": 1027246,
+            "samples": 8,
+            "with_worker": 5,
+            "begin": "2026-11-28T10:51:20+00:00",
+            "end": "2026-11-28T10:52:11+00:00"
+          }
+        },
+        "chip_sha256": "146744a68a9f0ace313f42dba03fc205eeee1bcd364950550d848056e70a6c7f"
+      },
+      "metrics_sha256": {
+        "A": "a74656d78eb7369c31bf577cf76496504803b9312639042f890d0cda827861e3",
+        "B": "77058deea91c857c51e123010fe4fbc1d413662462df3cfbd31b3d7ae14b7b89"
+      },
+      "plan_sha256": "1e21b26b1e43d29eb95c78b4e7ea7d19e38e047c55f9de70127eafda53f10754",
+      "A": {
+        "ms": 572.0646321401,
+        "seconds": 28.603231607005,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 4.754707505381779,
+        "tokens_per_s": 104.67348728759593
+      },
+      "B": {
+        "ms": 393.7590719200671,
+        "seconds": 19.687953596003354,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 6.9077773541485765,
+        "tokens_per_s": 152.07268675235912
+      },
+      "delta_ms": 178.30556022003293,
+      "gain_pct": 31.168778876084314
+    },
+    {
+      "id": "branch-v210-default-cache-l0-02-ba",
+      "order": "ba",
+      "mode": "l0",
+      "raw": "../raw/20261128T110018Z-ba-l0-9jfgzr9o",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-l0-02-ba",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "B": {
+            "worker_pid": 1161217,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "f31a370080aa3ea706c0219ba9080099d704f8a405322bb3622b41b1dae2e84e",
+            "worker_sha256": "8822f95098d735f60b39ccb8c4be609fa27d52132a6d5357e1a6f66c56769c58",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "A": {
+            "worker_pid": 1176076,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "52e1cbd496f526ea177f91a074052f8b84eac5e85ff97c2a6bef48780864bca7",
+            "worker_sha256": "298c8952aa9842577735c3df71cefcef5c39ae22661b35293f74f39321e6c9b9",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "B": {
+            "worker": 1161217,
+            "samples": 8,
+            "with_worker": 4,
+            "begin": "2026-11-28T11:00:19+00:00",
+            "end": "2026-11-28T11:01:09+00:00"
+          },
+          "A": {
+            "worker": 1176076,
+            "samples": 9,
+            "with_worker": 4,
+            "begin": "2026-11-28T11:01:18+00:00",
+            "end": "2026-11-28T11:02:11+00:00"
+          }
+        },
+        "chip_sha256": "3285e1d3f89c1978f1b4cb9b296004c747e7d31fcd8b9d1585ce9912fd380eac"
+      },
+      "metrics_sha256": {
+        "B": "f647fbeede22fd82c8cecdc71d6c6c3ae44640082d02381018877641c06ac050",
+        "A": "362716f99f0738f1680deff1cec19e29f4b33f99bdd5947449d5550852985980"
+      },
+      "plan_sha256": "23168e003d510e2c340bb2784ab06dda48d0b4475ce41d6b1906dbf98c9c2e03",
+      "B": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 465.3167799999961,
+            "Stage": 522.03575,
+            "Computing": 56.58446000000035
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 480.2942999999986,
+            "Stage": 534.15725,
+            "Computing": 53.73357999999982
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 494.2014200000001,
+            "Stage": 544.52825,
+            "Computing": 50.1773800000004
+          }
+        ],
+        "free_ms": 479.93749999999824,
+        "stage_ms": 533.57375,
+        "computing_ms": 53.49847333333352,
+        "free_pct": 89.94773449780807
+      },
+      "A": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 568.9098200000041,
+            "Stage": 623.47,
+            "Computing": 54.44255999999909
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 574.3621600000032,
+            "Stage": 626.3045,
+            "Computing": 51.824239999999726
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 571.9165800000056,
+            "Stage": 620.15325,
+            "Computing": 48.09192000000037
+          }
+        ],
+        "free_ms": 571.7295200000043,
+        "stage_ms": 623.30925,
+        "computing_ms": 51.452906666666394,
+        "free_pct": 91.72485728392516
+      },
+      "free_ratio_gain_pct": 1.9374494970498368
+    },
+    {
+      "id": "branch-v210-default-cache-no-profiler-04-ba",
+      "order": "ba",
+      "mode": "no-profiler",
+      "raw": "../raw/20261128T110708Z-ba-no-profiler-oiyhmqi2",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-no-profiler-04-ba",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "B": {
+            "worker_pid": 1250529,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "91d48d627f4cd6e4375a7ca78e2a8180e9e2dde7950f663e002bd7747c9f2e92",
+            "worker_sha256": "6f05915377b469635cff51c407120109cec9b3255f7ae4880e19166c73493079",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "A": {
+            "worker_pid": 1267115,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "31d64d243a21e43dcd04183944c64014adb1d46fbea49c1cba66b8440c58d325",
+            "worker_sha256": "f53cba424ec9f97f41b0ebf5d50f58fb64f6c06c0c3dcd1592787b6e45a61d71",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "B": {
+            "worker": 1250529,
+            "samples": 8,
+            "with_worker": 5,
+            "begin": "2026-11-28T11:07:08+00:00",
+            "end": "2026-11-28T11:08:01+00:00"
+          },
+          "A": {
+            "worker": 1267115,
+            "samples": 10,
+            "with_worker": 6,
+            "begin": "2026-11-28T11:08:05+00:00",
+            "end": "2026-11-28T11:09:11+00:00"
+          }
+        },
+        "chip_sha256": "e72bec90418f13de7881356d31ec41796cccec8697cc4bd996cf194053c29fdf"
+      },
+      "metrics_sha256": {
+        "B": "77613b46f7aa0434d64121d2c80a9bf8d99647c71f797c7add0d9406b70e3971",
+        "A": "17f68064be9036c949af72712c467fa24a6b592a092810c8e83d5db87012ff8e"
+      },
+      "plan_sha256": "487a66f89a2fcf1ed5154f7038ab429ff8f4fbcc32fe778313ec6c553df7421f",
+      "B": {
+        "ms": 406.17782110115513,
+        "seconds": 20.308891055057757,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 6.696574403363613,
+        "tokens_per_s": 147.42311590934307
+      },
+      "A": {
+        "ms": 623.7296427600086,
+        "seconds": 31.18648213800043,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 4.360863767776017,
+        "tokens_per_s": 96.00313324059849
+      },
+      "delta_ms": 217.55182165885344,
+      "gain_pct": 34.879185907564846
+    },
+    {
+      "id": "branch-v210-default-cache-l0-03-ab",
+      "order": "ab",
+      "mode": "l0",
+      "raw": "../raw/20261128T110915Z-ab-l0-urt40n8k",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-l0-03-ab",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "A": {
+            "worker_pid": 1322307,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "ab4cae3b717c4a257580b37db00f69ec07ea2c54ed23142e957f225c29e95e36",
+            "worker_sha256": "f2ae134bc8182dc671eb8858ad822e9822c8e754c55d06a21c159bda2077aaef",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "B": {
+            "worker_pid": 1333948,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "9e39aa38209810b85bb9ad201cfe1ea0547a045f0bc76ace4e611b9ae4510910",
+            "worker_sha256": "7433721d5e7cbad637726910423e26fc8f16a000c4bb35447614b6b610a0bdad",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "A": {
+            "worker": 1322307,
+            "samples": 9,
+            "with_worker": 4,
+            "begin": "2026-11-28T11:09:15+00:00",
+            "end": "2026-11-28T11:10:11+00:00"
+          },
+          "B": {
+            "worker": 1333948,
+            "samples": 9,
+            "with_worker": 5,
+            "begin": "2026-11-28T11:10:20+00:00",
+            "end": "2026-11-28T11:11:15+00:00"
+          }
+        },
+        "chip_sha256": "99c4de6687b3592db686974158bccebe255f456198332dcbd67d613b2afb17b1"
+      },
+      "metrics_sha256": {
+        "A": "d0a4cb1ab79bd71d6ad580416ba4c9a669017fdccbe77c7bdc6b4df807194b54",
+        "B": "c62de8f9a8c363e38355466701ac00e08570c58eb14bfbf71dc86d5d2a0050a4"
+      },
+      "plan_sha256": "68378d8e4605e517928b31daae34461f5e511a3746d477d2cb6f1fa1d493c954",
+      "A": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 674.3609200000063,
+            "Stage": 729.34425,
+            "Computing": 54.84121999999992
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 669.8901200000015,
+            "Stage": 721.58625,
+            "Computing": 51.54158000000007
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 665.968000000002,
+            "Stage": 714.097,
+            "Computing": 47.98706000000045
+          }
+        ],
+        "free_ms": 670.0730133333366,
+        "stage_ms": 721.6758333333333,
+        "computing_ms": 51.45662000000014,
+        "free_pct": 92.84958458957263
+      },
+      "B": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 438.2689999999928,
+            "Stage": 494.43975,
+            "Computing": 56.04031999999944
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 447.1142799999948,
+            "Stage": 500.27325,
+            "Computing": 53.02288000000008
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 434.8833199999931,
+            "Stage": 485.03875,
+            "Computing": 50.02125999999984
+          }
+        ],
+        "free_ms": 440.08886666666024,
+        "stage_ms": 493.25058333333334,
+        "computing_ms": 53.02815333333312,
+        "free_pct": 89.22216851576495
+      },
+      "free_ratio_gain_pct": 3.9067660774597113
+    },
+    {
+      "id": "branch-v210-default-cache-no-profiler-05-ab",
+      "order": "ab",
+      "mode": "no-profiler",
+      "raw": "../raw/20261128T111757Z-ab-no-profiler-pu73vg7w",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-no-profiler-05-ab",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "A": {
+            "worker_pid": 1430649,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "51e32bbd84e368ea579ab85be1820f6231e9a01ecfd889a18a0c51b6fe90cc8a",
+            "worker_sha256": "2de3d945a2e53974d21ec23852963b96d7d1499a3e90457b81379444f7b844f6",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "B": {
+            "worker_pid": 1447335,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "5d7be5d3bc897e5bb0bb8a2719e51c5928e4101ca2f4fa5d052b3e9522d0fc57",
+            "worker_sha256": "523287588769d1875085232af4e3514ff72c4f6a49f31a978899d2ec6cb63c69",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "A": {
+            "worker": 1430649,
+            "samples": 9,
+            "with_worker": 6,
+            "begin": "2026-11-28T11:17:57+00:00",
+            "end": "2026-11-28T11:19:00+00:00"
+          },
+          "B": {
+            "worker": 1447335,
+            "samples": 8,
+            "with_worker": 5,
+            "begin": "2026-11-28T11:19:03+00:00",
+            "end": "2026-11-28T11:19:56+00:00"
+          }
+        },
+        "chip_sha256": "fb421d393a0165cd151f04b236b131239b20f152c2cbdd073c33880808beb50c"
+      },
+      "metrics_sha256": {
+        "A": "0edc01669c470f65d906982b8ab1a8a26f303fce892b35a7360af2e8c10e8b36",
+        "B": "e92ded6bd04453f0c256d96c5e975649edd42a60db8f519bad69b35e4723bb2d"
+      },
+      "plan_sha256": "a843970b6e10c33d1cd5659016e25e0273626286904ed06263a5cfa8faa32efd",
+      "A": {
+        "ms": 588.5858597210608,
+        "seconds": 29.429292986053042,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 4.621245915233245,
+        "tokens_per_s": 101.73536963388482
+      },
+      "B": {
+        "ms": 424.38701417995617,
+        "seconds": 21.21935070899781,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 6.409244178349475,
+        "tokens_per_s": 141.09762551454654
+      },
+      "delta_ms": 164.19884554110467,
+      "gain_pct": 27.8971780971634
+    },
+    {
+      "id": "branch-v210-default-cache-no-profiler-06-ba",
+      "order": "ba",
+      "mode": "no-profiler",
+      "raw": "../raw/20261128T112156Z-ba-no-profiler-nnsupemr",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-no-profiler-06-ba",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "B": {
+            "worker_pid": 1482514,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "0f157bdbf6a867556c0114f8743f10166350ab45bb50e7529acd81442edae2d9",
+            "worker_sha256": "b641c693d75aec74ef53842beca21072ab0913da17778500bdbc59fe61d0530d",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "A": {
+            "worker_pid": 1496833,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "0c3dbae8ca29b2717e24ef43da0dcc985f3850b8bd1da684a5d79073dbf4c79a",
+            "worker_sha256": "a9c000da5524b4e87292ebb27599d4d5ed66729401359670e8f5c7e0886dbcd6",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "B": {
+            "worker": 1482514,
+            "samples": 8,
+            "with_worker": 5,
+            "begin": "2026-11-28T11:21:56+00:00",
+            "end": "2026-11-28T11:22:49+00:00"
+          },
+          "A": {
+            "worker": 1496833,
+            "samples": 10,
+            "with_worker": 6,
+            "begin": "2026-11-28T11:22:53+00:00",
+            "end": "2026-11-28T11:23:56+00:00"
+          }
+        },
+        "chip_sha256": "762008bfc5fdc558dbf79221cae895cdd6ef60a5910955293e0e7eed8b6918a4"
+      },
+      "metrics_sha256": {
+        "B": "6887276122ff21dbe4d761d31c9eab5f546be678b724898efdc9ff7c6337a3a6",
+        "A": "a77b4bb406144938ebb32eaed9fb930787b35099f03ba1603da1352120f70dac"
+      },
+      "plan_sha256": "4a1c08cd8a82b4368642dffbe937cadc55499c28aea2dbe7be2061a692e4c377",
+      "B": {
+        "ms": 400.16099449945614,
+        "seconds": 20.008049724972807,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 6.797264194633285,
+        "tokens_per_s": 149.6397720495004
+      },
+      "A": {
+        "ms": 578.8012558617629,
+        "seconds": 28.940062793088146,
+        "samples": 136,
+        "tokens": 2994,
+        "samples_per_s": 4.699367826958597,
+        "tokens_per_s": 103.4552005434856
+      },
+      "delta_ms": 178.64026136230677,
+      "gain_pct": 30.863834442849246
+    },
+    {
+      "id": "branch-v210-default-cache-l0-04-ba",
+      "order": "ba",
+      "mode": "l0",
+      "raw": "../raw/20261128T113214Z-ba-l0-unskychx",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-l0-04-ba",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "B": {
+            "worker_pid": 1673541,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "5dc43bb2eba3523a39c7f6d9e7e728a801348627f5f585d6f9e3fbd8fd2aa04e",
+            "worker_sha256": "eab88e813918f937f3fc6c16580b7e512093c570403e20e3fed7313c51e85115",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "A": {
+            "worker_pid": 1686443,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "5d11c851cd47dcb1ab8de57af37c20ab6b22595c77ba3fa0ebaebb4104b5490d",
+            "worker_sha256": "2485375b4103ec2aad5947d7a9acc4ff25cb1935d047e25b9e1bef9e6820f9f2",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "B": {
+            "worker": 1673541,
+            "samples": 9,
+            "with_worker": 4,
+            "begin": "2026-11-28T11:32:14+00:00",
+            "end": "2026-11-28T11:33:07+00:00"
+          },
+          "A": {
+            "worker": 1686443,
+            "samples": 8,
+            "with_worker": 5,
+            "begin": "2026-11-28T11:33:16+00:00",
+            "end": "2026-11-28T11:34:09+00:00"
+          }
+        },
+        "chip_sha256": "672b87d7a3df9160edaccc2a7d7f8551f9fd20b03596b1131416eacf1dd8d1fa"
+      },
+      "metrics_sha256": {
+        "B": "4718b23eec4bdcba2b24d754cded302f553c714b2afcf65c2a556b5377d3473d",
+        "A": "09f795cce825f0136bd03f57a51fc4dd100341faf33d00e83ab08f99ab5cb6fc"
+      },
+      "plan_sha256": "2426aff3bcb760c0d27d3ea07d77cecaf412d205639c4bdc337934afcd02532c",
+      "B": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 602.9053800000014,
+            "Stage": 660.617,
+            "Computing": 57.53665999999964
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 566.1002599999996,
+            "Stage": 620.4125,
+            "Computing": 54.1773600000002
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 532.2598800000027,
+            "Stage": 582.73525,
+            "Computing": 50.35680000000026
+          }
+        ],
+        "free_ms": 567.0885066666679,
+        "stage_ms": 621.2549166666666,
+        "computing_ms": 54.0236066666667,
+        "free_pct": 91.28112976704831
+      },
+      "A": {
+        "steps": [
+          {
+            "step": 4,
+            "shape": [
+              1,
+              19
+            ],
+            "Free": 572.9722600000056,
+            "Stage": 628.206,
+            "Computing": 55.14149999999983
+          },
+          {
+            "step": 5,
+            "shape": [
+              2,
+              14
+            ],
+            "Free": 579.7339999999986,
+            "Stage": 631.39075,
+            "Computing": 51.53530000000058
+          },
+          {
+            "step": 6,
+            "shape": [
+              2,
+              22
+            ],
+            "Free": 568.4027400000016,
+            "Stage": 616.33875,
+            "Computing": 47.837739999999926
+          }
+        ],
+        "free_ms": 573.7030000000019,
+        "stage_ms": 625.3118333333333,
+        "computing_ms": 51.50484666666678,
+        "free_pct": 91.74670451089634
+      },
+      "free_ratio_gain_pct": 0.5074566398106772
+    },
+    {
+      "id": "branch-v210-default-cache-l1-01-ab",
+      "order": "ab",
+      "mode": "l1",
+      "raw": "../raw/20261128T113621Z-ab-l1-2_8phllj",
+      "proof": {
+        "status": "host_receipt",
+        "path": "../pairs/branch-v210-default-cache-l1-01-ab",
+        "recipe": {
+          "endpoints": {
+            "A": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "0",
+                "NPU_DYNAMIC_REBASE_FORWARD": "0",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "0",
+              "B": "0",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            },
+            "B": {
+              "common": {
+                "PYTHONPATH": "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+                "NPU_DYNAMIC_REBASE_INDICES": "1",
+                "NPU_DYNAMIC_REBASE_FORWARD": "1",
+                "NPU_DYNAMIC_REBASE_COUNT": "0",
+                "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+              },
+              "switch": "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY",
+              "A": "1",
+              "B": "1",
+              "libraries": {
+                "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+              }
+            }
+          }
+        },
+        "legs": {
+          "A": {
+            "worker_pid": 1721980,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "81efa5642095ab5be9aa126406014ff9aa92ac46eeef2789f37eef362c4be6be",
+            "worker_sha256": "e673ca2a02aeada34fd4a1b473bf0d8bc26e25edafe32cf0a137f4b34cbf79ea",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "0",
+              "NPU_DYNAMIC_REBASE_FORWARD": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "0",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          },
+          "B": {
+            "worker_pid": 1733095,
+            "mapped_libraries": [
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so"
+            ],
+            "dispatch_sha256": "69a6ef91206563b17b33d9c0edfe575464c726ef861cab258ea7d555303dbe7c",
+            "worker_sha256": "2f2afabd7f548c5ac746d355e219d109935b4a0eee0e0fd77d8dfe37813fa34c",
+            "worker_env": {
+              "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/artifacts/infra-only-20261128/branch-stability-v210/build/overlay",
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1"
+            },
+            "actual_flags": {
+              "ACLNN_CACHE_LIMIT": null,
+              "NPU_DYNAMIC_REBASE_INDICES": "1",
+              "NPU_DYNAMIC_REBASE_FORWARD": "1",
+              "TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY": "1",
+              "NPU_DYNAMIC_REBASE_COUNT": "0",
+              "TORCH_NPU_QUEUE_WAKE_AUDIT": "0"
+            },
+            "library_digests": {
+              "/artifacts/infra-only-20261128/branch-stability-v210/build/overlay/torch_npu/lib/libtorch_npu.so": "175bd91575354569a63d8599a501b0a19a2a224ada114e44a763ba38fa817d75"
+            }
+          }
+        },
+        "chip": {
+          "A": {
+            "worker": 1721980,
+            "samples": 8,
+            "with_worker": 4,
+            "begin": "2026-11-28T11:36:21+00:00",
+            "end": "2026-11-28T11:37:10+00:00"
+          },
+          "B": {
+            "worker": 1733095,
+            "samples": 7,
+            "with_worker": 4,
+            "begin": "2026-11-28T11:37:19+00:00",
+            "end": "2026-11-28T11:38:06+00:00"
+          }
+        },
+        "chip_sha256": "fe86464e6b1cb8fb8c32ac49d496e5d0d993fbf5a43412aaaf2bc6417bcf88b0"
+      },
+      "metrics_sha256": {
+        "A": "da89ed222ad5fdd6b6a2a3664acf4c2d29795f8ff44ef74292044170e7cd5762",
+        "B": "c1c01b09a96a71fa4f9723dd3fb55e38bc6ccabdc5323b113c64da83bc318e24"
+      },
+      "plan_sha256": "c3a843ed6fd7e87e57ed4f95ae85bbf7d152b066d90a268d7516de2dfc2d534a",
+      "level1_file": "level1/branch-v210-default-cache-l1-01-ab/6343f07dd6310f5bcd1fffbebd19baa224116a2a8b8a7f21ac6dfaffbb17e1f1/pair.json",
+      "level1_compare": {
+        "4": {
+          "shape": [
+            1,
+            19
+          ],
+          "first_seen": 4,
+          "same_physical_streams_and_work_order": false,
+          "same_work_order_allowing_renumber": false,
+          "same_control_and_work": false,
+          "same_aten_counts": true,
+          "same_aten_per_thread_order": true,
+          "same_enqueue_counts": false,
+          "same_acl_counts": true,
+          "embedding_same_request": {
+            "aclnnEmbedding": {
+              "A_anchors": 1027,
+              "B_anchors": 1027,
+              "shared": 1027,
+              "both_have_device_links": 1027,
+              "same_acl_sequence": 1027,
+              "same_streams_and_task_counts": 1027,
+              "same_stream_task_types_and_names": 3
+            },
+            "aclnnEmbeddingDenseBackward": {
+              "A_anchors": 1027,
+              "B_anchors": 1027,
+              "shared": 1027,
+              "both_have_device_links": 1027,
+              "same_acl_sequence": 1027,
+              "same_streams_and_task_counts": 1027,
+              "same_stream_task_types_and_names": 3
+            }
+          }
+        },
+        "5": {
+          "shape": [
+            2,
+            14
+          ],
+          "first_seen": 5,
+          "same_physical_streams_and_work_order": false,
+          "same_work_order_allowing_renumber": false,
+          "same_control_and_work": false,
+          "same_aten_counts": true,
+          "same_aten_per_thread_order": true,
+          "same_enqueue_counts": false,
+          "same_acl_counts": true,
+          "embedding_same_request": {
+            "aclnnEmbedding": {
+              "A_anchors": 1027,
+              "B_anchors": 1027,
+              "shared": 1027,
+              "both_have_device_links": 1027,
+              "same_acl_sequence": 1027,
+              "same_streams_and_task_counts": 1027,
+              "same_stream_task_types_and_names": 3
+            },
+            "aclnnEmbeddingDenseBackward": {
+              "A_anchors": 1027,
+              "B_anchors": 1027,
+              "shared": 1027,
+              "both_have_device_links": 1027,
+              "same_acl_sequence": 1027,
+              "same_streams_and_task_counts": 1027,
+              "same_stream_task_types_and_names": 3
+            }
+          }
+        }
+      }
+    }
+  ],
+  "summary": {
+    "all": {
+      "timing_pairs": 6,
+      "level0_pairs": 4,
+      "legs": {
+        "A": {
+          "time_ms": {
+            "n": 6,
+            "median": 592.1237076912075,
+            "mean": 599.1780033676574,
+            "min": 572.0646321401,
+            "max": 636.2250740616582,
+            "sample_sd": 25.495780410106928,
+            "mad": 16.69076369027607
+          },
+          "samples_per_s": {
+            "n": 6,
+            "median": 4.5937986755627165,
+            "mean": 4.54629217574016,
+            "min": 4.275216603199134,
+            "max": 4.754707505381779,
+            "sample_sd": 0.19013426946028386,
+            "mad": 0.13323899060747157
+          },
+          "tokens_per_s": {
+            "n": 6,
+            "median": 101.1311267252557,
+            "mean": 100.08528510416205,
+            "min": 94.11763610278093,
+            "max": 104.67348728759593,
+            "sample_sd": 4.1857500203241935,
+            "mad": 2.9332171902850703
+          },
+          "free_ms": 615.1626950000032,
+          "computing_ms": 51.61652000000007,
+          "stage_ms": 666.8971875,
+          "free_pct": 92.24250852010127
+        },
+        "B": {
+          "time_ms": {
+            "n": 6,
+            "median": 400.72335527976975,
+            "mean": 399.91623336682096,
+            "min": 373.7267824402079,
+            "max": 424.38701417995617,
+            "sample_sd": 16.51520488723849,
+            "mad": 6.20937459054403
+          },
+          "samples_per_s": {
+            "n": 6,
+            "median": 6.7877385259052225,
+            "mean": 6.81118617951673,
+            "min": 6.409244178349475,
+            "max": 7.27804408942827,
+            "sample_sd": 0.28399311831389334,
+            "mad": 0.10560147539248188
+          },
+          "tokens_per_s": {
+            "n": 6,
+            "median": 149.43006725411936,
+            "mean": 149.946260452008,
+            "min": 141.09762551454654,
+            "max": 160.22400002756058,
+            "sample_sd": 6.25202497229262,
+            "mad": 2.3247854215080253
+          },
+          "free_ms": 493.93897666666464,
+          "computing_ms": 53.55802499999995,
+          "stage_ms": 547.6246458333334,
+          "free_pct": 90.19663019640507
+        }
+      },
+      "paired_ms": {
+        "n": 6,
+        "median": 186.5080504817888,
+        "mean": 199.2617700008365,
+        "min": 164.19884554110467,
+        "max": 262.49829162145033,
+        "sample_sd": 35.91956010524503,
+        "mad": 15.255847601220012
+      },
+      "positive_e2e_pairs": 6,
+      "paired_e2e_gain_pct": {
+        "n": 6,
+        "median": 31.900352567932103,
+        "mean": 33.11660313799661,
+        "min": 27.8971780971634,
+        "max": 41.25871524453797,
+        "sample_sd": 4.598847315520509,
+        "mad": 2.0076757323578
+      },
+      "paired_free_ratio_gain_pct": {
+        "n": 4,
+        "median": 2.2852178975629913,
+        "mean": 2.2461646280990926,
+        "min": 0.5074566398106772,
+        "max": 3.9067660774597113,
+        "sample_sd": 1.4172318886546798,
+        "mad": 0.9846582902049372
+      },
+      "paired_free_ms": {
+        "n": 4,
+        "median": 124.14811666667205,
+        "mean": 121.22371833333862,
+        "min": 6.614493333334053,
+        "max": 229.98414666667634,
+        "sample_sd": 95.00007617642918,
+        "mad": 69.09606333333514
+      },
+      "eight": {
+        "baseline_ms": 592.1237076912075,
+        "candidate_ms": 400.72335527976975,
+        "step_gain_pct": 32.32438592228316,
+        "baseline_free_ms": 615.1626950000032,
+        "baseline_free_pct": 92.24250852010127,
+        "candidate_free_ms": 493.93897666666464,
+        "candidate_free_pct": 90.19663019640507,
+        "free_ratio_gain_pct": 2.217934395453225
+      }
+    },
+    "ab": {
+      "timing_pairs": 3,
+      "level0_pairs": 2,
+      "legs": {
+        "A": {
+          "time_ms": {
+            "n": 3,
+            "median": 588.5858597210608,
+            "mean": 598.958521974273,
+            "min": 572.0646321401,
+            "max": 636.2250740616582,
+            "sample_sd": 33.31418119295177,
+            "mad": 16.52122758096084
+          },
+          "samples_per_s": {
+            "n": 3,
+            "median": 4.621245915233245,
+            "mean": 4.550390007938052,
+            "min": 4.275216603199134,
+            "max": 4.754707505381779,
+            "sample_sd": 0.24747383905768794,
+            "mad": 0.1334615901485341
+          },
+          "tokens_per_s": {
+            "n": 3,
+            "median": 101.73536963388482,
+            "mean": 100.1754976747539,
+            "min": 94.11763610278093,
+            "max": 104.67348728759593,
+            "sample_sd": 5.448063780431746,
+            "mad": 2.9381176537111173
+          },
+          "free_ms": 657.6091300000033,
+          "computing_ms": 51.75416333333355,
+          "stage_ms": 709.4838333333333,
+          "free_pct": 92.68838824845244
+        },
+        "B": {
+          "time_ms": {
+            "n": 3,
+            "median": 393.7590719200671,
+            "mean": 397.29095618007705,
+            "min": 373.7267824402079,
+            "max": 424.38701417995617,
+            "sample_sd": 25.51412206604078,
+            "mad": 20.032289479859173
+          },
+          "samples_per_s": {
+            "n": 3,
+            "median": 6.9077773541485765,
+            "mean": 6.86502187397544,
+            "min": 6.409244178349475,
+            "max": 7.27804408942827,
+            "sample_sd": 0.43597516521730567,
+            "mad": 0.3702667352796931
+          },
+          "tokens_per_s": {
+            "n": 3,
+            "median": 152.07268675235912,
+            "mean": 151.13143743148873,
+            "min": 141.09762551454654,
+            "max": 160.22400002756058,
+            "sample_sd": 9.597865034269208,
+            "mad": 8.15131327520146
+          },
+          "free_ms": 464.36494999999616,
+          "computing_ms": 53.35500999999979,
+          "stage_ms": 517.8349583333334,
+          "free_pct": 89.6743146686288
+        }
+      },
+      "paired_ms": {
+        "n": 3,
+        "median": 178.30556022003293,
+        "mean": 201.66756579419598,
+        "min": 164.19884554110467,
+        "max": 262.49829162145033,
+        "sample_sd": 53.151037179542556,
+        "mad": 14.106714678928256
+      },
+      "positive_e2e_pairs": 3,
+      "paired_e2e_gain_pct": {
+        "n": 3,
+        "median": 31.168778876084314,
+        "mean": 33.44155740592856,
+        "min": 27.8971780971634,
+        "max": 41.25871524453797,
+        "sample_sd": 6.964683081049586,
+        "mad": 3.271600778920913
+      },
+      "paired_free_ratio_gain_pct": {
+        "n": 2,
+        "median": 3.2698761877679283,
+        "mean": 3.2698761877679283,
+        "min": 2.6329862980761454,
+        "max": 3.9067660774597113,
+        "sample_sd": 0.9006983197404239,
+        "mad": 0.636889889691783
+      },
+      "paired_free_ms": {
+        "n": 2,
+        "median": 193.2441800000072,
+        "mean": 193.2441800000072,
+        "min": 156.50421333333804,
+        "max": 229.98414666667634,
+        "sample_sd": 51.95815914113894,
+        "mad": 36.73996666666915
+      },
+      "eight": {
+        "baseline_ms": 588.5858597210608,
+        "candidate_ms": 393.7590719200671,
+        "step_gain_pct": 33.10082710674105,
+        "baseline_free_ms": 657.6091300000033,
+        "baseline_free_pct": 92.68838824845244,
+        "candidate_free_ms": 464.36494999999616,
+        "candidate_free_pct": 89.6743146686288,
+        "free_ratio_gain_pct": 3.25183514006564
+      }
+    },
+    "ba": {
+      "timing_pairs": 3,
+      "level0_pairs": 2,
+      "legs": {
+        "A": {
+          "time_ms": {
+            "n": 3,
+            "median": 595.6615556613542,
+            "mean": 599.3974847610419,
+            "min": 578.8012558617629,
+            "max": 623.7296427600086,
+            "sample_sd": 22.69598779515959,
+            "mad": 16.860299799591303
+          },
+          "samples_per_s": {
+            "n": 3,
+            "median": 4.566351435892189,
+            "mean": 4.542194343542268,
+            "min": 4.360863767776017,
+            "max": 4.699367826958597,
+            "sample_sd": 0.17054009309799525,
+            "mad": 0.13301639106640817
+          },
+          "tokens_per_s": {
+            "n": 3,
+            "median": 100.52688381662658,
+            "mean": 99.99507253357022,
+            "min": 96.00313324059849,
+            "max": 103.4552005434856,
+            "sample_sd": 3.7543899907014655,
+            "mad": 2.9283167268590233
+          },
+          "free_ms": 572.7162600000031,
+          "computing_ms": 51.47887666666659,
+          "stage_ms": 624.3105416666667,
+          "free_pct": 91.73579841709434
+        },
+        "B": {
+          "time_ms": {
+            "n": 3,
+            "median": 401.28571606008336,
+            "mean": 402.5415105535649,
+            "min": 400.16099449945614,
+            "max": 406.17782110115513,
+            "sample_sd": 3.1989553679477996,
+            "mad": 1.124721560627222
+          },
+          "samples_per_s": {
+            "n": 3,
+            "median": 6.778212857177159,
+            "mean": 6.757350485058019,
+            "min": 6.696574403363613,
+            "max": 6.797264194633285,
+            "sample_sd": 0.053488666503387856,
+            "mad": 0.019051337456125417
+          },
+          "tokens_per_s": {
+            "n": 3,
+            "median": 149.22036245873835,
+            "mean": 148.76108347252728,
+            "min": 147.42311590934307,
+            "max": 149.6397720495004,
+            "sample_sd": 1.1775372611113477,
+            "mad": 0.41940959076205786
+          },
+          "free_ms": 523.513003333333,
+          "computing_ms": 53.76104000000011,
+          "stage_ms": 577.4143333333333,
+          "free_pct": 90.66505161227376
+        }
+      },
+      "paired_ms": {
+        "n": 3,
+        "median": 194.37583960127085,
+        "mean": 196.85597420747703,
+        "min": 178.64026136230677,
+        "max": 217.55182165885344,
+        "sample_sd": 19.573979716108393,
+        "mad": 15.73557823896408
+      },
+      "positive_e2e_pairs": 3,
+      "paired_e2e_gain_pct": {
+        "n": 3,
+        "median": 32.63192625977989,
+        "mean": 32.79164887006466,
+        "min": 30.863834442849246,
+        "max": 34.879185907564846,
+        "sample_sd": 2.0124351742293625,
+        "mad": 1.7680918169306423
+      },
+      "paired_free_ratio_gain_pct": {
+        "n": 2,
+        "median": 1.222453068430257,
+        "mean": 1.222453068430257,
+        "min": 0.5074566398106772,
+        "max": 1.9374494970498368,
+        "sample_sd": 1.0111576464021363,
+        "mad": 0.7149964286195798
+      },
+      "paired_free_ms": {
+        "n": 2,
+        "median": 49.20325666667006,
+        "mean": 49.20325666667006,
+        "min": 6.614493333334053,
+        "max": 91.79202000000606,
+        "sample_sd": 60.22960671070176,
+        "mad": 42.588763333336004
+      },
+      "eight": {
+        "baseline_ms": 595.6615556613542,
+        "candidate_ms": 401.28571606008336,
+        "step_gain_pct": 32.63192625977989,
+        "baseline_free_ms": 572.7162600000031,
+        "baseline_free_pct": 91.73579841709434,
+        "candidate_free_ms": 523.513003333333,
+        "candidate_free_pct": 90.66505161227376,
+        "free_ratio_gain_pct": 1.1672071571800502
+      }
+    }
+  },
+  "analysis_sha256": "bb09a39229d50e2e08c1eb7074c4660c3ad2e026ebe9d1ffd034520da9f4ef09"
+}
