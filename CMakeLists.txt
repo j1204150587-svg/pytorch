@@ -283,6 +283,7 @@ set(OPS_PLUGIN_SRCS)
 # Add subdirectory of op-plugin
 include_directories(${PROJECT_SOURCE_DIR}/third_party/op-plugin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/op-plugin/op_plugin)
+include("${PROJECT_SOURCE_DIR}/third_party/op-plugin-patches/embedding.cmake")
 
 if (DEFINED BUILD_TENSORPIPE)
   add_definitions(-DUSE_RPC_FRAMEWORK)

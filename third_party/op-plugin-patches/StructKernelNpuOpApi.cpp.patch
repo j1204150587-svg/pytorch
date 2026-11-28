@@ -1,0 +1,18 @@
+--- a/StructKernelNpuOpApi.cpp
++++ b/StructKernelNpuOpApi.cpp
+@@ -17,6 +17,7 @@
+ #include "op_plugin/AclOpsInterface.h"
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
++#include "op_plugin/utils/dynamic_embedding_scope.h"
+
+ namespace op_api {
+ using npu_preparation = at_npu::native::OpPreparation;
+@@ -1146,6 +1147,7 @@
+     auto output_dtype_0 = grad_output.scalar_type();
+     at::Tensor out = npu_preparation::apply_tensor_without_format(output_size_0,
+                                                                 grad_output.options().dtype(output_dtype_0));
++    dynamic_embedding_rebase::Scope scope(indices);
+     EXEC_NPU_CMD(aclnnEmbeddingDenseBackward, grad_output, indices, num_weights, padding_idx, scale_grad_by_freq, out);
+     return out;
+ }
