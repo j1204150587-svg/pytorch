@@ -1,0 +1,517 @@
+--- a/op_plugin/ops/opapi/DivKernelNpuOpApi.cpp
++++ b/op_plugin/ops/opapi/DivKernelNpuOpApi.cpp
+@@ -16,6 +16,173 @@
+ #include "op_plugin/AclOpsInterface.h"
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
++#include <array>
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include "torch_npu/csrc/core/NPUBridge.h"
++
++namespace div_geometry {
++enum Counts { Ineligible, FirstKey, Reused, Checked, ExecHit, ExecMiss, NumCounts };
++static std::atomic<uint64_t> counts[NumCounts]{};
++
++static bool flag(const char *name)
++{
++    const char *s = std::getenv(name);
++    return s && std::strcmp(s,"1") == 0;
++}
++static const bool enabled = flag("NPU_DIV_GEOMETRY_KEY");
++static const bool audit = flag("NPU_DIV_GEOMETRY_AUDIT");
++static const bool counting = audit || flag("NPU_DIV_GEOMETRY_COUNT");
++static void count(Counts c)
++{
++    if (counting) {
++        counts[c].fetch_add(1, std::memory_order_relaxed);
++    }
++}
++struct Report {
++    ~Report()
++    {
++        if (enabled && counting) {
++            std::fprintf(stderr, "DIV_GEOMETRY fallback=%llu first=%llu reuse=%llu checked=%llu exec_hit=%llu exec_miss=%llu\n",
++                (unsigned long long)counts[Ineligible].load(), (unsigned long long)counts[FirstKey].load(),
++                (unsigned long long)counts[Reused].load(), (unsigned long long)counts[Checked].load(),
++                (unsigned long long)counts[ExecHit].load(), (unsigned long long)counts[ExecMiss].load());
++        }
++    }
++};
++static Report report;
++extern "C" __attribute__((visibility("default"))) uint64_t npu_div_geometry_count(unsigned i)
++{
++    return i < NumCounts ? counts[i].load(std::memory_order_relaxed) : 0;
++}
++
++// All unlisted tensor/scalar fields consumed by stock add_param_to_buf are
++// checked against constants in geometry(). The addresses are rebound per call.
++using Key = std::array<uint64_t,12>;
++struct Slot {
++    bool valid = false;
++    Key key{};
++    uint64_t hash = 0;
++};
++static thread_local Slot slot;
++
++static int format(const at::Tensor& t)
++{
++    auto *s = t.storage().unsafeGetStorageImpl();
++    return typeid(*s) == typeid(torch_npu::NPUStorageImpl) ?
++        static_cast<int>(torch_npu::NPUBridge::GetNpuStorageImpl(t)->npu_desc_.npu_format_) : ACL_FORMAT_ND;
++}
++static bool geometry(const at::Tensor& x, const at::Scalar& scalar, const at::Tensor& out, Key& key)
++{
++    if (x.dim() != 4 || out.dim() != 4 || x.scalar_type() != at::kBFloat16 || out.scalar_type() != at::kBFloat16 ||
++        x.device().type() != c10::DeviceType::PrivateUse1 || out.device() != x.device() ||
++        x.layout() != at::kStrided || out.layout() != at::kStrided ||
++        !(scalar.type() == at::kLong || scalar.type() == at::kDouble) || scalar.toDouble() != 4.0) {
++        return false;
++    }
++    int64_t b = x.size(0), l = x.size(1);
++    if (b < 1 || b > 4 || l < 12 || l > 32 || x.size(2) != 4 || x.size(3) != 64 ||
++        !x.sizes().equals(out.sizes()) || x.stride(1) != 64 || x.stride(2) != 0 || x.stride(3) != 1 ||
++        out.stride(0) != l * 256 || out.stride(1) != 256 || out.stride(2) != 64 || out.stride(3) != 1 ||
++        !x.unsafeGetTensorImpl()->storage_initialized() || !out.unsafeGetTensorImpl()->storage_initialized()) {
++        return false;
++    }
++    key = {uint64_t(b), uint64_t(l), uint64_t(x.stride(0)), uint64_t(x.storage_offset()),
++           uint64_t(out.storage_offset()), x.storage().nbytes(), out.storage().nbytes(),
++           uint64_t(format(x)), uint64_t(format(out)), uint64_t(scalar.type()), 0, 0};
++    return true;
++}
++}  // namespace div_geometry
++
++static bool geometry_hit_cache(aclrtStream acl_stream, const char *aclnn_api, void *phrase2,
++                               const at::Tensor& x, const at::Scalar& scalar, const at::Tensor& out)
++{
++    using namespace div_geometry;
++    if (!enabled) {
++        return ::hit_cache(acl_stream, aclnn_api, phrase2, x, scalar, out);
++    }
++    Key key{};
++    if (c10_npu::is_core_control_enabled() || c10_npu::option::OptionsManager::GetTaskQueueEnable() != 1 ||
++        !geometry(x, scalar, out, key)) {
++        count(Ineligible);
++        return ::hit_cache(acl_stream, aclnn_api, phrase2, x, scalar, out);
++    }
++    using AddAddress = void(*)(void*);
++    static const auto bind = reinterpret_cast<AddAddress>(GetOpApiFuncAddr("AddTensorAddrToCachedList"));
++    if (!bind) {
++        return ::hit_cache(acl_stream, aclnn_api, phrase2, x, scalar, out);
++    }
++    static const auto ptaGetExecCacheAddr = GetOpApiFuncAddr("PTAGetExecCache");
++    static const auto initPTACacheThreadLocalAddr = GetOpApiFuncAddr("InitPTACacheThreadLocal");
++    static const auto setPTAHashKeyAddr = GetOpApiFuncAddr("SetPTAHashKey");
++    static const auto canUsePTACacheAddr = GetOpApiFuncAddr("CanUsePTACache");
++    PTAGetExecCache ptaGetExecCacheFunc = reinterpret_cast<PTAGetExecCache>(ptaGetExecCacheAddr);
++    InitPTACacheThreadLocal initPTACacheThreadLocalFunc =
++        reinterpret_cast<InitPTACacheThreadLocal>(initPTACacheThreadLocalAddr);
++    SetPTAHashKey setPTAHashKeyFunc = reinterpret_cast<SetPTAHashKey>(setPTAHashKeyAddr);
++    CanUsePTACache canUsePTACacheFunc = reinterpret_cast<CanUsePTACache>(canUsePTACacheAddr);
++    bool has_func = ptaGetExecCacheFunc && initPTACacheThreadLocalFunc && setPTAHashKeyFunc;
++    bool can_use = canUsePTACacheFunc && canUsePTACacheFunc(aclnn_api);
++    if (!has_func || !can_use) {
++        return false;
++    }
++    uint64_t workspace_size = 0;
++    uint64_t *workspace_size_addr = &workspace_size;
++    initPTACacheThreadLocalFunc();
++    g_hash_offset = 0;
++    auto deterministic = at::globalContext().deterministicAlgorithms();
++    const auto device = c10_npu::current_device();
++    key[10] = (static_cast<uint64_t>(static_cast<unsigned>(device)) << 1) | uint64_t(deterministic);
++    key[11] = reinterpret_cast<uintptr_t>(acl_stream);
++    bool hit = slot.valid && slot.key == key;
++    uint64_t hashId;
++    if (!hit || audit) {
++        add_param_to_buf(deterministic);
++        add_param_to_buf(std::string(aclnn_api), x, scalar, out);
++        add_param_to_buf(device);
++        add_param_to_buf((uintptr_t)acl_stream);
++        hashId = calc_hash_id();
++        if (hit) {
++            TORCH_CHECK(hashId == slot.hash, "Divs exact geometry hash disagrees with stock");
++            count(Checked);
++        } else {
++            slot = {true, key, hashId};
++            count(FirstKey);
++        }
++    } else {
++        bind(const_cast<void *>(x.storage().data()));
++        bind(const_cast<void *>(out.storage().data()));
++        hashId = slot.hash;
++    }
++    if (hit) {
++        count(Reused);
++    }
++    setPTAHashKeyFunc(hashId);
++    aclOpExecutor *executor = ptaGetExecCacheFunc(hashId, workspace_size_addr);
++    count(executor ? ExecHit : ExecMiss);
++    if (executor == nullptr) {
++        return false;
++    }
++    void *workspace_addr = nullptr;
++    at::Tensor workspace_tensor;
++    if (workspace_size != 0) {
++        workspace_tensor = at_npu::native::OpPreparation::unsafe_empty_workspace(workspace_size);
++        workspace_addr = const_cast<void *>(workspace_tensor.storage().data());
++    }
++    auto acl_call = [workspace_addr, workspace_size, acl_stream, executor, phrase2]()->int {
++        OpApiFunc opApiFunc = reinterpret_cast<OpApiFunc>(phrase2);
++        auto api_ret = opApiFunc(workspace_addr, workspace_size, executor, acl_stream);
++        NPU_CHECK_ERROR(api_ret, "call failed");
++        return api_ret;
++    };
++    at_npu::native::OpCommand::RunOpApiV2(aclnn_api, acl_call);
++    UnInitCacheThreadLocal();
++    return true;
++}
++
++
+ 
+ namespace op_api {
+ using npu_preparation = at_npu::native::OpPreparation;
+@@ -244,7 +411,9 @@
+         high_type = at::ScalarType::Float;
+     }
+     at::Tensor result = npu_preparation::apply_tensor_without_format(outputSize, self.options().dtype(high_type));
++#define hit_cache geometry_hit_cache
+     EXEC_NPU_CMD(aclnnDivs, self, other, result);
++#undef hit_cache
+     at::namedinference::propagate_names(result, self);
+     return result;
+ }
+--- a/op_plugin/ops/opapi/EmbeddingKernelNpuOpApi.cpp
++++ b/op_plugin/ops/opapi/EmbeddingKernelNpuOpApi.cpp
+@@ -16,6 +16,7 @@
+ #include "op_plugin/AclOpsInterface.h"
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
++#include "op_plugin/utils/dynamic_embedding_scope.h"
+ 
+ namespace op_api {
+ 
+@@ -41,6 +42,7 @@
+     // construct the output tensor of the NPU
+     at::Tensor result = npu_preparation::apply_tensor_without_format(output_size, weight.options());
+     // calculate the output resugt of the NPU
++    dynamic_embedding_rebase::Scope scope(weight, indices);
+     EXEC_NPU_CMD(aclnnEmbedding, weight, indices, result);
+     return result;
+ }
+--- a/op_plugin/ops/opapi/StructKernelNpuOpApi.cpp
++++ b/op_plugin/ops/opapi/StructKernelNpuOpApi.cpp
+@@ -17,6 +17,7 @@
+ #include "op_plugin/AclOpsInterface.h"
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
++#include "op_plugin/utils/dynamic_embedding_scope.h"
+ 
+ namespace op_api {
+ using npu_preparation = at_npu::native::OpPreparation;
+@@ -1146,6 +1147,7 @@
+     auto output_dtype_0 = grad_output.scalar_type();
+     at::Tensor out = npu_preparation::apply_tensor_without_format(output_size_0,
+                                                                 grad_output.options().dtype(output_dtype_0));
++    dynamic_embedding_rebase::Scope scope(indices);
+     EXEC_NPU_CMD(aclnnEmbeddingDenseBackward, grad_output, indices, num_weights, padding_idx, scale_grad_by_freq, out);
+     return out;
+ }
+--- /dev/null
++++ b/op_plugin/utils/dynamic_embedding_scope.h
+@@ -0,0 +1,33 @@
++#pragma once
++
++#include <ATen/Tensor.h>
++#include <cstdint>
++
++namespace dynamic_embedding_rebase {
++
++struct Counters;
++
++struct View {
++    const c10::TensorImpl *tensor = nullptr;
++    void *base = nullptr;
++    int64_t offset = 0;
++    int64_t storage_elements = 0;
++    uint64_t domain = 0;
++    Counters *counters = nullptr;
++};
++
++class Scope {
++public:
++    explicit Scope(const at::Tensor &indices);
++    Scope(const at::Tensor &weight, const at::Tensor &indices);
++    ~Scope();
++    Scope(const Scope &) = delete;
++    Scope &operator=(const Scope &) = delete;
++    friend const View *for_tensor(const at::Tensor &);
++private:
++    const Scope *previous_;
++    View views_[2];
++    unsigned count_ = 0;
++};
++
++}  // namespace dynamic_embedding_rebase
+--- /dev/null
++++ b/op_plugin/utils/dynamic_embedding_scope.inc
+@@ -0,0 +1,183 @@
++#include "op_plugin/utils/dynamic_embedding_scope.h"
++#include "torch_npu/csrc/core/npu/NPUGraphsUtils.h"
++#include <atomic>
++#include <cstdlib>
++#include <cstring>
++#include <limits>
++
++namespace dynamic_embedding_rebase {
++struct Counters {
++    std::atomic<uint64_t> eligible{0}, fallback{0}, keys{0}, descriptors{0};
++};
++
++namespace {
++thread_local const Scope *active = nullptr;
++Counters backward, forward;
++constexpr uint64_t backward_domain = 0x4249445852425345ULL;
++constexpr uint64_t forward_domain = 0x4649445852425345ULL;
++
++bool flag(const char *name)
++{
++    const char *value = std::getenv(name);
++    return value && std::strcmp(value, "1") == 0;
++}
++
++bool count_enabled()
++{
++    static const bool enabled = flag("NPU_DYNAMIC_REBASE_COUNT");
++    return enabled;
++}
++
++void increment(std::atomic<uint64_t> &value)
++{
++    if (count_enabled()) {
++        value.fetch_add(1, std::memory_order_relaxed);
++    }
++}
++
++bool producer_path()
++{
++    return c10_npu::option::OptionsManager::GetTaskQueueEnable() == 1 &&
++           c10_npu::currentStreamCaptureStatus() == c10_npu::CaptureStatus::None;
++}
++
++uint64_t count(const Counters &c, unsigned index)
++{
++    switch (index) {
++        case 0: return c.eligible.load(std::memory_order_relaxed);
++        case 1: return c.fallback.load(std::memory_order_relaxed);
++        case 2: return c.keys.load(std::memory_order_relaxed);
++        case 3: return c.descriptors.load(std::memory_order_relaxed);
++        default: return 0;
++    }
++}
++
++bool eligible_indices(const at::Tensor &t)
++{
++    return t.layout() == at::kStrided && t.scalar_type() == at::kLong && t.dim() == 3 && t.size(2) == 4 &&
++           t.size(0) > 0 && t.size(1) > 0 && t.stride(2) == 1 && t.stride(1) >= 4 &&
++           t.stride(0) > 0 && t.stride(0) / t.size(1) >= t.stride(1);
++}
++
++bool eligible_weight(const at::Tensor &t)
++{
++    return t.layout() == at::kStrided && t.scalar_type() == at::kBFloat16 && t.dim() == 2 &&
++           t.size(0) == 64 && t.size(1) == 64 && t.stride(0) == 64 && t.stride(1) == 1;
++}
++
++bool make_view(const at::Tensor &tensor, View &result)
++{
++    if (tensor.device().type() != c10::DeviceType::PrivateUse1 || tensor.layout() != at::kStrided ||
++        tensor.storage_offset() < 0 ||
++        tensor.is_neg() || tensor.is_conj() || !at_npu::native::FormatHelper::IsOpInputBaseFormat(tensor)) {
++        return false;
++    }
++    // Advance the descriptor base only in multiples of 512 bytes. Keep the
++    // original base alignment and the residual index offset that kernels see.
++    const int64_t item = tensor.itemsize();
++    const int64_t quantum = 512 / item;
++    const auto bytes = tensor.storage().nbytes();
++    if (bytes % item || bytes / item > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
++        return false;
++    }
++    const int64_t elements = static_cast<int64_t>(bytes / item);
++    const int64_t original = tensor.storage_offset();
++    const int64_t shift = original - original % quantum;
++    const int64_t residual = original - shift;
++    if (original >= elements) {
++        return false;
++    }
++    // Build residual + 1 + sum((size - 1) * stride) without overflowing or
++    // crossing the actual storage. Round the view extent within this storage.
++    int64_t length = residual + 1;
++    const int64_t available = elements - shift;
++    for (int64_t axis = 0; axis < tensor.dim(); ++axis) {
++        const int64_t size_minus_one = tensor.size(axis) - 1;
++        const int64_t stride = tensor.stride(axis);
++        if (size_minus_one > (available - length) / stride) {
++            return false;
++        }
++        length += size_minus_one * stride;
++    }
++    const int64_t padding = (quantum - length % quantum) % quantum;
++    if (padding > available - length) {
++        return false;
++    }
++    const uintptr_t base = reinterpret_cast<uintptr_t>(tensor.storage().data());
++    const uint64_t advance = static_cast<uint64_t>(shift) * item;
++    if (!base || base % 512 || advance > std::numeric_limits<uintptr_t>::max() - base) {
++        return false;
++    }
++    result.tensor = tensor.unsafeGetTensorImpl();
++    result.base = reinterpret_cast<void *>(base + advance);
++    result.offset = residual;
++    result.storage_elements = length + padding;
++    return true;
++}
++}  // namespace
++
++Scope::Scope(const at::Tensor &indices) : previous_(active)
++{
++    static const bool enabled = flag("NPU_DYNAMIC_REBASE_INDICES");
++    if (enabled) {
++        if (eligible_indices(indices) && producer_path() && make_view(indices, views_[0])) {
++            views_[0].domain = backward_domain;
++            views_[0].counters = &backward;
++            count_ = 1;
++            increment(backward.eligible);
++        } else {
++            increment(backward.fallback);
++        }
++    }
++    active = this;
++}
++
++Scope::Scope(const at::Tensor &weight, const at::Tensor &indices) : previous_(active)
++{
++    static const bool enabled = flag("NPU_DYNAMIC_REBASE_FORWARD");
++    if (enabled) {
++        if (eligible_indices(indices) && eligible_weight(weight) && weight.device() == indices.device() &&
++            producer_path() && make_view(weight, views_[0]) && make_view(indices, views_[1])) {
++            for (View &view : views_) {
++                view.domain = forward_domain;
++                view.counters = &forward;
++            }
++            count_ = 2;
++            increment(forward.eligible);
++        } else {
++            increment(forward.fallback);
++        }
++    }
++    active = this;
++}
++
++Scope::~Scope()
++{
++    active = previous_;
++}
++
++const View *for_tensor(const at::Tensor &tensor)
++{
++    if (active) {
++        for (unsigned i = 0; i < active->count_; ++i) {
++            if (active->views_[i].tensor == tensor.unsafeGetTensorImpl()) {
++                return &active->views_[i];
++            }
++        }
++    }
++    return nullptr;
++}
++
++void record_key(const View &view) { increment(view.counters->keys); }
++void record_descriptor(const View &view) { increment(view.counters->descriptors); }
++
++extern "C" __attribute__((visibility("default"))) uint64_t npu_embedding_backward_rebase_counter(unsigned index)
++{
++    return count(backward, index);
++}
++
++extern "C" __attribute__((visibility("default"))) uint64_t npu_embedding_forward_rebase_counter(unsigned index)
++{
++    return count(forward, index);
++}
++}  // namespace dynamic_embedding_rebase
+--- a/op_plugin/utils/op_api_common.cpp
++++ b/op_plugin/utils/op_api_common.cpp
+@@ -17,6 +17,7 @@
+ #include <sys/stat.h>
+ #include "op_api_common_base.h"
+ #include "op_api_common.h"
++#include "op_plugin/utils/dynamic_embedding_scope.inc"
+ 
+ thread_local char g_hash_buf[g_hash_buf_size];
+ thread_local int g_hash_offset = 0;
+@@ -261,7 +262,12 @@
+     // strides
+     MEMCPY_TO_BUF(at_tensor.strides().data(), static_cast<int64_t>(at_tensor.sizes().size() * sizeof(int64_t)));
+     // offset
+-    auto so = at_tensor.storage_offset();
++    const auto *view = dynamic_embedding_rebase::for_tensor(at_tensor);
++    if (view) {
++        dynamic_embedding_rebase::record_key(*view);
++        MEMCPY_TO_BUF(&view->domain, sizeof(view->domain));
++    }
++    auto so = view ? view->offset : at_tensor.storage_offset();
+     MEMCPY_TO_BUF(&so, sizeof(so));
+     // storage shape
+     aclDataType acl_data_type = at_npu::native::OpPreparation::convert_to_acl_data_type(st);
+@@ -269,7 +275,7 @@
+     if (acl_data_type != ACL_STRING) {
+         TORCH_CHECK(at_tensor.itemsize() > 0, "the itemsize of tensor must be greater than 0.",
+             OPS_ERROR(ErrCode::PARAM));
+-        storageDims.push_back(at_tensor.storage().nbytes() / at_tensor.itemsize());
++        storageDims.push_back(view ? view->storage_elements : at_tensor.storage().nbytes() / at_tensor.itemsize());
+     }
+     MEMCPY_TO_BUF(storageDims.data(), static_cast<int64_t>(storageDims.size() * sizeof(int64_t)));
+     aclFormat npu_format_ = ACL_FORMAT_ND;
+@@ -279,7 +285,7 @@
+     }
+     MEMCPY_TO_BUF(&npu_format_, sizeof(npu_format_));
+ 
+-    addTensorAddrToCachedListFunc(const_cast<void*>(at_tensor.storage().data()));
++    addTensorAddrToCachedListFunc(view ? view->base : const_cast<void*>(at_tensor.storage().data()));
+ }
+ 
+ void add_param_to_buf(const at::Scalar &at_scalar)
+@@ -932,6 +938,10 @@
+         return nullptr;
+     }
+     CheckNpuTensorValid(at_tensor);
++    const auto *view = dynamic_embedding_rebase::for_tensor(at_tensor);
++    if (view) {
++        dynamic_embedding_rebase::record_descriptor(*view);
++    }
+     at::ScalarType scalar_data_type = at_tensor.scalar_type();
+     aclDataType acl_data_type = at_npu::native::OpPreparation::convert_to_acl_data_type(scalar_data_type);
+     c10::SmallVector<int64_t, MAX_DIM_NUM> storageDims;
+@@ -978,7 +988,7 @@
+                 storageDims.push_back(at_tensor.storage().nbytes() / at_tensor.itemsize() * FP4_IN_INT8);
+                 CollectB4ShapeInfo(at_tensor, wrapperStride, wrapperShape);
+             } else {
+-                storageDims.push_back(at_tensor.storage().nbytes() / at_tensor.itemsize());
++                storageDims.push_back(view ? view->storage_elements : at_tensor.storage().nbytes() / at_tensor.itemsize());
+             }
+         }
+     }
+@@ -993,8 +1003,8 @@
+ 
+     auto acl_tensor =
+         aclCreateTensor(wrapperShape.data(), at_tensor.sizes().size(), acl_data_type, wrapperStride.data(),
+-                        at_tensor.storage_offset(), format, storageDims.data(), storageDims.size(),
+-                        const_cast<void *>(at_tensor.storage().data()));
++                        view ? view->offset : at_tensor.storage_offset(), format, storageDims.data(), storageDims.size(),
++                        view ? view->base : const_cast<void *>(at_tensor.storage().data()));
+     return acl_tensor;
+ }
+ 
