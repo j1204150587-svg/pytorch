@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import sys
+import tarfile
 import tempfile
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -74,15 +75,17 @@ def test(fixture, upstream, registered_name):
         with patch.object(o,"FREE70",root),patch.object(o,"observe",observe), \
              patch.object(o,"safe_sample",lambda _:synthetic(0)),patch.object(o.subprocess,"run",original):
             plan=o.make_plan([registered_name],["no-profiler","l0"])
+            o.save(path/"plan.json",plan)
             source=plan["families"][registered_name]
             expected=[]
+            finished=[]
             for j,job in enumerate(plan["jobs"]):
                 current.update(job)
-                parent=path/f"pair-{j}"
+                parent=path/f"{j+1:02d}-{registered_name}-{job['mode']}-{job['order']}"
                 parent.mkdir()
                 def execute():
-                    return [o.run_slot(parent/f"{i}-{v}",job,v,source,99,args)
-                            for i,v in enumerate(job["order"].upper())]
+                    return [o.run_slot(parent/f"{i:02d}-{v}",job,v,source,99,args)
+                            for i,v in enumerate(job["order"].upper(),1)]
                 legs=execute()
                 expected.extend((job["mode"],job["order"],v) for v in job["order"].upper())
                 if j==0:
@@ -90,10 +93,12 @@ def test(fixture, upstream, registered_name):
                 total=len(calls)
                 assert [v["token"] for v in execute()]==[v["token"] for v in legs] and total==len(calls)
                 target=o.install_pair(path,job,legs,source)
+                finished.append({**job,"exit":0,"directory":str(target)})
                 assert o.read(target/"status.json")["exit"]==0
                 assert [e["variant"] for e in o.read(target/"pair-provenance.json")["legs"]]==list(job["order"].upper())
             assert calls==expected
-            first=path/"pair-0/1-B/try-00001/decision.json"
+            o.save(path/"runs.json",finished)
+            first=path/f"01-{registered_name}-no-profiler-ab/02-B/try-00001/decision.json"
             assert o.read(first)["verdict"]=="external"
             quiet=[synthetic(2)]
             bounds=({"utc":synthetic(0)["utc"]},{"utc":synthetic(7)["utc"]})
@@ -101,6 +106,18 @@ def test(fixture, upstream, registered_name):
             assert o.audit_samples(*bounds,quiet,4)[0]=="observation_failed"
             quiet[0]["valid"]=False
             assert o.audit_samples(*bounds,quiet,8)[0]=="observation_failed"
+            import ordered_export
+            with patch.object(ordered_export,"FREE70",root):
+                artifact=root/"completed.tgz"
+                ordered_export.export(path,artifact,[registered_name])
+                with tarfile.open(artifact) as ar:
+                    all_files={m.name:ar.extractfile(m).read() for m in ar if m.isfile()}
+                hashes=json.loads(all_files.pop("file-sha256.json"))
+                assert set(hashes)==set(all_files)
+                for key,raw in all_files.items():
+                    assert len(raw)==hashes[key]["bytes"] and o.digest(raw)==hashes[key]["sha256"]
+                assert len(json.loads(all_files["runs.json"]))==4
+                assert len([k for k in all_files if k.startswith("attempts/") and k.endswith("/decision.json")])==9
             print("verified original runner options, 4 ordered pairs, 8 accepted full legs, 1 rejected B, restart deduplication and sample coverage")
 
 
