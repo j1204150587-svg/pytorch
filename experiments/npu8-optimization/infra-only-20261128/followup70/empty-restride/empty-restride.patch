@@ -1,0 +1,67 @@
+--- a/torch_npu/csrc/aten/common/TensorFactories.cpp
++++ b/torch_npu/csrc/aten/common/TensorFactories.cpp
+@@ -6,6 +6,10 @@
+ #endif
+ 
+ #include <algorithm>
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
+ #include <cctype>
+ #include <cstddef>
+ #include <string>
+@@ -43,6 +47,31 @@
+ namespace native {
+ 
+ namespace {
++
++bool emptyAlreadyRestrided(c10::IntArrayRef size)
++{
++    static const bool enabled = [] {
++        const char *value = std::getenv("TORCH_NPU_EMPTY_SINGLE_RESTRIDE");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    // The special [0] case keeps TensorImpl's default geometry.
++    const bool skip = enabled && (size.size() != 1 || size[0] != 0);
++    static const bool audit = std::getenv("TORCH_NPU_EMPTY_STRIDE_AUDIT") &&
++        std::strcmp(std::getenv("TORCH_NPU_EMPTY_STRIDE_AUDIT"), "1") == 0;
++    if (audit) {
++        static struct Counts {
++            std::atomic<uint64_t> skipped{0}, kept{0};
++            ~Counts()
++            {
++                std::fprintf(stderr, "NPU_EMPTY_STRIDE skipped=%llu kept=%llu\n",
++                    static_cast<unsigned long long>(skipped.load()),
++                    static_cast<unsigned long long>(kept.load()));
++            }
++        } counts;
++        (skip ? counts.skipped : counts.kept).fetch_add(1, std::memory_order_relaxed);
++    }
++    return skip;
++}
+ 
+ int64_t npu_byte_tensor_sum_on_cpu(const at::Tensor& t)
+ {
+@@ -201,7 +230,9 @@
+     TORCH_CHECK(
+         memory_format == c10::MemoryFormat::Contiguous,
+         "Only c10::MemoryFormat::Contiguous is supported for creating a npu tensor", OPS_ERROR(ErrCode::NOT_SUPPORT));
+-    tensor.unsafeGetTensorImpl()->empty_tensor_restride(memory_format);
++    if (!emptyAlreadyRestrided(size)) {
++        tensor.unsafeGetTensorImpl()->empty_tensor_restride(memory_format);
++    }
+     StorageDescHelper::SetDesc(tensor, size, tensor.strides());
+ 
+     return tensor;
+@@ -399,7 +430,9 @@
+     if (size.size() != 1 || size[0] != 0) {
+         tensor.unsafeGetTensorImpl()->set_sizes_contiguous(size);
+     }
+-    tensor.unsafeGetTensorImpl()->empty_tensor_restride(c10::MemoryFormat::Contiguous);
++    if (!emptyAlreadyRestrided(size)) {
++        tensor.unsafeGetTensorImpl()->empty_tensor_restride(c10::MemoryFormat::Contiguous);
++    }
+     StorageDescHelper::SetDesc(tensor, size, tensor.strides(), format);
+     return tensor;
+ }
