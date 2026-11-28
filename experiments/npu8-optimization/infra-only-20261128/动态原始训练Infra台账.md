@@ -137,9 +137,25 @@ op-plugin 在反向 Mm 的合格 RHS 上规范化权重描述符。[实测代码
 
 原版 !42634 的 eager 入口无命中。上述单点均使用各自同轮基线。双向 embedding 配方的 Level1 两步共有 34,439 个全流空档；按原始对时，101.357、69.580 ms 落在后继 ATen 尚未开始且两个 producer 都无可见提交操作的区间。时间线给出相关区间，逐请求归因还需考虑 CPU 与设备对时。[互斥分解及校时敏感性](producer-coverage/README.md)
 
+### PTA view 的形状与 stride 暂存
+
+动态 eager 中，第 4、5 步各有 9,545 次 `aten::view`。PTA 改用栈内小向量暂存常见维数，两个步骤中 view 的独占 CPU 时间从 26.671→22.701、26.055→22.799 ms，与入队前设备空档的交集从 10.144→8.529、7.741→6.825 ms。两步逐流核名和工作顺序全部匹配。50 步端到端却分别慢 0.13%、2.22%，早窗 Free 占比从 89.178%→88.604%、88.938%→89.451%。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/c09cc057761b7982a41f077c2440ae0381647f28/experiments/npu8-optimization/infra-only-20261128/followup70/native-host/view.patch) · [双序八列及设备工作归因](followup70/native-host/实机结果.md)
+
+### PTA Storage ID 分配
+
+`NPUStorageImpl` 的构造器分别锁住新对象各自的 mutex，却用这些锁保护同一个进程序号。补丁以进程原子计数器分配 ID，2、4、8 个线程的并发门均未发现重复。无卡夹具的单对象中位耗时从 36.828 降至 21.810 ns。原训练八步两腿各构造 105,703 个对象，带计时代码的 ID 段累计为 6.211→7.372 ms。按预设条件止于实机审计，未测双序步时和 Level0。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/4b94ef78bae73a9ddedf4fcd4bfc85115471508c/experiments/npu8-optimization/infra-only-20261128/followup70/storage-id/storage-id.patch) · [并发门与原训练证据](followup70/storage-id/README.md)
+
+### PTA InplaceCopy 的两种描述符对齐方式
+
+原训练八步有 25,746 次 copy。512 B 整对齐的补丁只命中 48 次。保留 128 B 残余偏移后，每步 2,048 笔目标 BF16 搬运都能命中，但 CANN 为单 SDMA copy 显式禁用普通 executor 缓存。两步各有 1,052 笔流 44、1,060 笔流 47 的单 SDMA，逐笔核对了算子、流和设备任务位置。128 B 的双序步时为 363.161→379.836、393.779→386.643 ms/步，Free 占比为 88.798%→88.869%、89.381%→88.959%。[512 B 实测补丁](https://github.com/j1204150587-svg/pytorch/blob/e102d756995b05b46dc87f2fdc2fd7a92e9f3532/experiments/npu8-optimization/infra-only-20261128/copy_rebase/aligned512.patch) · [128 B 实测补丁](https://github.com/j1204150587-svg/pytorch/blob/e102d756995b05b46dc87f2fdc2fd7a92e9f3532/experiments/npu8-optimization/infra-only-20261128/copy_rebase/residual128.patch) · [八列与吞吐](copy_rebase/residual128-analysis/PAIRS.md)
+
+### PTA 空张量重复计算 stride
+
+八步中有 53,185 次空张量工厂已算好连续 stride，补丁跳过第二次计算。Level1 第 4、5 步，工厂时间与全流空档的交集分别少 0.336、0.423 ms，设备提交数和逐流工作相同。正反序 Level0 Free 占比为 89.453%→88.788%、89.741%→88.846%，但 50 步端到端两序均回退，分别为 376.789→379.648、388.577→393.736 ms/步。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/df46e997c4e4b7811c831d51d84957e70dfe843e/experiments/npu8-optimization/infra-only-20261128/followup70/empty-restride/empty-restride.patch) · [八列、配对波动与工厂归因](followup70/empty-restride/README.md)
+
 ## 数据边界与归档
 
-本轮有效对照 38 对，共 76 腿。其中 6 对使用原训练的内置数值审计，另 32 对全部经过同步计时或 profiler。后 64 腿每腿都有 7–16 个芯片进程采样，至少 3 个样本实际捕获到训练 worker。有效性能腿均未检出外部作业或采样失败。5 个因占卡失败的尝试及 1 个原装库映射验证失败的尝试均保留在排除清单。12:51（北京时间）收尾时卡上无进程，训练容器仅余 init，公共锁可获取。[逐腿卡况](evidence/slot.json) · [排除清单](evidence/excluded.json) · [收尾快照](evidence/final-slot.json)
+11 月 28 日截至北京时间 12:51 的首批有效对照为 38 对，共 76 腿。其中 6 对使用原训练的内置数值审计，另 32 对经过同步计时或 profiler。后 64 腿每腿都有 7–16 个芯片进程采样，至少 3 个样本实际捕获到训练 worker。该批有效性能腿均未检出外部作业或采样失败。5 个因占卡失败的尝试及 1 个原装库映射验证失败的尝试均保留在排除清单。12:51 快照记录当时卡上无进程，容器仅余 init，公共锁可获取。后续新增配对在各项实测报告中单列。[首批逐腿卡况](evidence/slot.json) · [首批排除清单](evidence/excluded.json) · [12:51 快照](evidence/final-slot.json)
 
 数据仅覆盖单 rank、60 个合成形状，batch size 1–4、序列长度 12–32。真实业务频率、长序列与多卡没有在本轮实测。每项训练数值门均使用同一组 8 个有限步，包含 8 次真实权重更新。保留了非有限值算子微测及其适用范围，真实训练 overflow 跳步覆盖数为 0。
 
