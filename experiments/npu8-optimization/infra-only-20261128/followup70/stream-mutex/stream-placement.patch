@@ -1,0 +1,99 @@
+--- a/src/runtime/core/src/stream/v100/stream_creator_c.cc
++++ b/src/runtime/core/src/stream/v100/stream_creator_c.cc
+@@ -11,6 +11,59 @@
+ #include "stream_creator_c.hpp"
+ #include "coprocessor_stream.hpp"
+ 
++#include <array>
++#include <atomic>
++#include <cstddef>
++#include <cstdint>
++#include <cstdlib>
++#include <memory>
++#include <new>
++
++namespace {
++using cce::runtime::Stream;
++std::atomic<uint64_t> layoutCounters[6]{};
++std::atomic<uintptr_t> observedStreams[128]{};
++std::atomic<uintptr_t> observedHandles[128]{};
++bool splitRequested() {
++    static const bool enabled = [] {
++        const char *value = std::getenv("NPU_CANN_STREAM_LAYOUT");
++        return value && value[0] == '1' && value[1] == '\0';
++    }();
++    return enabled;
++}
++// These checked offsets belong only to this pinned v100 build. The ordinary Stream
++// object and its deleting destructor remain exactly the ones shipped by this TU.
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Winvalid-offsetof"
++static_assert(offsetof(Stream, streamMutex_) == 0x28 && offsetof(Stream, recycleMutex_) == 0x58,
++              "Unexpected v100 Stream mutex offsets");
++static_assert(alignof(Stream) <= alignof(std::max_align_t), "Stream needs overaligned storage");
++#pragma GCC diagnostic pop
++struct ReleaseRawBlock {
++    void operator()(void *pointer) const noexcept { ::operator delete(pointer); }
++};
++using RawBlock = std::unique_ptr<void, ReleaseRawBlock>;
++bool splitHotFields(const void *p) {
++    const auto addr = reinterpret_cast<uintptr_t>(p);
++    return ((addr + 0x28 + 12) >> 7) != ((addr + 0x58) >> 7)
++        && ((addr + 0x28 + 12) >> 6) != ((addr + 0x58) >> 6);
++}
++}
++extern "C" __attribute__((visibility("default"))) uint64_t npu_cann_stream_layout_count(unsigned i) {
++    return i<6 ? layoutCounters[i].load(std::memory_order_relaxed) : 0;
++}
++extern "C" __attribute__((visibility("default"))) uintptr_t npu_cann_stream_layout_object(uintptr_t handle) {
++    for (unsigned i=0; i<128; ++i) {
++        if (handle && observedHandles[i].load(std::memory_order_acquire) == handle)
++            return observedStreams[i].load(std::memory_order_relaxed);
++    }
++    return 0;
++}
++extern "C" __attribute__((visibility("default"))) unsigned npu_cann_stream_layout_classify(uintptr_t handle) {
++    auto addr = npu_cann_stream_layout_object(handle);
++    return addr ? (splitHotFields(reinterpret_cast<void *>(addr)) ? 2U : 1U) : 0U;
++}
++
+ namespace cce {
+ namespace runtime {
+ 
+@@ -20,7 +73,35 @@
+         return new (std::nothrow) CoprocessorStream(dev, prio, stmFlags);
+     }
+ 
+-    return new (std::nothrow) Stream(dev, prio, stmFlags, dvppGrp);
++    auto finish = [](Stream *s) {
++        if (s != nullptr) {
++            const auto serial = layoutCounters[0].fetch_add(1, std::memory_order_relaxed);
++            observedStreams[serial % 128].store(reinterpret_cast<uintptr_t>(s), std::memory_order_relaxed);
++            observedHandles[serial % 128].store(reinterpret_cast<uintptr_t>(s->GetInnerHandle()), std::memory_order_release);
++            if (splitHotFields(s)) layoutCounters[1].fetch_add(1, std::memory_order_relaxed);
++        }
++        return s;
++    };
++    if (!splitRequested()) return finish(new (std::nothrow) Stream(dev, prio, stmFlags, dvppGrp));
++    layoutCounters[2].fetch_add(1, std::memory_order_relaxed);
++    std::array<RawBlock, 12> blocks;
++    size_t selected = 0;
++    for (size_t i = 0; i < blocks.size(); ++i) {
++        blocks[i].reset(::operator new(sizeof(Stream), std::nothrow));
++        if (!blocks[i]) break;
++        layoutCounters[3].fetch_add(1, std::memory_order_relaxed);
++        if (splitHotFields(blocks[i].get())) {
++            selected = i;
++            break;
++        }
++    }
++    if (!blocks[selected]) return nullptr;
++    if (!splitHotFields(blocks[selected].get())) layoutCounters[4].fetch_add(1, std::memory_order_relaxed);
++    Stream *const s = ::new(blocks[selected].get()) Stream(dev, prio, stmFlags, dvppGrp);
++    // On constructor exceptions all raw allocations are owned by their guards.
++    // An ordinary virtual delete can free the selected global-operator-new allocation.
++    (void)blocks[selected].release();
++    return finish(s);
+ }
+ }  // namespace runtime
+ }  // namespace cce
