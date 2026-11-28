@@ -1,0 +1,211 @@
+--- a/op_plugin/ops/opapi/AddKernelNpuOpApi.cpp
++++ b/op_plugin/ops/opapi/AddKernelNpuOpApi.cpp
+@@ -16,6 +16,197 @@
+ #include "op_plugin/AclOpsInterface.h"
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
++#include "torch_npu/csrc/core/NPUBridge.h"
++#include "torch_npu/csrc/core/npu/NPUCachingAllocator.h"
++#include "torch_npu/csrc/core/npu/NPUGraphsUtils.h"
++#include "torch_npu/csrc/core/npu/sys_ctrl/npu_sys_ctrl.h"
++#include "torch_npu/csrc/framework/FormatHelper.h"
++#include <array>
++#include <atomic>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <mutex>
++
++namespace repeat_add {
++using Prepare = int(*)(const aclTensor*, const aclTensor*, const aclScalar*, aclTensor*, uint64_t*, aclOpExecutor**);
++using Bind = int(*)(aclOpExecutor*,size_t,aclTensor*,void*);
++using Control = int(*)(aclOpExecutor*);
++struct Api {
++    Prepare prepare=reinterpret_cast<Prepare>(GetOpApiFuncAddr("aclnnAddGetWorkspaceSize"));
++    OpApiFunc launch=reinterpret_cast<OpApiFunc>(GetOpApiFuncAddr("aclnnAdd"));
++    Control keep=reinterpret_cast<Control>(GetOpApiFuncAddr("aclSetAclOpExecutorRepeatable"));
++    Control destroy=reinterpret_cast<Control>(GetOpApiFuncAddr("aclDestroyAclOpExecutor"));
++    Bind input=reinterpret_cast<Bind>(GetOpApiFuncAddr("aclSetInputTensorAddr"));
++    Bind output=reinterpret_cast<Bind>(GetOpApiFuncAddr("aclSetOutputTensorAddr"));
++    _aclDestroyTensor destroy_tensor=GET_OP_API_FUNC(aclDestroyTensor);
++    _aclDestroyScalar destroy_scalar=GET_OP_API_FUNC(aclDestroyScalar);
++    bool ready() const { return prepare && launch && keep && destroy && input && output && destroy_tensor && destroy_scalar; }
++};
++static bool flag(const char* name) {
++    const char* s=std::getenv(name);
++    return s && std::strcmp(s,"1")==0;
++}
++enum Field { Accepted, Fallback, NewPlan, Rebind, Work, Refused, BindFailure, OtherStream, SingleUse, Length };
++static const bool enabled=flag("NPU_HSTU_REPEAT_ADD");
++static const bool profile_toggle=flag("NPU_HSTU_REPEAT_ADD_PROFILE_TOGGLE");
++static thread_local bool profile_stock=false;
++extern "C" __attribute__((visibility("default"))) void npu_repeat_add_profile_stock(bool value) {
++    if (profile_toggle) profile_stock=value;
++}
++static const bool audit=flag("NPU_HSTU_REPEAT_ADD_COUNT");
++static const bool fault=flag("NPU_HSTU_REPEAT_ADD_TEST_REBIND_FAILURE");
++static std::atomic<uint64_t> counts[Length]{};
++static void count(Field f) { if (audit) counts[f].fetch_add(1,std::memory_order_relaxed); }
++extern "C" __attribute__((visibility("default"))) uint64_t npu_repeat_add_count(unsigned i) {
++    return i<Length ? counts[i].load(std::memory_order_relaxed) : 0;
++}
++struct Report {
++    ~Report() {
++        if (audit && enabled) {
++            std::fprintf(stderr,"REPEAT_ADD");
++            for (unsigned i=0;i<Length;++i) std::fprintf(stderr," %llu",(unsigned long long)counts[i].load());
++            std::fprintf(stderr,"\n");
++        }
++    }
++};
++static Report report;
++struct Input { at::Tensor x,y,out; aclrtStream stream; std::array<int,3> formats; };
++struct Plan {
++    aclOpExecutor* executor=nullptr;
++    std::array<aclTensor*,3> tensors{};
++    std::array<int,3> formats{};
++    aclScalar* alpha=nullptr;
++    void* workspace=nullptr;
++    uint64_t bytes=0;
++    bool retained=false;
++    void release(Api &api) {
++        if (retained && executor) NPU_CHECK_ERROR(api.destroy(executor),"release repeated Add");
++        for (auto t:tensors) if (t) api.destroy_tensor(t);
++        if (alpha) api.destroy_scalar(alpha);
++        if (workspace) NPU_CHECK_ERROR(aclrtFree(workspace),"release repeated Add workspace");
++        *this=Plan{};
++    }
++};
++struct Bank {
++    Api api;
++    std::mutex owner_lock,run_lock;
++    aclrtStream stream=nullptr;
++    int device=-1;
++    aclrtContext context=nullptr;
++    std::atomic<bool> disabled{false};
++    bool shutdown_registered=false;
++    std::array<Plan,84> plans{};
++    bool own(aclrtStream s,int dev) {
++        std::lock_guard<std::mutex> lock(owner_lock);
++        if (!stream) { stream=s; device=dev; }
++        return stream==s && device==dev;
++    }
++    void tear_down() {
++        std::lock_guard<std::mutex> guard(run_lock);
++        disabled=true;
++        aclrtContext prior=nullptr;
++        if (aclrtGetCurrentContext(&prior)!=0) prior=nullptr;
++        if (context!=prior) NPU_CHECK_ERROR(aclrtSetCurrentContext(context),"select Add owner context");
++        NPU_CHECK_ERROR(aclrtSynchronizeStream(stream),"drain repeated Add stream");
++        for (auto &p:plans) p.release(api);
++        if (prior && prior!=context) NPU_CHECK_ERROR(aclrtSetCurrentContext(prior),"restore Add owner context");
++    }
++    void prepare(Plan &p,const Input &v,bool keep) {
++        p.formats=v.formats;
++        p.tensors={ConvertType(v.x),ConvertType(v.y),ConvertType(v.out)};
++        p.alpha=ConvertType(at::Scalar(int64_t(1)));
++        TORCH_CHECK(p.tensors[0] && p.tensors[1] && p.tensors[2] && p.alpha,"Add descriptor creation failed");
++        NPU_CHECK_ERROR(api.prepare(p.tensors[0],p.tensors[1],p.alpha,p.tensors[2],&p.bytes,&p.executor),"prepare repeated Add");
++        TORCH_CHECK(p.executor,"missing Add executor");
++        if (keep) {
++            p.retained=api.keep(p.executor)==0;
++            if (!p.retained) { count(Refused); disabled=true; }
++        }
++        if (p.bytes) NPU_CHECK_ERROR(aclrtMalloc(&p.workspace,p.bytes,ACL_MEM_MALLOC_HUGE_FIRST),"allocate Add workspace");
++        count(NewPlan);
++    }
++    int submit_plan(Plan &p,const Input &v) {
++        auto rc=api.launch(p.workspace,p.bytes,p.executor,v.stream);
++        // Stage 2 can fail after a partial submission. Propagate its status without retrying it.
++        NPU_CHECK_ERROR(rc,"execute repeated Add");
++        count(Work);
++        if (!p.retained) {
++            p.executor=nullptr;  // Single-use workspace queries give stage 2 ownership.
++            if (p.workspace) NPU_CHECK_ERROR(aclrtSynchronizeStream(v.stream),"complete single-use Add workspace");
++            p.release(api);
++        }
++        return rc;
++    }
++    int once(const Input &v) {
++        count(SingleUse);
++        Plan p;
++        prepare(p,v,false);
++        return submit_plan(p,v);
++    }
++    int consume(const Input &v) {
++        std::lock_guard<std::mutex> lock(run_lock);
++        if (c10_npu::check_dequeue_need_use(v.stream)) c10_npu::UseStreamResInCurrentThread(v.stream);
++        if (!shutdown_registered) {
++            NPU_CHECK_ERROR(aclrtGetCurrentContext(&context),"get Add owner context");
++            c10_npu::NpuSysCtrl::GetInstance().RegisterReleaseFn([this](){tear_down();},c10_npu::ReleasePriority::PriorityFirst);
++            shutdown_registered=true;
++        }
++        if (disabled.load()) return once(v);
++        auto &p=plans[(v.x.size(0)-1)*21+(v.x.size(1)-12)];
++        if (!p.executor) { prepare(p,v,true); return submit_plan(p,v); }
++        if (p.formats!=v.formats) return once(v);
++        bool ok=!fault;
++        const at::Tensor* values[]={&v.x,&v.y,&v.out};
++        for (size_t j=0;j<3 && ok;++j) {
++            auto bind=j==2?api.output:api.input;
++            ok=bind(p.executor,j==2?0:j,p.tensors[j],const_cast<void*>(values[j]->storage().data()))==0;
++        }
++        if (!ok) {
++            count(BindFailure);
++            disabled=true;
++            // No stage-2 submission for this request has occurred. Earlier asynchronous launches retain their plan.
++            return once(v);
++        }
++        count(Rebind);
++        return submit_plan(p,v);
++    }
++};
++static Bank &bank() { static Bank *state=new Bank; return *state; }
++static bool plain(const at::Tensor &t,int64_t b,int64_t l) {
++    return t.device().is_privateuseone() && t.scalar_type()==at::kBFloat16 && t.layout()==at::kStrided &&
++        t.dim()==3 && t.size(0)==b && t.size(1)==l && t.size(2)==64 && t.stride(2)==1 &&
++        t.stride(1)==64 && t.stride(0)==l*64 && t.storage_offset()==0 && !t.is_conj() && !t.is_neg() &&
++        t.storage().nbytes()==static_cast<size_t>(b*l*64*2) && t.storage().data() &&
++        reinterpret_cast<uintptr_t>(t.storage().data())%512==0 &&
++        t.storage().data_ptr().get_deleter()==c10_npu::NPUCachingAllocator::get()->raw_deleter() &&
++        at_npu::native::FormatHelper::IsOpInputBaseFormat(t) &&
++        typeid(*t.storage().unsafeGetStorageImpl())==typeid(torch_npu::NPUStorageImpl);
++}
++static bool submit(const at::Tensor &x,const at::Tensor &y,const at::Scalar &alpha,const at::Tensor &out) {
++    if (!enabled || (profile_toggle && profile_stock)) return false;
++    auto &state=bank();
++    if (x.dim()!=3 || x.size(0)<1 || x.size(0)>4 || x.size(1)<12 || x.size(1)>32 ||
++        alpha.type()!=at::kLong || alpha.toLong()!=1 || x.device()!=y.device() || x.device()!=out.device() ||
++        !plain(x,x.size(0),x.size(1)) || !plain(y,x.size(0),x.size(1)) || !plain(out,x.size(0),x.size(1)) ||
++        at::globalContext().deterministicAlgorithms() || c10_npu::is_core_control_enabled() ||
++        c10_npu::option::OptionsManager::GetTaskQueueEnable()!=1 || c10_npu::currentStreamCaptureStatus()!=c10_npu::CaptureStatus::None ||
++        !state.api.ready() || state.disabled.load()) { count(Fallback); return false; }
++    auto s=c10_npu::getCurrentNPUStream();
++    auto raw=s.stream(false);
++    if (s.device_index()!=x.get_device() || !state.own(raw,s.device_index())) { count(OtherStream); return false; }
++    if (c10_npu::check_enqueue_need_use(raw)) c10_npu::UseStreamResInCurrentThread(raw);
++    at_npu::native::SetDeterministic();
++    for (auto t:{&x,&y,&out}) c10_npu::NPUCachingAllocator::recordStream(t->storage().data_ptr(),s);
++    Input v{x,y,out,raw,{torch_npu::NPUBridge::GetNpuStorageImpl(x)->npu_desc_.npu_format_,
++                         torch_npu::NPUBridge::GetNpuStorageImpl(y)->npu_desc_.npu_format_,
++                         torch_npu::NPUBridge::GetNpuStorageImpl(out)->npu_desc_.npu_format_}};
++    count(Accepted);
++    at_npu::native::OpCommand::RunOpApiV2("aclnnAdd",[v](){return bank().consume(v);});
++    return true;
++}
++} // namespace repeat_add
++
+ 
+ namespace op_api {
+ using npu_preparation = at_npu::native::OpPreparation;
+@@ -102,7 +293,9 @@
+     at::Tensor result =
+         npu_preparation::apply_tensor_without_format(output_size, output_tensor.options().dtype(result_type));
+     // calculate the output result of the NPU
+-    add_out_npu_nocheck(self, other, alpha, result);
++    if (!repeat_add::submit(self, other, alpha, result)) {
++        add_out_npu_nocheck(self, other, alpha, result);
++    }
+     at::namedinference::propagate_names_if_nonempty(result, maybe_names);
+     return result;
+ }

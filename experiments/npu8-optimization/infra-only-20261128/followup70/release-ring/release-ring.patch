@@ -1,0 +1,86 @@
+--- a/torch_npu/csrc/core/npu/NPUQueue.cpp
++++ b/torch_npu/csrc/core/npu/NPUQueue.cpp
+@@ -20,6 +20,9 @@
+ #include <sys/time.h>
+ #include <sys/eventfd.h>
+ #include <acl/acl_rt.h>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
+ 
+ namespace c10_npu {
+ struct timeval delay = { 0, 1 };
+@@ -840,9 +843,43 @@
+     return repo_para;
+ }
+ 
++namespace {
++bool releaseAcquireEnabled()
++{
++    static const bool enabled = [] {
++        const char *value = std::getenv("TORCH_NPU_RELEASE_RING_ACQ_REL");
++        return value != nullptr && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++
++bool auditReleaseRing()
++{
++    static const bool enabled = [] {
++        const char *value = std::getenv("TORCH_NPU_RELEASE_RING_COUNT");
++        return value != nullptr && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++
++std::atomic<uint64_t> releasePublished{0};
++std::atomic<uint64_t> releaseConsumed{0};
++} // namespace
+ static constexpr size_t kReleaseQueueCapacity = 8192;
+ bool ReleaseQueue::WriteToReleaseQueue(void *cur_paras)
+ {
++    if (releaseAcquireEnabled()) {
++        // Only the dispatch thread publishes slots. The release thread returns them.
++        const unsigned write = __atomic_load_n(&write_idx.idx, __ATOMIC_RELAXED);
++        const unsigned next = (write + 1) & (kReleaseQueueCapacity - 1);
++        if (next == __atomic_load_n(&read_idx.idx, __ATOMIC_ACQUIRE)) {
++            return false;
++        }
++        releaseManager().CopyRealseParam(datas, write, cur_paras);
++        __atomic_store_n(&write_idx.idx, next, __ATOMIC_RELEASE);
++        if (auditReleaseRing()) ++releasePublished;
++        return true;
++    }
+     if (IsFullQueue()) {
+         return false;
+     }
+@@ -872,6 +909,16 @@
+ 
+ bool ReleaseQueue::ReadFromReleaseQueue()
+ {
++    if (releaseAcquireEnabled()) {
++        const unsigned read = __atomic_load_n(&read_idx.idx, __ATOMIC_RELAXED);
++        if (read == __atomic_load_n(&write_idx.idx, __ATOMIC_ACQUIRE)) {
++            return false;
++        }
++        releaseManager().ReleaseParam(datas, read);
++        __atomic_store_n(&read_idx.idx, (read + 1) & (kReleaseQueueCapacity - 1), __ATOMIC_RELEASE);
++        if (auditReleaseRing()) ++releaseConsumed;
++        return true;
++    }
+     if (IsEmptyQueue()) {
+         return false;
+     }
+@@ -938,6 +985,12 @@
+             releaser.join();
+         }
+     }
++    if (initialized && auditReleaseRing()) {
++        std::fprintf(stderr, "NPU_RELEASE_RING enabled=%d published=%llu consumed=%llu\n",
++                     int(releaseAcquireEnabled()),
++                     static_cast<unsigned long long>(releasePublished.load()),
++                     static_cast<unsigned long long>(releaseConsumed.load()));
++    }
+     releaseManager().DeInit(datas);
+ }
+ 
