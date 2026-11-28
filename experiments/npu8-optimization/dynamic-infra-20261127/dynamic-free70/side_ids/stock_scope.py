@@ -19,7 +19,7 @@ def ns(x):
     return int(Decimal(str(x)) * 1000)
 
 
-def collect(trace, attribution):
+def collect(trace, attribution, steps=(4,5), clock_gaps=None):
     with gzip.open(trace, "rt", encoding="utf8") as f:
         obj = json.load(f)
     E = obj if isinstance(obj, list) else obj["traceEvents"]
@@ -40,6 +40,8 @@ def collect(trace, attribution):
     result=[]
     for slo,shi,scope in scopes:
         step, = [int(e["name"].split("#")[1]) for a,b,e in events if e["name"].startswith("ProfilerStep#") and a<=slo<shi<=b]
+        if step not in steps:
+            continue
         qr = [r for r in q if int(r["step"])==step]
         idx, = [i for i in range(len(qr)-len(OPS)) if [r["op"] for r in qr[i:i+len(OPS)]]==OPS]
         requests = qr[idx:idx+len(OPS)]
@@ -63,12 +65,25 @@ def collect(trace, attribution):
             kernel_work_ms=sum(b-a for a,b,_ in physical)/1e6,
             tasks=[dict(name=r["task"],stream=r["stream"],slot=r["stream_work_slot"],task_id=r["task_id"]) for r in tasks],
             requests=[{k:r[k] for k in ("op","queue_id","aten_to_enqueue_ns","enqueue_ns","signed_queue_wait_ns","dequeue_ns","acl_api_sum_ns")} for r in requests]))
-    if len(result)!=2:raise RuntimeError("expected two source scopes")
+    if [r["step"] for r in result] != list(steps):
+        raise RuntimeError("missing or duplicate source scope for selected steps")
+    if clock_gaps is not None:
+        budgets = load_csv(clock_gaps)
+        for row in result:
+            first = row["tasks"][0]
+            match, = [r for r in budgets if int(r["step"]) == row["step"] and
+                      (r["stream"], r["task_id"]) == (first["stream"], first["task_id"])]
+            assert match["task"] == first["name"] and match["op"] == OPS[0]
+            assert int(match["gap_ns"])/1e6 == row["before_first_task_all_stream_gap_ms"]
+            row["leading_gap_before_first_aten_ms"] = [
+                int(match[field])/1e6 for field in ("before_aten_min_ns","before_aten_max_ns")]
     return {"sha256":hashlib.sha256(trace.read_bytes()).hexdigest(),"steps":result}
 
 
 if __name__=="__main__":
     cli=argparse.ArgumentParser(description=__doc__)
     for n in ("trace","attribution","output"): cli.add_argument(n,type=Path)
+    cli.add_argument("--steps", nargs="+", type=int, default=[4,5])
+    cli.add_argument("--clock-gaps", type=Path)
     a=cli.parse_args()
-    a.output.write_text(json.dumps(collect(a.trace,a.attribution),indent=2)+"\n",encoding="utf8")
+    a.output.write_text(json.dumps(collect(a.trace,a.attribution,a.steps,a.clock_gaps),indent=2)+"\n",encoding="utf8")
