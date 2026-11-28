@@ -1,0 +1,127 @@
+--- a/op_plugin/utils/dynamic_embedding_scope.h
++++ b/op_plugin/utils/dynamic_embedding_scope.h
+@@ -20,6 +20,7 @@
+ public:
+     explicit Scope(const at::Tensor &indices);
+     Scope(const at::Tensor &weight, const at::Tensor &indices);
++    void selectNarrowIndex(const at::Tensor &grad, const at::Tensor &indices, int64_t weights, int64_t padding, bool scale);
+     ~Scope();
+     Scope(const Scope &) = delete;
+     Scope &operator=(const Scope &) = delete;
+--- a/op_plugin/utils/dynamic_embedding_scope.inc
++++ b/op_plugin/utils/dynamic_embedding_scope.inc
+@@ -1,6 +1,7 @@
+ #include "op_plugin/utils/dynamic_embedding_scope.h"
+ #include "torch_npu/csrc/core/npu/NPUGraphsUtils.h"
+ #include <atomic>
++#include "torch_npu/csrc/core/npu/NpuVariables.h"
+ #include <cstdlib>
+ #include <cstring>
+ #include <limits>
+@@ -151,6 +152,52 @@
+     active = this;
+ }
+ 
++namespace {
++constexpr uint64_t narrowDomain = 0x454d424c4f333201ULL;
++struct NarrowAudit {
++    uint64_t hit=0, fallback=0;
++    ~NarrowAudit() {
++        std::fprintf(stderr, "NPU_NARROW_INDEX hit=%llu fallback=%llu\n",
++            static_cast<unsigned long long>(hit), static_cast<unsigned long long>(fallback));
++    }
++};
++} // namespace
++
++bool isNarrow(const View *v)
++{
++    return v && v->domain==narrowDomain;
++}
++
++void Scope::selectNarrowIndex(const at::Tensor &grad, const at::Tensor &indices, int64_t weights,
++                              int64_t padding, bool scale)
++{
++    static const bool enabled = flag("NPU_EMBED_NARROW_INDEX");
++    static const bool audit = flag("NPU_EMBED_NARROW_AUDIT");
++    bool hit = false;
++#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
++    if (enabled && count_==1 && weights==64 && !scale && (padding==-1 || (padding>=0 && padding<weights))
++        && grad.scalar_type()==at::kBFloat16 && grad.device()==indices.device() && grad.is_contiguous()
++        && grad.dim()==4 && grad.size(3)==64 && indices.size(0)<=4 && indices.size(1)>=12 && indices.size(1)<=32
++        && grad.size(0)==indices.size(0) && grad.size(1)==indices.size(1) && grad.size(2)==4
++        && c10_npu::GetSocVersion()==c10_npu::SocVersion::Ascend910_9362) {
++        constexpr int64_t limit = std::numeric_limits<int64_t>::max()/2;
++        View &v = views_[0];
++        if (v.storage_elements<=limit && indices.stride(0)<=limit && indices.stride(1)<=limit) {
++            // The original base denotes the same bytes. Counts and strides now
++            // measure four-byte elements, selecting the little-endian low word.
++            v.offset *= 2;
++            v.storage_elements *= 2;
++            v.domain = narrowDomain;
++            hit = true;
++        }
++    }
++#endif
++    if (audit) {
++        static thread_local NarrowAudit counter;
++        if (hit) { ++counter.hit; } else { ++counter.fallback; }
++    }
++}
++
+ Scope::~Scope()
+ {
+     active = previous_;
+--- a/op_plugin/ops/opapi/StructKernelNpuOpApi.cpp
++++ b/op_plugin/ops/opapi/StructKernelNpuOpApi.cpp
+@@ -1148,6 +1148,7 @@
+     at::Tensor out = npu_preparation::apply_tensor_without_format(output_size_0,
+                                                                 grad_output.options().dtype(output_dtype_0));
+     dynamic_embedding_rebase::Scope scope(indices);
++    scope.selectNarrowIndex(grad_output, indices, num_weights, padding_idx, scale_grad_by_freq);
+     EXEC_NPU_CMD(aclnnEmbeddingDenseBackward, grad_output, indices, num_weights, padding_idx, scale_grad_by_freq, out);
+     return out;
+ }
+--- a/op_plugin/utils/op_api_common.cpp
++++ b/op_plugin/utils/op_api_common.cpp
+@@ -255,14 +255,20 @@
+     // view shape
+     MEMCPY_TO_BUF(at_tensor.sizes().data(), static_cast<int64_t>(at_tensor.sizes().size() * sizeof(int64_t)));
+     // data type
+-    auto st = at_tensor.scalar_type();
++    const auto *view = dynamic_embedding_rebase::for_tensor(at_tensor);
++    const bool narrow = dynamic_embedding_rebase::isNarrow(view);
++    auto st = narrow ? at::kInt : at_tensor.scalar_type();
+     MEMCPY_TO_BUF(&st, sizeof(st));
+     // seperator
+     MEMCPY_TO_BUF(",", 1);
+     // strides
+-    MEMCPY_TO_BUF(at_tensor.strides().data(), static_cast<int64_t>(at_tensor.sizes().size() * sizeof(int64_t)));
++    if (narrow) {
++        int64_t strides[] = {2*at_tensor.stride(0), 2*at_tensor.stride(1), 2*at_tensor.stride(2)};
++        MEMCPY_TO_BUF(strides, sizeof(strides));
++    } else {
++        MEMCPY_TO_BUF(at_tensor.strides().data(), static_cast<int64_t>(at_tensor.dim()*sizeof(int64_t)));
++    }
+     // offset
+-    const auto *view = dynamic_embedding_rebase::for_tensor(at_tensor);
+     if (view) {
+         dynamic_embedding_rebase::record_key(*view);
+         MEMCPY_TO_BUF(&view->domain, sizeof(view->domain));
+@@ -942,12 +948,16 @@
+     if (view) {
+         dynamic_embedding_rebase::record_descriptor(*view);
+     }
+-    at::ScalarType scalar_data_type = at_tensor.scalar_type();
++    const bool narrow = dynamic_embedding_rebase::isNarrow(view);
++    at::ScalarType scalar_data_type = narrow ? at::kInt : at_tensor.scalar_type();
+     aclDataType acl_data_type = at_npu::native::OpPreparation::convert_to_acl_data_type(scalar_data_type);
+     c10::SmallVector<int64_t, MAX_DIM_NUM> storageDims;
+     c10::SmallVector<int64_t, MAX_DIM_NUM> wrapperStride = op_infer::array_to_small_vector(at_tensor.strides());
+     c10::SmallVector<int64_t, MAX_DIM_NUM> wrapperShape = op_infer::array_to_small_vector(at_tensor.sizes());
+ 
++    if (narrow) {
++        for (auto &s : wrapperStride) { s *= 2; }
++    }
+     const auto dimNum = at_tensor.sizes().size();
+     aclFormat format = ACL_FORMAT_ND;
+     if (!at_npu::native::FormatHelper::IsOpInputBaseFormat(at_tensor)) {
