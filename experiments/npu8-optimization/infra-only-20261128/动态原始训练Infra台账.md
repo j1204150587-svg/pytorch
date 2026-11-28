@@ -153,6 +153,10 @@ op-plugin 在反向 Mm 的合格 RHS 上规范化权重描述符。[实测代码
 
 八步中有 53,185 次空张量工厂已算好连续 stride，补丁跳过第二次计算。Level1 第 4、5 步，工厂时间与全流空档的交集分别少 0.336、0.423 ms，设备提交数和逐流工作相同。正反序 Level0 Free 占比为 89.453%→88.788%、89.741%→88.846%，但 50 步端到端两序均回退，分别为 376.789→379.648、388.577→393.736 ms/步。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/df46e997c4e4b7811c831d51d84957e70dfe843e/experiments/npu8-optimization/infra-only-20261128/followup70/empty-restride/empty-restride.patch) · [八列、配对波动与工厂归因](followup70/empty-restride/README.md)
 
+### PTA 空张量分配的 GIL 获取
+
+`npu_lazy_init` 在 Python 初始化成功后发布原子标志，后续空张量分配可直接返回。八步原训练两腿各调用 71,592 次，B 获取 GIL 1 次，其余 71,591 次命中热路径。Level1 第 4、5 步两腿的逐流设备工作序列相同，空张量工厂与入队前设备空档的交集分别少 1.771 和 0.596 ms。Level0 Free 占比为 89.172%→88.786%、89.351%→88.529%。稳态正序 409.183→384.488、反序按 A→B 为 373.716→393.393 ms/步，端到端方向翻转。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/9b6fc8ee6568485df36638441cebf9bb0523414a/experiments/npu8-optimization/infra-only-20261128/followup70/lazy-gil/lazy-gil.patch) · [初始化、fork 和训练验证](https://github.com/j1204150587-svg/pytorch/blob/9b6fc8ee6568485df36638441cebf9bb0523414a/experiments/npu8-optimization/infra-only-20261128/followup70/lazy-gil/README.md) · [八列与配对波动](https://github.com/j1204150587-svg/pytorch/blob/9b6fc8ee6568485df36638441cebf9bb0523414a/experiments/npu8-optimization/infra-only-20261128/followup70/lazy-gil/实机结果.md)
+
 ## 数据边界与归档
 
 11 月 28 日截至北京时间 12:51 的首批有效对照为 38 对，共 76 腿。其中 6 对使用原训练的内置数值审计，另 32 对经过同步计时或 profiler。后 64 腿每腿都有 7–16 个芯片进程采样，至少 3 个样本实际捕获到训练 worker。该批有效性能腿均未检出外部作业或采样失败。5 个因占卡失败的尝试及 1 个原装库映射验证失败的尝试均保留在排除清单。12:51 快照记录当时卡上无进程，容器仅余 init，公共锁可获取。后续新增配对在各项实测报告中单列。[首批逐腿卡况](evidence/slot.json) · [首批排除清单](evidence/excluded.json) · [12:51 快照](evidence/final-slot.json)
