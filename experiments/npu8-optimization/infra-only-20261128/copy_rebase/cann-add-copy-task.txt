@@ -1,0 +1,122 @@
+
+/usr/local/Ascend/cann/lib64/libnnopbase.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000001cbcf0 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base>:
+  1cbcf0:	a9b97bfd 	stp	x29, x30, [sp, #-112]!
+  1cbcf4:	910003fd 	mov	x29, sp
+  1cbcf8:	a90153f3 	stp	x19, x20, [sp, #16]
+  1cbcfc:	91008014 	add	x20, x0, #0x20
+  1cbd00:	a9025bf5 	stp	x21, x22, [sp, #32]
+  1cbd04:	2a0103f5 	mov	w21, w1
+  1cbd08:	a90363f7 	stp	x23, x24, [sp, #48]
+  1cbd0c:	52800001 	mov	w1, #0x0                   	// #0
+  1cbd10:	a9046bf9 	stp	x25, x26, [sp, #64]
+  1cbd14:	aa0303f6 	mov	x22, x3
+  1cbd18:	f9002bfb 	str	x27, [sp, #80]
+  1cbd1c:	aa0003fb 	mov	x27, x0
+  1cbd20:	aa0203f9 	mov	x25, x2
+  1cbd24:	aa0403f7 	mov	x23, x4
+  1cbd28:	f9446000 	ldr	x0, [x0, #2240]
+  1cbd2c:	aa0503f8 	mov	x24, x5
+  1cbd30:	97fac60c 	bl	7d560 <op::OpExecutorImpl::AbandonCache(bool)@plt>
+  1cbd34:	a9446a93 	ldp	x19, x26, [x20, #64]
+  1cbd38:	91000661 	add	x1, x19, #0x1
+  1cbd3c:	eb1a003f 	cmp	x1, x26
+  1cbd40:	54000288 	b.hi	1cbd90 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0xa0>  // b.pmore
+  1cbd44:	f9402a80 	ldr	x0, [x20, #80]
+  1cbd48:	f9002281 	str	x1, [x20, #64]
+  1cbd4c:	f100001f 	cmp	x0, #0x0
+  1cbd50:	9a941000 	csel	x0, x0, x20, ne  // ne = any
+  1cbd54:	8b130c00 	add	x0, x0, x19, lsl #3
+  1cbd58:	f9000019 	str	x25, [x0]
+  1cbd5c:	f9446360 	ldr	x0, [x27, #2240]
+  1cbd60:	97facc4c 	bl	7ee90 <op::OpExecutorImpl::GetGraph()@plt>
+  1cbd64:	f9402bfb 	ldr	x27, [sp, #80]
+  1cbd68:	a94153f3 	ldp	x19, x20, [sp, #16]
+  1cbd6c:	aa1803e4 	mov	x4, x24
+  1cbd70:	a9446bf9 	ldp	x25, x26, [sp, #64]
+  1cbd74:	aa1703e3 	mov	x3, x23
+  1cbd78:	aa1603e2 	mov	x2, x22
+  1cbd7c:	2a1503e1 	mov	w1, w21
+  1cbd80:	a94363f7 	ldp	x23, x24, [sp, #48]
+  1cbd84:	a9425bf5 	ldp	x21, x22, [sp, #32]
+  1cbd88:	a8c77bfd 	ldp	x29, x30, [sp], #112
+  1cbd8c:	17fac721 	b	7da10 <op::internal::BuildGraph(void*, unsigned int, op::OpArgList&, op::OpArgList&, op::OpArgList&)@plt>
+  1cbd90:	d37ffb5a 	lsl	x26, x26, #1
+  1cbd94:	f9002fbc 	str	x28, [x29, #88]
+  1cbd98:	eb01035f 	cmp	x26, x1
+  1cbd9c:	92fc0000 	mov	x0, #0x1fffffffffffffff    	// #2305843009213693951
+  1cbda0:	9a81235a 	csel	x26, x26, x1, cs  // cs = hs, nlast
+  1cbda4:	eb00035f 	cmp	x26, x0
+  1cbda8:	54000668 	b.hi	1cbe74 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x184>  // b.pmore
+  1cbdac:	d37df340 	lsl	x0, x26, #3
+  1cbdb0:	97facc04 	bl	7edc0 <op::internal::MallocPtr(unsigned long)@plt>
+  1cbdb4:	aa0003fc 	mov	x28, x0
+  1cbdb8:	b40005e0 	cbz	x0, 1cbe74 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x184>
+  1cbdbc:	f9402a81 	ldr	x1, [x20, #80]
+  1cbdc0:	d2800000 	mov	x0, #0x0                   	// #0
+  1cbdc4:	f100003f 	cmp	x1, #0x0
+  1cbdc8:	9a941021 	csel	x1, x1, x20, ne  // ne = any
+  1cbdcc:	b40004f3 	cbz	x19, 1cbe68 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x178>
+  1cbdd0:	f8607822 	ldr	x2, [x1, x0, lsl #3]
+  1cbdd4:	f8207b82 	str	x2, [x28, x0, lsl #3]
+  1cbdd8:	91000400 	add	x0, x0, #0x1
+  1cbddc:	eb00027f 	cmp	x19, x0
+  1cbde0:	54ffff81 	b.ne	1cbdd0 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0xe0>  // b.any
+  1cbde4:	d37df264 	lsl	x4, x19, #3
+  1cbde8:	8b040380 	add	x0, x28, x4
+  1cbdec:	8b040021 	add	x1, x1, x4
+  1cbdf0:	91000742 	add	x2, x26, #0x1
+  1cbdf4:	f100001f 	cmp	x0, #0x0
+  1cbdf8:	f9402283 	ldr	x3, [x20, #64]
+  1cbdfc:	fa411840 	ccmp	x2, #0x1, #0x0, ne  // ne = any
+  1cbe00:	91002000 	add	x0, x0, #0x8
+  1cbe04:	9a9f8002 	csel	x2, x0, xzr, hi  // hi = pmore
+  1cbe08:	eb03027f 	cmp	x19, x3
+  1cbe0c:	54000162 	b.cs	1cbe38 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x148>  // b.hs, b.nlast
+  1cbe10:	cb130fe3 	neg	x3, x19, lsl #3
+  1cbe14:	aa1303e0 	mov	x0, x19
+  1cbe18:	8b030021 	add	x1, x1, x3
+  1cbe1c:	8b030042 	add	x2, x2, x3
+  1cbe20:	f8607823 	ldr	x3, [x1, x0, lsl #3]
+  1cbe24:	f8207843 	str	x3, [x2, x0, lsl #3]
+  1cbe28:	91000400 	add	x0, x0, #0x1
+  1cbe2c:	f9402283 	ldr	x3, [x20, #64]
+  1cbe30:	eb00007f 	cmp	x3, x0
+  1cbe34:	54ffff68 	b.hi	1cbe20 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x130>  // b.pmore
+  1cbe38:	f9403b60 	ldr	x0, [x27, #112]
+  1cbe3c:	b4000080 	cbz	x0, 1cbe4c <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x15c>
+  1cbe40:	f90037a4 	str	x4, [x29, #104]
+  1cbe44:	97fab8af 	bl	7a100 <op::internal::FreePtr(void*)@plt>
+  1cbe48:	f94037a4 	ldr	x4, [x29, #104]
+  1cbe4c:	f9402281 	ldr	x1, [x20, #64]
+  1cbe50:	8b040380 	add	x0, x28, x4
+  1cbe54:	f9002a9c 	str	x28, [x20, #80]
+  1cbe58:	91000421 	add	x1, x1, #0x1
+  1cbe5c:	a9046a81 	stp	x1, x26, [x20, #64]
+  1cbe60:	f9402fbc 	ldr	x28, [x29, #88]
+  1cbe64:	17ffffbd 	b	1cbd58 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x68>
+  1cbe68:	aa1c03e0 	mov	x0, x28
+  1cbe6c:	d2800004 	mov	x4, #0x0                   	// #0
+  1cbe70:	17ffffe0 	b	1cbdf0 <aclOpExecutor::AddToKernelLauncherListCopyTask(unsigned int, op::KernelLauncher*, op::OpArgList&, op::OpArgList&, op::OpArgList&)@@Base+0x100>
+  1cbe74:	97fadbc7 	bl	82d90 <op::internal::g_hashBuf@plt>
+000000000030cca8 000000000000003c T NnopbaseIsV2CacheKeyEnabled
+000000000017ce20 00000000000001ec T op::internal::OpExecCache::AddLaunchData(unsigned long)
+0000000000175ab0 00000000000001ac T op::internal::OpExecCache::IsOpCacheValid()
+0000000000176b88 0000000000000528 T op::internal::OpExecCache::RecordAddrRule(aclTensor const*, op::internal::AddrRule&)
+000000000017d010 000000000000055c T op::internal::OpExecCache::AddLaunchTensor(aclTensor const*, unsigned long)
+0000000000174fe8 000000000000005c T op::internal::OpExecCache::UpdateTensorAddr(void*, std::vector<void*, std::allocator<void*> > const&)
+00000000001770b0 000000000000008c T op::internal::OpExecCache::AddTensorRelation(aclTensor const*, aclTensor const*)
+000000000017cbf0 000000000000022c T op::internal::OpExecCache::MarkOpCacheInvalid()
+0000000000179ec0 000000000000003c T op::internal::AddOpExecCache(op::internal::OpExecCache*)
+0000000000177e58 00000000000003d0 T op::internal::OpExecCacheWrap::ReportAddr()
+000000000032c0a0 0000000000000158 T op::internal::AicpuArgsHandler::GetDeviceCacheAddr(void*&, aclOpExecutor*, unsigned long)
+0000000000179790 00000000000006a8 T op::internal::OpExecCacheManager::AddOpExecCache(op::internal::OpExecCache*)
+00000000001757e0 0000000000000180 T op::internal::DisableOpCacheCount()
+00000000004300c0 0000000000000001 D op::internal::g_enableOpCacheCount
+00000000003520a0 0000000000000048 T op::internal::AicpuTaskSpace::CalcDeviceCacheSize(op::internal::SmallVector<aclTensor const*, 8ul, op::internal::PoolAllocator<aclTensor const*> > const&, std::unique_ptr<op::internal::AicpuTask, std::default_delete<op::internal::AicpuTask> >&) const
+0000000000180038 000000000000012c W std::_Hashtable<unsigned long, std::pair<unsigned long const, op::internal::OpExecCache*>, std::allocator<std::pair<unsigned long const, op::internal::OpExecCache*> >, std::__detail::_Select1st, std::equal_to<unsigned long>, std::hash<unsigned long>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<false, false, true> >::_M_insert_unique_node(unsigned long, unsigned long, std::__detail::_Hash_node<std::pair<unsigned long const, op::internal::OpExecCache*>, false>*)
+0000000000243a88 0000000000000138 W void std::vector<op::internal::TensorsCached const*, std::allocator<op::internal::TensorsCached const*> >::_M_realloc_insert<op::internal::TensorsCached const* const&>(__gnu_cxx::__normal_iterator<op::internal::TensorsCached const**, std::vector<op::internal::TensorsCached const*, std::allocator<op::internal::TensorsCached const*> > >, op::internal::TensorsCached const* const&)
