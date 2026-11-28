@@ -20,3 +20,4 @@
 第 4、5 步分别有 630、631 段完成队列关联的空档，合计 22.819、20.472 ms。另各有 5 段无法唯一对应 consumer，合计 0.633、0.580 ms。采样步边界会截断部分工作，官方 Stage 另含通信和边界区间。这里的交集限定了各函数可能解释的时间，优化收益仍用启停该实现的配对训练测量。[按算子和阶段的界限](common_shift_bounds.csv) · [逐笔空档](bounded_gaps.csv.gz) · [官方 CSV](../clock-rms-0947/step_trace_time.csv)
 
 第 4 步的 Addmm workspace 与真实后继空档重合 0.587 ms，Mm 为 0.604–0.620 ms，Matmul 为 0.452–0.460 ms。Addmm 进入 ATen 前还有 1.231–1.291 ms。首个侧表 GeScalar 之前大约 2.09 ms 已经在下一次 ATen 的入口以前。侧表范围校验与索引算子融合是两个独立候选。单纯缩短 4、5 两步的可见队列等待，即使完全消除，也分别只能解释至多 0.972、0.764 ms 的已关联空档。
+八次投影的 `aten::linear` 入口至 `aten::addmm` 入口，和后继设备空档相交的时间分别只有 0.074–0.121、0.055–0.102 ms。第 4 步另有 1.157–1.170 ms 位于对应 Linear 入口以前，第 5 步只有 0–0.004 ms。前一笔长尾缺少 Python 栈或线程调度证据。它没有进入可以靠移除 Linear 内部转置视图所节省的时间。[按真实调用复算](../../addmm_alignment/linear-prelude.json) · [时间界限计算](../../addmm_alignment/prelude.py)

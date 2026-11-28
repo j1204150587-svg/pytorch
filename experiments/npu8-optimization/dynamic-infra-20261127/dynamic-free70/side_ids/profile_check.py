@@ -27,7 +27,14 @@ def calc(trace,receipt):
     for name,(lo,hi) in sorted(markers.items()):
         tasks=sorted(t for t in device if lo<=t[0]<=t[1]<=hi)
         cross=[t for t in device if t[1]>lo and t[0]<hi and t not in tasks]
+        busy, end = 0, None
+        for a,b,*_ in tasks:
+            busy += max(0,b-max(a,end if end is not None else a))
+            end = max(end if end is not None else b,b)
+        span = end-tasks[0][0] if tasks else 0
         rows[name]={"counts":rec[name],"marker_us":(hi-lo)/1000,"crossing":len(cross),
+                    "first_to_last_us":span/1000,"between_device_tasks_idle_us":(span-busy)/1000,
+                    "device_work_union_us":busy/1000,
                     "device":[{"name":n,"type":k,"stream":s,"id":i,"duration_us":(v-u)/1000} for u,v,n,k,s,i in tasks]}
     checks=[]
     for name,row in rows.items():
