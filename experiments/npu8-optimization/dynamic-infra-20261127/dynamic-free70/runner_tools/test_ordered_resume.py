@@ -75,6 +75,7 @@ def test(fixture, upstream, registered_name):
         with patch.object(o,"FREE70",root),patch.object(o,"observe",observe), \
              patch.object(o,"safe_sample",lambda _:synthetic(0)),patch.object(o.subprocess,"run",original):
             plan=o.make_plan([registered_name],["no-profiler","l0"])
+            plan["max_sample_gap"]=args.max_sample_gap
             o.save(path/"plan.json",plan)
             source=plan["families"][registered_name]
             expected=[]
@@ -118,6 +119,9 @@ def test(fixture, upstream, registered_name):
                     assert len(raw)==hashes[key]["bytes"] and o.digest(raw)==hashes[key]["sha256"]
                 assert len(json.loads(all_files["runs.json"]))==4
                 assert len([k for k in all_files if k.startswith("attempts/") and k.endswith("/decision.json")])==9
+                from ordered_review import review
+                checked=review(artifact)
+                assert checked["decided_attempts"]=={"accepted":8,"external":1} and len(checked["pairs"])==4
             print("verified original runner options, 4 ordered pairs, 8 accepted full legs, 1 rejected B, restart deduplication and sample coverage")
 
 
