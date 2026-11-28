@@ -1,5 +1,7 @@
 # PTA 空张量工厂的连续 stride 计算
 
+独立 BF16 ZeRO-2 验证在三个实际形状上交错注入 +Inf、NaN、−Inf。两腿均完成四次有限更新与三次跳步，逐步 loss、梯度哈希、BF16/FP32 权重及 AdamW 状态一致。A 的工厂计数为 0 次跳过、287 次保留，B 为 214 次跳过、73 次保留。这七步独立于原 HSTU 的八步有限值审计。[两腿原始收据与探针](overflow.tgz)
+
 `NPUNativeFunctions::empty` 和 `empty_with_format` 先调用 `TensorImpl::set_sizes_contiguous`，该函数已经计算连续 stride。补丁为已执行这一步的路径省去后续重复计算，保留单维零长等特例。正反两序都开启 01、双向 embedding 描述符、65,536 项 CANN 缓存和 Task Queue Mode 1，只切换 `TORCH_NPU_EMPTY_SINGLE_RESTRIDE`。[实测补丁](empty-restride.patch) · [构造器微门、代码指纹及训练计数](repro.tgz)
 
 54 个工厂、shape 与 dtype 组合通过两腿比对。原始八步审计中，A 保留 63,017 次计算。B 跳过 53,185 次，保留 9,832 次。梯度、norm、最终 BF16/FP32 权重和 AdamW 相同，最大 loss 绝对差 7.63×10⁻⁶。该训练序列为 8 次有限值更新。
