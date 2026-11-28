@@ -1,0 +1,144 @@
+{
+  "enabled": true,
+  "expected_forwards": 72,
+  "all_expected": true,
+  "rms": {
+    "table_created": 1,
+    "triton_forward": 72
+  },
+  "tables": [
+    {
+      "device": "npu:0",
+      "eps": 1e-06,
+      "numel": 65536,
+      "retained_bytes": 131072,
+      "build_host_us": 2491.99
+    }
+  ],
+  "launches": {
+    "cold_stock": 1,
+    "entered": 71,
+    "direct": 44,
+    "returned": 71,
+    "capped": 27
+  },
+  "plans": {
+    "0": {
+      "abi": {
+        "runtime": {
+          "constants": "{7: False}",
+          "signature": {
+            "0": "*bf16",
+            "1": "*bf16",
+            "2": "*bf16",
+            "3": "*bf16",
+            "4": "*bf16",
+            "5": "*bf16",
+            "6": "*bf16"
+          },
+          "binary_hash": "ed99f2871f358af30fee9d3bfe217a398abada9621d957a1cc97cf89eb8c27fb",
+          "name": "lut_forward",
+          "coalesce_factor": 1,
+          "mode": "simd"
+        },
+        "image_sha256": "99712c27dc9b0d7313fc4096b03c5c0713763a93c186b7a018687b29316064f0",
+        "driver": {
+          "original_shared_object": "/root/.triton/cache/zfVeLptlCSJ_Hs4AeW5NIcSX99Nqb8kcqIwk1RDSuLg/launcher_cxx11abi1.cpython-312-aarch64-linux-gnu.so",
+          "shared_object_sha256": "702f043351d4a7c5f0ee898b0db408c921d7aa13030a188f1b1e9533580721e3",
+          "driver_py_sha256": "b39118053062f3fc6d7f1047f8c9eb229de47a2b6106d8119cc7087f5b38818e",
+          "launcher_source_cache_hash": "cdf55e2e9b6509227f1ece00796e4d21c497f7d36a6fc91ca88c24d510d2b8b8",
+          "allocates_workspace": false,
+          "allocates_sync_lock": false,
+          "actual_null_resource_slots": true,
+          "uses_ffts": true,
+          "auto_map_physical_cap": 40
+        },
+        "generated_argument_initializer": "static_cast<void*>(ffts_addr),\n      nullptr,\n      nullptr,\n      static_cast<void*>(arg0), static_cast<void*>(arg1), static_cast<void*>(arg2), static_cast<void*>(arg3), static_cast<void*>(arg4), static_cast<void*>(arg5), static_cast<void*>(arg6),\n      static_cast<int32_t>(gridX), static_cast<int32_t>(gridY), static_cast<int32_t>(gridZ)",
+        "physical_caps_in_all_generated_entrypoints": [
+          "40",
+          "40"
+        ],
+        "logical_product_assignments": [
+          "uint32_t blockNum = gridX * gridY * gridZ",
+          "uint32_t blockNum = gridX * gridY * gridZ"
+        ],
+        "capped_entry": true
+      },
+      "first_stock_and_prepare_host_us": 6434.979
+    }
+  },
+  "shape_routes": [
+    {
+      "shape": [
+        1,
+        13
+      ],
+      "route": "cold_stock",
+      "calls": 1
+    },
+    {
+      "shape": [
+        1,
+        13
+      ],
+      "route": "direct",
+      "calls": 8
+    },
+    {
+      "shape": [
+        1,
+        18
+      ],
+      "route": "direct",
+      "calls": 9
+    },
+    {
+      "shape": [
+        1,
+        19
+      ],
+      "route": "direct",
+      "calls": 9
+    },
+    {
+      "shape": [
+        1,
+        24
+      ],
+      "route": "direct",
+      "calls": 9
+    },
+    {
+      "shape": [
+        2,
+        14
+      ],
+      "route": "direct",
+      "calls": 9
+    },
+    {
+      "shape": [
+        2,
+        22
+      ],
+      "route": "capped",
+      "calls": 9
+    },
+    {
+      "shape": [
+        2,
+        28
+      ],
+      "route": "capped",
+      "calls": 9
+    },
+    {
+      "shape": [
+        4,
+        21
+      ],
+      "route": "capped",
+      "calls": 9
+    }
+  ]
+}

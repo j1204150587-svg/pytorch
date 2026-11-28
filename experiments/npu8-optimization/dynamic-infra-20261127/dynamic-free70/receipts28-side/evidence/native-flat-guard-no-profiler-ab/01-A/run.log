@@ -1,0 +1,41 @@
+can not use command: npu-smi info
+can not use command: npu-smi info
+[rank0]:[W1127 11:38:30.990531049 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+{"chunk_elements": 262144, "component": "zero2_batch_overflow", "deepspeed": "0.19.0", "device": "npu:0", "event": "installed", "grad_accum_dtype": "torch.bfloat16", "source_hashes": {"_has_inf_or_nan": "d3252aef4efb2f28aa999d5834c2e65d397cc39f6c1e8fe585f5d1275f5971cd", "has_overflow": "7bb9d1f516f05fc446ab6aa6755f7994e252a3d15db8859abc56a7c9d70366ff", "has_overflow_partitioned_grads_serial": "b54b01f27a954af8eaabbbf5af3ba8a7aad2c631217a87a474e53c4f34064e49", "step": "44750b4ab49af6bb844cb020d3c2306f474a32c90ff4e7d56b140b75187dc966"}}
+{
+  "model": {
+    "config": {
+      "num_tables": 1024,
+      "table_rows": 64,
+      "features_per_table": 4,
+      "vocab_size": 1024,
+      "seq_len": 32,
+      "embedding_dim": 64,
+      "num_heads": 4,
+      "hidden_dim": 16,
+      "attention_dim": 16,
+      "num_layers": 4,
+      "dropout": 0.0,
+      "num_user_groups": 32
+    },
+    "trainable_parameter_tensors": 1052,
+    "trainable_parameter_elements": 4380544,
+    "embedding_table_tensors": 1027,
+    "side_embedding_elements": 4194304
+  },
+  "world_size": 1,
+  "profile": false
+}
+/usr/local/python3.12.13/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+[rank0]:[W1127 11:38:32.451433853 VariableFallbackKernel.cpp:67] Warning: npu::npu_format_cast: an autograd kernel was not registered to the Autograd key(s) but we are trying to backprop through it. This may lead to silently incorrect behavior. This behavior is deprecated and will be removed in a future version of PyTorch. If your operator is differentiable, please ensure you have registered an autograd kernel to the correct Autograd key (e.g. DispatchKey::Autograd, DispatchKey::CompositeImplicitAutograd). If your operator is not differentiable, or to squash this warning and use the previous behavior, please register torch::CppFunction::makeFallthrough() to DispatchKey::Autograd. (function operator())
+[rank0]:[W1127 11:38:32.497386294 ToKernelNpu.cpp:40] Warning: Device do not support double dtype now, dtype cast replace with float. (function operator())
+{"step": 0, "batch_size": 1, "seq_len": 13, "host_step_ms": 484.9932469660416, "loss": 30.78255271911621}
+{"step": 9, "batch_size": 3, "seq_len": 18, "host_step_ms": 41.54347407165915, "loss": 29.218069076538086}
+{"step": 19, "batch_size": 3, "seq_len": 15, "host_step_ms": 42.242961935698986, "loss": 26.272584915161133}
+{"step": 29, "batch_size": 2, "seq_len": 30, "host_step_ms": 40.07993498817086, "loss": 25.24410057067871}
+{"step": 39, "batch_size": 1, "seq_len": 28, "host_step_ms": 39.984171045944095, "loss": 22.70732307434082}
+{"step": 49, "batch_size": 4, "seq_len": 23, "host_step_ms": 43.75982307828963, "loss": 21.029186248779297}
+{"step": 59, "batch_size": 4, "seq_len": 19, "host_step_ms": 44.04924507252872, "loss": 18.379600524902344}
+{"status": "completed", "rank": 0, "steps": 60, "elapsed_s_synchronized": 2.9807816490065306, "profile_enabled": false, "input_shape_count": 60, "samples": 155, "tokens": 3366, "samples_per_s": 51.9997833627499, "tokens_per_s": 1129.234005154943, "profiled_elapsed_includes_profiler_overhead": false, "steady_state": {"start_step_inclusive": 10, "end_step_exclusive": 60, "steps": 50, "samples": 136, "tokens": 2994, "elapsed_s_synchronized": 2.1166189539944753, "samples_per_s": 64.25341686718873, "tokens_per_s": 1414.5200742673755, "ms_per_step": 42.332379079889506, "loss_log_policy": "deferred_until_after_end_sync"}}
+{"calls": 60, "chunks": 60, "component": "zero2_batch_overflow", "errors": 0, "event": "run_scan_summary", "expected_steps": 60, "fallback_calls": 0, "fast_calls": 60, "first_npu_formats": {"2": 1052}, "first_shards": [{"count": 1052, "device": "npu:0", "dtype": "torch.bfloat16", "layout": "torch.strided"}], "reasons": {}, "training_completed": true, "valid": true}

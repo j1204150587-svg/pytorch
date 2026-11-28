@@ -1,0 +1,106 @@
+diff --git a/train_deepspeed.py b/train_deepspeed.py
+--- a/train_deepspeed.py
++++ b/train_deepspeed.py
+@@ -19,6 +19,8 @@
+     parser.add_argument("--weight-decay", type=float, default=0.01)
+     parser.add_argument("--seed", type=int, default=1234)
+     parser.add_argument("--log-interval", type=int, default=10)
++    parser.add_argument("--steady-warmup-steps", type=int, default=0)
++    parser.add_argument("--steady-measure-steps", type=int, default=0)
+     parser.add_argument("--output-dir", default="/artifacts/hstu_deepspeed")
+     parser.add_argument("--profile", action="store_true")
+     parser.add_argument("--profile-active", type=int, default=5)
+@@ -33,6 +35,12 @@
+         parser.error("steps, micro-batch-size and log-interval must be positive")
+     if args.profile and (args.profile_active < 1 or args.steps < 4 + args.profile_active):
+         parser.error("profile requires 2 wait + 2 warmup steps and at least one active step")
++    warmup, measured = args.steady_warmup_steps, args.steady_measure_steps
++    if warmup or measured:
++        if min(warmup, measured) < 1 or warmup + measured != args.steps:
++            parser.error("steady timing requires positive warmup and measure counts summing to --steps")
++        if args.profile or args.dry_run:
++            parser.error("steady timing requires training with profiler disabled")
+     return args
+ 
+ 
+@@ -73,9 +81,17 @@
+     device = torch.device("npu", local_rank)
+     deepspeed.init_distributed(dist_backend="hccl", auto_mpi_discovery=False)
+     rank, world_size = dist.get_rank(), dist.get_world_size()
++    if args.steady_measure_steps and world_size != 1:
++        raise RuntimeError("steady timing requires a single rank")
+     output_dir = Path(args.output_dir)
+     rank_dir = output_dir / f"rank{rank:03d}"
+     rank_dir.mkdir(parents=True, exist_ok=True)
++    (rank_dir / "runtime.json").write_text(json.dumps({
++        "rank": rank, "world_size": world_size, "local_rank": local_rank,
++        "device": str(device), "python": sys.version.split()[0],
++        "torch": torch.__version__, "torch_npu": torch_npu.__version__,
++        "deepspeed": deepspeed.__version__, "deepspeed_file": deepspeed.__file__,
++    }, indent=2))
+     ds_config = json.loads(Path(args.deepspeed_config).read_text())
+     ds_config["train_micro_batch_size_per_gpu"] = args.micro_batch_size
+     accumulation = int(ds_config.get("gradient_accumulation_steps", 1))
+@@ -119,12 +135,17 @@
+                 str(rank_dir / "profile"), analyse_flag=True),
+             record_shapes=False, with_stack=args.profile_stack, profile_memory=False, **experimental)
+     metrics = []
++    steady = args.steady_measure_steps > 0
++    deferred_logs = []
+     dist.barrier()
+     torch.npu.synchronize()
+     start = time.perf_counter()
+     try:
+         with profiler_context as profiler:
+             for step in range(args.steps):
++                if steady and step == args.steady_warmup_steps:
++                    torch.npu.synchronize()
++                    steady_start = time.perf_counter()
+                 step_start = time.perf_counter()
+                 with record_function("input_generation_and_h2d"):
+                     tokens = torch.randint(1, config.vocab_size,
+@@ -148,18 +169,40 @@
+                 metric = {"step": step, "host_step_ms": (time.perf_counter() - step_start) * 1000}
+                 # item() synchronizes only at log points; host_step_ms is not NPU kernel time.
+                 if step == 0 or (step + 1) % args.log_interval == 0:
+-                    metric["loss"] = loss.detach().float().cpu().item()
+-                    if rank == 0:
+-                        print(json.dumps(metric), flush=True)
++                    if steady:
++                        # Keep just the detached scalar. A device-to-host copy would
++                        # serialize outstanding work inside the measurement window.
++                        deferred_logs.append((metric, loss.detach()))
++                    else:
++                        metric["loss"] = loss.detach().float().cpu().item()
++                        if rank == 0:
++                            print(json.dumps(metric), flush=True)
+                 metrics.append(metric)
+                 if profiler is not None:
+                     profiler.step()
+         torch.npu.synchronize()
+-        elapsed = time.perf_counter() - start
++        end = time.perf_counter()
++        elapsed = end - start
+         result = {"status": "completed", "rank": rank, "steps": args.steps,
+                   "elapsed_s_synchronized": elapsed, "profile_enabled": args.profile,
+                   "samples_per_s": args.steps * args.micro_batch_size * world_size / elapsed,
+                   "profiled_elapsed_includes_profiler_overhead": args.profile}
++        if steady:
++            steady_elapsed = end - steady_start
++            samples = args.steady_measure_steps * args.micro_batch_size * world_size
++            result["steady_state"] = {
++                "start_step_inclusive": args.steady_warmup_steps,
++                "end_step_exclusive": args.steps,
++                "steps": args.steady_measure_steps,
++                "samples": samples,
++                "elapsed_s_synchronized": steady_elapsed,
++                "samples_per_s": samples / steady_elapsed,
++                "ms_per_step": steady_elapsed * 1000 / args.steady_measure_steps,
++                "loss_log_policy": "deferred_until_after_end_sync",
++            }
++            for metric, logged_loss in deferred_logs:
++                metric["loss"] = logged_loss.float().cpu().item()
++                print(json.dumps(metric), flush=True)
+         (rank_dir / "metrics.json").write_text(json.dumps({"summary": result, "steps": metrics}, indent=2))
+         if args.save_checkpoint:
+             engine.save_checkpoint(str(output_dir / "checkpoint"), tag="final")

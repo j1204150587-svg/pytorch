@@ -1,0 +1,71 @@
+{
+  "stage": [
+    "side_tables",
+    "partition_hints",
+    "side_slab",
+    "slab_host_guard"
+  ],
+  "common": {
+    "RECSYS_DYNAMIC_PARTITION": "1",
+    "RECSYS_DYNAMIC_NORM": "1",
+    "ACLNN_CACHE_LIMIT": "65536",
+    "NPU_DYNAMIC_GROUPED_SIDE": "1",
+    "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+    "NPU_DYNAMIC_SIDE_SLAB": "1",
+    "NPU_HSTU_SLAB_GUARD_DIR": "/artifacts/dynamic-infra-20261127/dynamic-free70/slab-guard-build"
+  },
+  "A": {
+    "NPU_DYNAMIC_NATIVE_SLAB_GUARD": "0"
+  },
+  "B": {
+    "NPU_DYNAMIC_NATIVE_SLAB_GUARD": "1"
+  },
+  "activation": [
+    {
+      "file": "grouped_side_counts.json",
+      "A": {
+        "hits": "$steps",
+        "fallbacks": 0
+      },
+      "B": {
+        "hits": "$steps",
+        "fallbacks": 0
+      }
+    },
+    {
+      "file": "zero_flat_hints.json",
+      "A": {
+        "enabled": true,
+        "validated": true
+      },
+      "B": {
+        "enabled": true,
+        "validated": true
+      }
+    },
+    {
+      "file": "side_slab_counts.json",
+      "A": {
+        "installed": 1,
+        "slab_forwards": "$steps",
+        "dense_gradients": "$steps",
+        "guard_enabled": 0,
+        "guard_native": 0,
+        "guard_python": "$steps",
+        "guard_accepted": "$steps",
+        "guard_rejected": 0
+      },
+      "B": {
+        "installed": 1,
+        "slab_forwards": "$steps",
+        "dense_gradients": "$steps",
+        "guard_enabled": 1,
+        "guard_native": "$steps",
+        "guard_shape_fallback": 0,
+        "guard_python": 0,
+        "guard_accepted": "$steps",
+        "guard_rejected": 0
+      }
+    }
+  ]
+}

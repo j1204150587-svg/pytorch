@@ -1,0 +1,72 @@
+{
+  "stage": [
+    "side_tables",
+    "side_slab",
+    "partition_hints",
+    "partition_pack",
+    "flat_stats_stage",
+    "side_publish"
+  ],
+  "common": {
+    "RECSYS_DYNAMIC_PARTITION": "1",
+    "RECSYS_DYNAMIC_NORM": "1",
+    "ACLNN_CACHE_LIMIT": "65536",
+    "NPU_DYNAMIC_GROUPED_SIDE": "1",
+    "NPU_DYNAMIC_SIDE_SLAB": "1",
+    "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+    "NPU_DYNAMIC_PARTITION_PACK": "1",
+    "RECSYS_DYNAMIC_FLAT_STATS": "both"
+  },
+  "A": {
+    "NPU_DYNAMIC_DIRECT_SIDE": "0"
+  },
+  "B": {
+    "NPU_DYNAMIC_DIRECT_SIDE": "1"
+  },
+  "activation": [
+    {
+      "file": "grouped_side_counts.json",
+      "A": {
+        "hits": "$steps",
+        "fallbacks": 0
+      },
+      "B": {
+        "hits": "$steps",
+        "fallbacks": 0
+      }
+    },
+    {
+      "file": "eager_partition_pack.json",
+      "A": {
+        "hits": "$steps",
+        "fallbacks": 0
+      },
+      "B": {
+        "hits": "$steps",
+        "fallbacks": 0
+      }
+    },
+    {
+      "file": "flat_stats_counts.json",
+      "A": {
+        "overflow": "$steps",
+        "norm_fallback": 0,
+        "overflow_fallback": 0
+      },
+      "B": {
+        "overflow": "$steps",
+        "norm_fallback": 0,
+        "overflow_fallback": 0
+      }
+    },
+    {
+      "file": "side_slab_counts.json",
+      "A": {
+        "direct_disabled": 1
+      },
+      "B": {
+        "direct_partitions": "$steps"
+      }
+    }
+  ]
+}

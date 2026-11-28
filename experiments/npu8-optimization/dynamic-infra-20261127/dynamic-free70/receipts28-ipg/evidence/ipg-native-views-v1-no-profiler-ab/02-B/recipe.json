@@ -1,0 +1,47 @@
+{
+  "stage": [
+    "ipg_range_copy",
+    "ipg_native_views"
+  ],
+  "common": {
+    "NPU_DYNAMIC_IPG_RANGE_COPY": "range",
+    "NPU_IPG_HOST_VIEWS_DIR": "/artifacts/dynamic-infra-20261127/dynamic-free70/ipg-native-views-build-v1"
+  },
+  "A": {
+    "NPU_IPG_HOST_VIEWS": "python"
+  },
+  "B": {
+    "NPU_IPG_HOST_VIEWS": "native"
+  },
+  "activation": [
+    {
+      "file": "ipg_range_copy.json",
+      "A": {
+        "mode": "range",
+        "hits": "$steps",
+        "declined": 0
+      },
+      "B": {
+        "mode": "range",
+        "hits": "$steps",
+        "declined": 0
+      }
+    },
+    {
+      "file": "ipg_host_views.json",
+      "A": {
+        "mode": "python",
+        "calls": "$steps",
+        "published": 0
+      },
+      "B": {
+        "mode": "native",
+        "calls": "$steps",
+        "prepared": "$steps",
+        "published": "$steps",
+        "declined": 0,
+        "context_fallback": 0
+      }
+    }
+  ]
+}

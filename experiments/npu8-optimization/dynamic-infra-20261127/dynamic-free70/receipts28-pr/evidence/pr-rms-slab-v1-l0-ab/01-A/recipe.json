@@ -1,0 +1,121 @@
+{
+  "stage": [
+    "side_tables",
+    "side_slab",
+    "partition_hints",
+    "partition_pack",
+    "flat_stats_stage",
+    "side_publish",
+    "pr42634_eager_fold",
+    "rms_native",
+    "slab_host_guard"
+  ],
+  "common": {
+    "RECSYS_DYNAMIC_PARTITION": "1",
+    "RECSYS_DYNAMIC_NORM": "1",
+    "ACLNN_CACHE_LIMIT": "65536",
+    "NPU_DYNAMIC_GROUPED_SIDE": "1",
+    "NPU_DYNAMIC_SIDE_SLAB": "1",
+    "NPU_DYNAMIC_ZERO_FLAT_HINTS": "1",
+    "NPU_DYNAMIC_PARTITION_PACK": "1",
+    "RECSYS_DYNAMIC_FLAT_STATS": "both",
+    "TORCHINDUCTOR_NPU_FAST_LAUNCH": "1",
+    "PYTHONPATH": "/artifacts/dynamic-infra-20261127/pr42634/package-v1/package",
+    "NPU_DYNAMIC_DIRECT_SIDE": "1",
+    "NPU_EAGER_FOLD_PLAN": "1",
+    "NPU_NATIVE_RMS_LIBRARY": "/artifacts/dynamic-infra-20261127/dynamic-free70/rms-native-build-v2/native_rms.so",
+    "NPU_DYNAMIC_NATIVE_RMS": "1",
+    "NPU_HSTU_SLAB_GUARD_DIR": "/artifacts/dynamic-infra-20261127/dynamic-free70/slab-guard-build"
+  },
+  "A": {
+    "NPU_DYNAMIC_NATIVE_SLAB_GUARD": "0"
+  },
+  "B": {
+    "NPU_DYNAMIC_NATIVE_SLAB_GUARD": "1"
+  },
+  "activation": [
+    {
+      "file": "grouped_side_counts.json",
+      "A": {
+        "hits": "$steps",
+        "fallbacks": 0
+      },
+      "B": {
+        "hits": "$steps",
+        "fallbacks": 0
+      }
+    },
+    {
+      "file": "eager_partition_pack.json",
+      "A": {
+        "hits": "$steps",
+        "fallbacks": 0
+      },
+      "B": {
+        "hits": "$steps",
+        "fallbacks": 0
+      }
+    },
+    {
+      "file": "flat_stats_counts.json",
+      "A": {
+        "overflow": "$steps",
+        "norm_fallback": 0,
+        "overflow_fallback": 0
+      },
+      "B": {
+        "overflow": "$steps",
+        "norm_fallback": 0,
+        "overflow_fallback": 0
+      }
+    },
+    {
+      "file": "side_slab_counts.json",
+      "A": {
+        "direct_partitions": "$steps",
+        "installed": 1,
+        "slab_forwards": "$steps",
+        "dense_gradients": "$steps",
+        "guard_enabled": 0,
+        "guard_native": 0,
+        "guard_python": "$steps",
+        "guard_accepted": "$steps",
+        "guard_rejected": 0
+      },
+      "B": {
+        "direct_partitions": "$steps",
+        "installed": 1,
+        "slab_forwards": "$steps",
+        "dense_gradients": "$steps",
+        "guard_enabled": 1,
+        "guard_native": "$steps",
+        "guard_shape_fallback": 0,
+        "guard_python": 0,
+        "guard_accepted": "$steps",
+        "guard_rejected": 0
+      }
+    },
+    {
+      "file": "eager_fold_plan.json",
+      "A": {
+        "adapter_enabled": true,
+        "pr_switch": true
+      },
+      "B": {
+        "adapter_enabled": true,
+        "pr_switch": true
+      }
+    },
+    {
+      "file": "native_rms_total.json",
+      "A": {
+        "enabled": true,
+        "all_expected": true
+      },
+      "B": {
+        "enabled": true,
+        "all_expected": true
+      }
+    }
+  ]
+}
