@@ -159,6 +159,18 @@ op-plugin 在反向 Mm 的合格 RHS 上规范化权重描述符。[实测代码
 
 `npu_lazy_init` 在 Python 初始化成功后发布原子标志，后续空张量分配可直接返回。八步原训练两腿各调用 71,592 次，B 获取 GIL 1 次，其余 71,591 次命中热路径。Level1 第 4、5 步两腿的逐流设备工作序列相同，空张量工厂与入队前设备空档的交集分别少 1.771 和 0.596 ms。Level0 Free 占比为 89.172%→88.786%、89.351%→88.529%。稳态正序 409.183→384.488、反序按 A→B 为 373.716→393.393 ms/步，端到端方向翻转。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/9b6fc8ee6568485df36638441cebf9bb0523414a/experiments/npu8-optimization/infra-only-20261128/followup70/lazy-gil/lazy-gil.patch) · [初始化、fork 和训练验证](https://github.com/j1204150587-svg/pytorch/blob/9b6fc8ee6568485df36638441cebf9bb0523414a/experiments/npu8-optimization/infra-only-20261128/followup70/lazy-gil/README.md) · [八列与配对波动](https://github.com/j1204150587-svg/pytorch/blob/9b6fc8ee6568485df36638441cebf9bb0523414a/experiments/npu8-optimization/infra-only-20261128/followup70/lazy-gil/实机结果.md)
 
+### CANN 提交计数的 LSE 原子加
+
+`AllocTaskAndSendStars` 在写入流的 pending 数量时按同机 HWCAP 选择 LSE 原子加。八步两腿各执行 145,332 次。两步 Level1 的算子、逐流物理任务与提交数均相同，单笔 kernel launch 的 P50 从 4.32→4.63、4.29→4.55 µs。正反序端到端分别为 361.994→373.592、364.558→373.233 ms/步，Free 占比分别为 88.666%→88.881%、89.748%→89.897%。两序均回退。独立 ZeRO-2 探针验证了三次非有限跳步及四次有限更新。[实测增量补丁](https://github.com/j1204150587-svg/pytorch/blob/bbbbb9954582f334de0687e9a9120f6c0df6b0ab/experiments/npu8-optimization/infra-only-20261128/followup70/cann-pending/candidate.patch) · [八列与逐次提交证据](https://github.com/j1204150587-svg/pytorch/blob/bbbbb9954582f334de0687e9a9120f6c0df6b0ab/experiments/npu8-optimization/infra-only-20261128/followup70/cann-pending/README.md)
+
+### PTA 相同分配流 D2D copy 将 workspace 准备移给 consumer
+
+八步原训练与异常更新对照通过。B 每步把流 47 上 1,024 个侧表复制的 workspace 准备移入 consumer，流 44 未命中。两序 Free 占比分别为 89.234%→89.177%、89.954%→89.205%，绝对 Free 一升一降。四个无 profiler 配对中，正序分别缩短 11.47%、9.44%，反序分别缩短 0.49%、增加 3.86%，尚无稳定的端到端增量。独立地址审计确认流 44 的 1,051 个相邻边在源宿两端都连续，但后项入队通常晚于 consumer 开始处理上一项。限时等待与可消除的调用需共同计量。[实测增量补丁](https://github.com/j1204150587-svg/pytorch/blob/880f641fd4db7dde354982e327e0ea9e247d3b6f/experiments/npu8-optimization/infra-only-20261128/copy_rebase/consumer.patch) · [四组同步窗口](https://github.com/j1204150587-svg/pytorch/blob/880f641fd4db7dde354982e327e0ea9e247d3b6f/experiments/npu8-optimization/infra-only-20261128/copy_rebase/consumer-analysis/confirmation.json) · [配对八列](https://github.com/j1204150587-svg/pytorch/blob/880f641fd4db7dde354982e327e0ea9e247d3b6f/experiments/npu8-optimization/infra-only-20261128/copy_rebase/consumer-analysis/PAIRS.md) · [流 44 可合并性](https://github.com/j1204150587-svg/pytorch/blob/880f641fd4db7dde354982e327e0ea9e247d3b6f/experiments/npu8-optimization/infra-only-20261128/copy_rebase/LOOKAHEAD.md)
+
+### 前向相邻 embedding 和 mean 的发布时刻
+
+每步 1,024 对侧表调用共对应流 47 上 3,072 个设备任务。consumer 开始处理 embedding 时，第 4、5 步仅 0、6 个后继 mean 已进入 enqueue。放宽到 10 µs 后，已完成 enqueue 的也仅 0、11 个。另在反向测得，部分复合算子的后继 SQE 已经提交，但其前驱和后继设备任务之间仍有全流空档。两类观察分别限制了原队列中可立即合并的数量、单笔 Host 准备可直接覆盖的时段。[前向逐笔就绪时序](https://github.com/j1204150587-svg/pytorch/blob/9c013549fa13e35993fedc36abeeb34e3c9442e8/experiments/npu8-optimization/infra-only-20261128/followup70/embedding-mean/README.md) · [实际 HAL 提交与已发送 SQE](https://github.com/j1204150587-svg/pytorch/blob/8f434e9a2787e6fc79eb436a5152fc93030d5f40/experiments/npu8-optimization/infra-only-20261128/followup70/hal-submit/README.md)
+
 ## 数据边界与归档
 
 11 月 28 日截至北京时间 12:51 的首批有效对照为 38 对，共 76 腿。其中 6 对使用原训练的内置数值审计，另 32 对经过同步计时或 profiler。后 64 腿每腿都有 7–16 个芯片进程采样，至少 3 个样本实际捕获到训练 worker。该批有效性能腿均未检出外部作业或采样失败。5 个因占卡失败的尝试及 1 个原装库映射验证失败的尝试均保留在排除清单。12:51 快照记录当时卡上无进程，容器仅余 init，公共锁可获取。后续新增配对在各项实测报告中单列。[首批逐腿卡况](evidence/slot.json) · [首批排除清单](evidence/excluded.json) · [12:51 快照](evidence/final-slot.json)
