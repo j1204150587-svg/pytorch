@@ -90,6 +90,8 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 
 ### 侧表反向 Div 广播
 
+op-plugin 对满足守卫的零 stride 均值梯度构造紧凑视图，并用一次二元 Div 完成广播和除法。[实测代码](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/divs/native/compact_div.inc) · [补丁应用位置](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/divs/native/apply.py)
+
 两腿使用原装缓存配置。设备工作数与早窗 Free 占比均下降，稳态步时两序方向相反。 按 A−B 计，两序分别节省 +51.493、-50.550 ms/步。[吞吐、配对波动及原始证据](reports/divs.md)
 
 |优化前端到端|优化后端到端|端到端提升比例|优化前 Free|优化前 Free 占比|优化后 Free|优化后 Free 占比|Free 占比提升比例|
@@ -99,6 +101,8 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 
 ### 前向 Addmm 描述符
 
+op-plugin 在 Addmm 的对齐输入上复用可重绑的只读描述符。[实测代码](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/projection/native/addmm_rebase.inc) · [补丁应用位置](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/projection/native/apply.py)
+
 两腿使用原装缓存配置，只切换前向投影描述符。两序稳态步时均回退。 按 A−B 计，两序分别节省 -21.411、-7.109 ms/步。[吞吐、配对波动及原始证据](reports/addmm.md)
 
 |优化前端到端|优化后端到端|端到端提升比例|优化前 Free|优化前 Free 占比|优化后 Free|优化后 Free 占比|Free 占比提升比例|
@@ -107,6 +111,8 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 |548.188|555.297|-1.30%|641.484|92.58%|558.503|91.56%|+1.10%|
 
 ### 反向 Mm 描述符
+
+op-plugin 在反向 Mm 的合格 RHS 上规范化权重描述符。[实测代码](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/projection/native_mm/mm_rebase.inc) · [补丁应用位置](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/projection/native_mm/apply_mm.py)
 
 两腿使用原装缓存配置，只切换反向 dInput 的权重描述符。两序稳态步时均回退。 按 A−B 计，两序分别节省 -16.923、-53.214 ms/步。[吞吐、配对波动及原始证据](reports/mm.md)
 
@@ -121,7 +127,15 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 
 两次数值门均通过，128 次复用的审计 hash 与原路径逐笔相同。每腿取 9 个同步微窗的中位数。对 `[1,19]`、`[2,14]` 和全 60 形状，B 相对 A 的每次调用在正序分别慢 0.812、0.610、0.833 µs，反序慢 1.772、1.106、2.754 µs。三个负载双序均回退，在算子微测结束，未进入端到端和 Level0 测量。[完整微窗、触发与回退明细](div-geometry/README.md)
 
-原版 !42634 的 eager 入口无命中。前述优化的累计效果若要以百分比归因，需要同轮端点对照。本轮只切换单项，表中增量均使用各自同轮基线。
+### PTA 释放环索引交接
+
+共同前置为大缓存与双向 embedding。第 4–6 步的 Free 占比正序 89.394%→88.744%，反序 90.599%→89.433%。50 步稳态正序 400.426→377.370、反序按 A→B 为 375.594→386.129 ms/步，方向翻转。Level1 两步实际提交序列相同，但单笔 kernel launch p95 分别从 7.72→9.39、7.70→9.19 µs。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/94706c599bb3da830334a04ea56967c2a5d8c25e/experiments/npu8-optimization/infra-only-20261128/followup70/release-ring/release-ring.patch) · [八列、吞吐、配对波动与归因](followup70/release-ring/README.md)
+
+### 已热侧表 Add 复用 CANN executor
+
+每步 1,023 个侧表 Add，在已热的原缓存上通常没有 workspace 查询。候选保留 executor 并按调用重绑地址，60 个 shape 的数值和双流门通过。两个方向、三个负载的六个同步微窗每次 Add 均慢 8.142–10.040 µs。同流真实 Add 次数与 workspace 查询相同，producer 准备时间增加，按事前判据在微测结项。[实测补丁](https://github.com/j1204150587-svg/pytorch/blob/94706c599bb3da830334a04ea56967c2a5d8c25e/experiments/npu8-optimization/infra-only-20261128/repeat-add/from-stock.patch) · [实卡分位数与六窗原值](repeat-add/README.md)
+
+原版 !42634 的 eager 入口无命中。上述单点均使用各自同轮基线。双向 embedding 配方的 Level1 两步共有 34,439 个全流空档；按原始对时，101.357、69.580 ms 落在后继 ATen 尚未开始且两个 producer 都无可见提交操作的区间。时间线给出相关区间，逐请求归因还需考虑 CPU 与设备对时。[互斥分解及校时敏感性](producer-coverage/README.md)
 
 ## 数据边界与归档
 
