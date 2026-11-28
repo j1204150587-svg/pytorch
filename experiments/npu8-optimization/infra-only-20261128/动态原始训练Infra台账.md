@@ -1,6 +1,6 @@
 # 动态 HSTU 原始训练脚本上的 Infra 实验
 
-原始动态训练上，最低的两组配对结果来自大缓存与双向 embedding 描述符规范化。候选腿 Free 占比为 **89.20% / 89.12%**，无 profiler 为 **389.618 / 364.982 ms/步**。70% 目标还差至少 **19.12 个百分点**。正序吞吐为 6.981 样本/s、153.689 token/s，反序为 7.452 样本/s、164.063 token/s。[稳态和 Level0 的逐腿结果](reports/emb-fwd.md)
+原装库直接对照大缓存与双向 embedding 补丁，原训练无 profiler 步时正、反序分别从 **595.291→368.560、559.120→373.065 ms/步**，缩短 **38.09%、33.28%**。Level0 Free 占比为 **91.853%→90.572%、91.543%→89.296%**。同一完整配方在前向补丁增量实验中的 B 腿另测得 **89.20%、89.12%**。截至这两组配对，获双序端到端收益的完整配方距 70% 至少还差 **19.12 个百分点**。[直接配方对照与逐次下发](https://github.com/j1204150587-svg/pytorch/blob/79af60ca56d3e4c6dc5355b403d967107c5bc883/experiments/npu8-optimization/infra-only-20261128/followup70/stock-to-embedding/README.md) · [前向增量的逐腿复算](reports/emb-fwd.md)
 
 2026-11-28，逻辑 NPU 8（板 4、chip 0，容器内 npu:0）。按最初动态 shape 配对的 10 个文件逐项核验 SHA-256。训练前反向均走 eager，1,024 张侧表、原梯度表示与分区、原 norm、01 分块 overflow、单 rank、BF16 ZeRO-2、累积 1、seed 1234、Task Queue Mode 1。每个配对调用原动态 runner，宿主只在 docker exec 传入待测原生库及开关。每腿核验工作区文件、训练 worker 加载的 ELF、设备映射与训练容器。两个矩阵乘候选的独立诊断进程通过 so 析构读取原生计数。[原始指纹](runner/reference.json) · [宿主调度](runner/host_pair.py) · [独立分支](https://github.com/j1204150587-svg/pytorch/tree/codex/npu8-infra-only-20261128)
 
@@ -52,6 +52,15 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 ## 有实测收益的优化
 
 每张表第一行是正序 A/B，第二行是反序 B/A。数据统一按 A→B 展示，时间单位为 ms/步。端到端提升为 1−B步时/A步时，末列为 1−B的Free占比/A的Free占比。正值表示改善。
+
+### 原装库到大缓存与双向 embedding 完整配方
+
+完整配方另外与镜像原装端点直接配对，A 未设置大缓存和两项描述符开关，B 同时使用三项。Level1 第 4、5 步，各 1,024 张侧表的前向与反向请求数均相等，每组 workspace 查询由 1,024 次减至 16 次。两步在新形状首张表各查询一次，随后 1,023 张表只查询 15 次。两端的逐步 kernel launch 与 memcpy 总数相同。原装→完整配方的累计结果如下。[D02/D05 实测实现](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/embedding/embedding.patch) · [端点配置、两序及逐个算子形状](https://github.com/j1204150587-svg/pytorch/blob/79af60ca56d3e4c6dc5355b403d967107c5bc883/experiments/npu8-optimization/infra-only-20261128/followup70/stock-to-embedding/README.md)
+
+|优化前端到端|优化后端到端|端到端提升比例|优化前 Free|优化前 Free 占比|优化后 Free|优化后 Free 占比|Free 占比提升比例|
+|---:|---:|---:|---:|---:|---:|---:|---:|
+|595.291|368.560|38.09%|581.799|91.853%|506.941|90.572%|1.39%|
+|559.120|373.065|33.28%|563.780|91.543%|444.095|89.296%|2.45%|
 
 ### 大缓存下增加 embedding 反向描述符规范化
 
@@ -170,6 +179,13 @@ op-plugin 在反向 Mm 的合格 RHS 上规范化权重描述符。[实测代码
 ### 前向相邻 embedding 和 mean 的发布时刻
 
 每步 1,024 对侧表调用共对应流 47 上 3,072 个设备任务。consumer 开始处理 embedding 时，第 4、5 步仅 0、6 个后继 mean 已进入 enqueue。放宽到 10 µs 后，已完成 enqueue 的也仅 0、11 个。另在反向测得，部分复合算子的后继 SQE 已经提交，但其前驱和后继设备任务之间仍有全流空档。两类观察分别限制了原队列中可立即合并的数量、单笔 Host 准备可直接覆盖的时段。[前向逐笔就绪时序](https://github.com/j1204150587-svg/pytorch/blob/9c013549fa13e35993fedc36abeeb34e3c9442e8/experiments/npu8-optimization/infra-only-20261128/followup70/embedding-mean/README.md) · [实际 HAL 提交与已发送 SQE](https://github.com/j1204150587-svg/pytorch/blob/8f434e9a2787e6fc79eb436a5152fc93030d5f40/experiments/npu8-optimization/infra-only-20261128/followup70/hal-submit/README.md)
+
+### 后续独立语义与时序验证
+
+- **CANN Stream 两个锁所在的缓存行。** 原始实机采样检出相邻提交间回收线程触及同一行的比例为 1.42% 和 0.93%。八个普通流均已走新布局，60 个动态 shape 的两个提交微窗仍各慢 0.0494、0.0387 µs/笔，首尾同步窗也均未改善。该点停止于微门。[实测布局补丁](https://github.com/j1204150587-svg/pytorch/blob/69e349e9b770cae0dac03b353473b07be53742a7/experiments/npu8-optimization/infra-only-20261128/followup70/stream-mutex/stream-placement.patch) · [双序数据与完整设备回执](https://github.com/j1204150587-svg/pytorch/blob/69e349e9b770cae0dac03b353473b07be53742a7/experiments/npu8-optimization/infra-only-20261128/followup70/stream-mutex/README.md)
+- **CANN Host 直接使用 BF16 EmbeddingDenseGradV2。** 局部 Level1 每笔运算任务从 6 减至 4。穷举 BF16 位模式等 22 组受控用例均逐位一致。固定输入、输出与 workspace 后，跨核强抵消时原实现能够产生 0 或 1，候选在部分实际 shape 的 16 次重复中均为 1。现有 Host 几何条件不足以识别可保证相同累加行为的输入。该点停止于数值门。[Host 实现](https://github.com/j1204150587-svg/pytorch/blob/0c838b692f7896eb6ca5a341dd434b4efaf5317f/experiments/npu8-optimization/infra-only-20261128/followup70/embedding-bf16-host/host.cpp) · [op-plugin 接入补丁](https://github.com/j1204150587-svg/pytorch/blob/0c838b692f7896eb6ca5a341dd434b4efaf5317f/experiments/npu8-optimization/infra-only-20261128/followup70/embedding-bf16-host/route.patch) · [同址、两流与还原结果](https://github.com/j1204150587-svg/pytorch/blob/0c838b692f7896eb6ca5a341dd434b4efaf5317f/experiments/npu8-optimization/infra-only-20261128/followup70/embedding-bf16-host/README.md)
+- **Cast→LpNorm 的合并时机。** 两步各 1,052 对只有 1、2 个后继 norm 在 consumer 开始处理 Cast 时可见，两步均无下一整对已经就绪。两组已就绪请求涉及的实际 ACL 服务合计至多 6.42、8.59 µs。该时刻可批量处理的请求极少，Cast 输出的独占性也缺少证明。[逐对数据、设备空档与上下界](https://github.com/j1204150587-svg/pytorch/blob/bd71584ace2420cdecc788ede4e6a98ddf4a004a/experiments/npu8-optimization/infra-only-20261128/norm_lookahead/RESULTS.md)
+- **空张量 stride 补丁的异常训练补测。** 独立真实 BF16 ZeRO-2 两腿各完成四次更新与三次非有限跳步，B 的 287 次工厂调用中实际省去 214 次重复计算。[两腿原始收据及补丁](https://github.com/j1204150587-svg/pytorch/blob/835e03b6b2367ba37911aef5c027df450e13f345/experiments/npu8-optimization/infra-only-20261128/followup70/empty-restride/README.md)
 
 ## 数据边界与归档
 
