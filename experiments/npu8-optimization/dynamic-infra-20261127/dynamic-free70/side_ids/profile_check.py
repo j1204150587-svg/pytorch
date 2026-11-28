@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 
-def calc(trace,receipt):
+def calc(trace,receipt,marker_prefix="SideIDs/",planned_counter="cpp_returned",expected_work=1):
     with (gzip.open if trace.suffix==".gz" else open)(trace,"rt",encoding="utf8") as f:
         data=json.load(f)
     events=data if isinstance(data,list) else data["traceEvents"]
@@ -16,7 +16,7 @@ def calc(trace,receipt):
         if e.get("ph")!="X":continue
         start=int(Decimal(str(e["ts"]))*1000);end=start+int(Decimal(str(e["dur"]))*1000)
         n=e["name"];args=e.get("args",{})
-        if n.startswith("SideIDs/"):
+        if n.startswith(marker_prefix):
             if n in markers:raise ValueError("duplicate marker "+n)
             markers[n]=(start,end)
         if e["pid"] in pids and str(args.get("Task Type","")).startswith(("AI_","MIX_","SDMA","HDMA","KERNEL_","MEMSET","MEMCPY")):
@@ -43,8 +43,8 @@ def calc(trace,receipt):
         key=lambda r:[(t["name"],t["type"],t["stream"]) for t in r["device"]]
         checks.append({"shape_repeat":name.rsplit("/",1)[0],
             "A_count":len(a["device"]),"S_count":len(row["device"]),"P_count":len(p["device"]),
-            "S_P_same_work":len(row["device"])==1 and key(row)==key(p) and all(t["stream"] is not None for t in row["device"]),
-            "P_native":p["counts"].get("cpp_returned")==1,
+            "S_P_same_work":len(row["device"])==expected_work and key(row)==key(p) and all(t["stream"] is not None for t in row["device"]),
+            "P_native":p["counts"].get(planned_counter)==1,
             "crossing":a["crossing"]+row["crossing"]+p["crossing"]})
     return {"checks":checks,"windows":rows,"all_verified":all(c["A_count"]>1 and c["S_P_same_work"] and c["P_native"] and c["crossing"]==0 for c in checks)}
 
