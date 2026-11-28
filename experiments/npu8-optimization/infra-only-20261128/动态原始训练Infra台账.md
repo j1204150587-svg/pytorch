@@ -53,6 +53,8 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 
 ### 大缓存下增加 embedding 反向描述符规范化
 
+11 月 27 日的 D02 补丁在 op-plugin 的 `aclnnEmbeddingDenseBackward` 调用前规范化索引描述符。11 月 28 日将 D02、D05 合入同一实测库，A/B 用补丁提供的 `NPU_DYNAMIC_REBASE_INDICES` 单独切换 D02。两腿均设置 CANN 原有配置 `ACLNN_CACHE_LIMIT=65536`。[实测补丁·反向调用点](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/embedding/embedding.patch#L29-L35) · [反向开关与适用条件](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/embedding/index_scope.inc#L119-L133) · [D02 原始实现](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/dynamic-infra-20261127/rebase/apply_rebase.py)
+
 两腿共用 65,536 项 CANN 缓存并关闭前向规范化，只切换反向索引描述符。 按 A−B 计，两序分别节省 +112.366、+53.843 ms/步。[吞吐、配对波动及原始证据](reports/emb-back.md)
 
 |优化前端到端|优化后端到端|端到端提升比例|优化前 Free|优化前 Free 占比|优化后 Free|优化后 Free 占比|Free 占比提升比例|
@@ -62,6 +64,8 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 
 ### 大缓存和反向规范化下增加 embedding 前向规范化
 
+11 月 27 日的 D05 补丁在 op-plugin 的 `aclnnEmbedding` 调用前规范化只读权重和索引的描述符。11 月 28 日在同一实测库内，用补丁提供的 `NPU_DYNAMIC_REBASE_FORWARD` 单独切换 D05，测量其在 D02 上的增量。[实测补丁·前向调用点](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/embedding/embedding.patch#L11-L17) · [前向开关与适用条件](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/embedding/index_scope.inc#L135-L152) · [D05 原始实现](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/dynamic-infra-20261127/rebase_forward/apply_forward.py)
+
 两腿共用 65,536 项 CANN 缓存并开启反向规范化，只切换前向只读权重和索引的描述符。 按 A−B 计，两序分别节省 +37.502、+38.266 ms/步。[吞吐、配对波动及原始证据](reports/emb-fwd.md)
 
 |优化前端到端|优化后端到端|端到端提升比例|优化前 Free|优化前 Free 占比|优化后 Free|优化后 Free 占比|Free 占比提升比例|
@@ -70,6 +74,8 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 |403.248|364.982|+9.49%|497.374|90.65%|441.175|89.12%|+1.69%|
 
 ### Task Queue 满环等待者唤醒
+
+11 月 28 日新增的 TorchNPU/PTA 补丁提供 `TORCH_NPU_QUEUE_NOTIFY_FULL_ONLY`。`Repository::Enqueue` 登记因队列已满而等待的生产者，`Repository::Dequeue` 在正常出队时仅在有等待者时写入唤醒用的 eventfd。该开关在 Task Queue Mode 1 且关闭 per-stream queue 时生效。[实测补丁·开关定义](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/queue/producer-wake.patch#L32-L40) · [入队登记与出队唤醒](https://github.com/j1204150587-svg/pytorch/blob/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128/queue/producer-wake.patch#L90-L122)
 
 两腿共用 Mode 1，只切换 producer 满环等待者唤醒。两序端到端均缩短，早窗 Free 占比方向不一致。 按 A−B 计，两序分别节省 +8.670、+27.465 ms/步。[吞吐、配对波动及原始证据](reports/queue.md)
 
