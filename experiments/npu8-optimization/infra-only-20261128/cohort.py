@@ -4,6 +4,7 @@ from collections import Counter, defaultdict
 import csv
 import gzip
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -28,7 +29,8 @@ def cohort(parsed, leg, target):
     for r in rows(parsed/"work_tasks.csv.gz"):
         tasks[r["step"],r["queue_id"]].append(r)
     gaps={(r["step"],r["stream"],r["task_id"]):r for r in rows(parsed/"device_gaps.csv.gz")}
-    kernel_path,=leg.rglob("kernel_details.csv")
+    kernel_root = Path("//?/" + leg.resolve().as_posix()) if os.name == "nt" else leg
+    kernel_path,=kernel_root.rglob("kernel_details.csv")
     info={(r["Step Id"],r["Stream ID"],r["Task ID"]):r for r in rows(kernel_path)}
     result={}
     for step in ("4","5"):

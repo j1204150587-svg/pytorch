@@ -21,7 +21,7 @@
 
 ## 实现前探针
 
-`probe.py` 用 60 个形状及第二条流的 4 个附加用例比对三种原始调用入口。64 组中，输出 BF16 位、连续布局、非零偏移读取和独立输出均通过；位对比覆盖 ±0、subnormal、±Inf 和带 payload 的 NaN。Python 执行候选表达式时包含一次 `narrow`。
+`probe.py` 用 60 个形状及第二条流的 4 个附加用例比对三种原始调用入口。64 组中，输出 BF16 位、连续布局、非零偏移读取和独立输出均通过。位对比覆盖 ±0、subnormal、±Inf 和带 payload 的 NaN。Python 执行候选表达式时包含一次 `narrow`。
 
 | 同流标记（8 个请求） | ACL launch | 设备任务 | consumer 中位 µs | 各请求 ACL 总时长中位 µs |
 |---|---:|---|---:|---:|
@@ -44,7 +44,7 @@ python3 -B build.py --study /artifacts/dynamic-infra-20261127 --output /artifact
 
 正式实验两腿使用同一产物，仅 B 启用 `NPU_HSTU_COMPACT_DIV=1`。原生门禁位于 [native_gate.py](native_gate.py)，对照采用原 op-plugin `div.out`，覆盖功能性输入、回退形状、共享存储、两个流与梯度。
 
-实机原生门禁通过 197 组功能性与回退对照、4 组梯度对照。标量入口命中 128 次、Tensor 入口命中 260 次、回退 22 次、常量初始化 3 次。两条流、非零 storage offset、非有限值传播和独立输出均符合检查。真实训练 8 步审计中逐步梯度、最终 BF16 权重、FP32 主权重和 AdamW 状态相同，norm 最大差 0，FP32 loss 最大差 0.000003814697265625；两腿各有 8 次更新和 0 次实际 overflow 跳步。[原生门禁](native-gate.json) · [原训练 8 步审计](../evidence/pairs/divs-audit-ab/result.json)
+实机原生门禁通过 197 组功能性与回退对照、4 组梯度对照。标量入口命中 128 次、Tensor 入口命中 260 次、回退 22 次、常量初始化 3 次。两条流、非零 storage offset、非有限值传播和独立输出均符合检查。真实训练 8 步审计中逐步梯度、最终 BF16 权重、FP32 主权重和 AdamW 状态相同，norm 最大差 0，FP32 loss 最大差 0.000003814697265625。两腿各有 8 次更新和 0 次实际 overflow 跳步。[原生门禁](native-gate.json) · [原训练 8 步审计](../evidence/pairs/divs-audit-ab/result.json)
 
 ## 原始 01 训练结果
 
