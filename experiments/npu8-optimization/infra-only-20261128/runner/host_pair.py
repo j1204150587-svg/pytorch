@@ -2,6 +2,7 @@
 """Launch one pair through the archived runner, or act as its host-side docker shim."""
 
 import argparse
+import fcntl
 import hashlib
 import importlib.util
 import json
@@ -119,6 +120,9 @@ def mapped_process(init_pid, output, libraries, expected_env, stop, result):
                     continue
                 maps = (proc / "maps").read_text().splitlines()
                 actual = {}
+                overlay_paths = []
+                overlay_root = any(row.split()[4] == "/" and " - overlay " in row
+                                   for row in (proc / "mountinfo").read_text().splitlines())
                 for path in libraries:
                     stat = native_library(proc / "root", path).stat()
                     for row in maps:
@@ -127,6 +131,13 @@ def mapped_process(init_pid, output, libraries, expected_env, stop, result):
                             major, minor = (int(x, 16) for x in fields[3].split(":"))
                             if os.makedev(major, minor) == stat.st_dev:
                                 actual[path] = row
+                                break
+                            # Lower-layer ELF entries can report a backing device in
+                            # maps while stat returns the container root overlay device.
+                            if (overlay_root and fields[5] == path and path.startswith("/usr/local/")
+                                    and digest(native_library(proc / "root", path)) == libraries[path]):
+                                actual[path] = row
+                                overlay_paths.append(path)
                                 break
                 if len(actual) != len(libraries):
                     continue
@@ -138,7 +149,7 @@ def mapped_process(init_pid, output, libraries, expected_env, stop, result):
                         check(observed[key] == expected, f"worker environment differs: {observed}")
                 namespace = next(line for line in (proc / "status").read_text().splitlines() if line.startswith("NSpid:"))
                 result.update(pid=int(name), container_pid=int(namespace.split()[-1]), init_pid=init_pid,
-                              libraries=actual, env=observed)
+                              libraries=actual, env=observed, overlay_lower_files=overlay_paths)
                 return
             except (OSError, ProcessLookupError):
                 continue
@@ -230,6 +241,10 @@ def main():
     parser.add_argument("--mode", choices=("audit", "no-profiler", "l0", "l1"), required=True)
     parser.add_argument("--order", choices=("ab", "ba"), default="ab")
     args = parser.parse_args()
+    # Serialize study drivers before the archived runner starts its bounded card-lock wait.
+    # The archived runner still owns the shared NPU reservation for the entire pair.
+    admission = Path("/run/lock/recsys-gr-ds019-npu8-infra-study.lock").open("a")
+    fcntl.flock(admission, fcntl.LOCK_EX)
     check(args.mode != "audit" or args.order == "ab", "the original audit reader expects AB")
     runner = args.runner.resolve()
     verify(runner, REFERENCE["runner"])
@@ -266,6 +281,7 @@ def main():
     verify(runner, REFERENCE["runner"])
     write(args.out / "result.json", entry)
     print(json.dumps(entry), flush=True)
+    admission.close()
     return 0
 
 

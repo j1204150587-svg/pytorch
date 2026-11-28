@@ -15,7 +15,8 @@ def add_raw(archive, run):
               "command.json","run.log","metrics.json","runtime.json","state_audit.json","overflow_scan.json",
               "before.card.json","after.card.json","step_trace_time.csv","trace_view.json.gz"}
     for file in sorted(run.rglob("*")):
-        if file.is_file() and (file.name in wanted or file.name.startswith(("npu_addmm_rebase_counter-", "npu_mm_rebase_counter-"))):
+        if file.is_file() and (file.name in wanted or file.name.startswith(("npu_addmm_rebase_counter-", "npu_mm_rebase_counter-",
+                "npu_embedding_forward_rebase_counter-", "npu_embedding_backward_rebase_counter-"))):
             archive.add(file, "raw/"+run.name+"/"+file.relative_to(run).as_posix(),recursive=False)
     for file in sorted(run.rglob("kernel_details.csv")):
         archive.add(file,"raw/"+run.name+"/"+file.relative_to(run).as_posix(),recursive=False)
