@@ -1,0 +1,18 @@
+--- a/EmbeddingKernelNpuOpApi.cpp
++++ b/EmbeddingKernelNpuOpApi.cpp
+@@ -16,6 +16,7 @@
+ #include "op_plugin/AclOpsInterface.h"
+ #include "op_plugin/OpApiInterface.h"
+ #include "op_plugin/utils/op_api_common.h"
++#include "op_plugin/utils/dynamic_embedding_scope.h"
+
+ namespace op_api {
+
+@@ -41,6 +42,7 @@
+     // construct the output tensor of the NPU
+     at::Tensor result = npu_preparation::apply_tensor_without_format(output_size, weight.options());
+     // calculate the output resugt of the NPU
++    dynamic_embedding_rebase::Scope scope(weight, indices);
+     EXEC_NPU_CMD(aclnnEmbedding, weight, indices, result);
+     return result;
+ }

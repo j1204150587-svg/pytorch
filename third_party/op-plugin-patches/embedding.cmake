@@ -35,3 +35,4 @@ endfunction()
 
 patch_embedding_source(op_plugin/utils/op_api_common.cpp)
 patch_embedding_source(op_plugin/ops/opapi/StructKernelNpuOpApi.cpp)
+patch_embedding_source(op_plugin/ops/opapi/EmbeddingKernelNpuOpApi.cpp)

@@ -19,13 +19,14 @@ struct View {
 class Scope {
 public:
     explicit Scope(const at::Tensor &indices);
+    Scope(const at::Tensor &weight, const at::Tensor &indices);
     ~Scope();
     Scope(const Scope &) = delete;
     Scope &operator=(const Scope &) = delete;
     friend const View *for_tensor(const at::Tensor &);
 private:
     const Scope *previous_;
-    View views_[1];
+    View views_[2];
     unsigned count_ = 0;
 };
 

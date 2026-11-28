@@ -12,8 +12,9 @@ struct Counters {
 
 namespace {
 thread_local const Scope *active = nullptr;
-Counters backward;
+Counters backward, forward;
 constexpr uint64_t backward_domain = 0x4249445852425345ULL;
+constexpr uint64_t forward_domain = 0x4649445852425345ULL;
 
 bool flag(const char *name)
 {
@@ -56,6 +57,12 @@ bool eligible_indices(const at::Tensor &t)
     return t.layout() == at::kStrided && t.scalar_type() == at::kLong && t.dim() == 3 && t.size(2) == 4 &&
            t.size(0) > 0 && t.size(1) > 0 && t.stride(2) == 1 && t.stride(1) >= 4 &&
            t.stride(0) > 0 && t.stride(0) / t.size(1) >= t.stride(1);
+}
+
+bool eligible_weight(const at::Tensor &t)
+{
+    return t.layout() == at::kStrided && t.scalar_type() == at::kBFloat16 && t.dim() == 2 &&
+           t.size(0) == 64 && t.size(1) == 64 && t.stride(0) == 64 && t.stride(1) == 1;
 }
 
 bool make_view(const at::Tensor &tensor, View &result)
@@ -125,6 +132,25 @@ Scope::Scope(const at::Tensor &indices) : previous_(active)
     active = this;
 }
 
+Scope::Scope(const at::Tensor &weight, const at::Tensor &indices) : previous_(active)
+{
+    static const bool enabled = flag("NPU_DYNAMIC_REBASE_FORWARD");
+    if (enabled) {
+        if (eligible_indices(indices) && eligible_weight(weight) && weight.device() == indices.device() &&
+            producer_path() && make_view(weight, views_[0]) && make_view(indices, views_[1])) {
+            for (View &view : views_) {
+                view.domain = forward_domain;
+                view.counters = &forward;
+            }
+            count_ = 2;
+            increment(forward.eligible);
+        } else {
+            increment(forward.fallback);
+        }
+    }
+    active = this;
+}
+
 Scope::~Scope()
 {
     active = previous_;
@@ -150,4 +176,8 @@ extern "C" __attribute__((visibility("default"))) uint64_t npu_embedding_backwar
     return count(backward, index);
 }
 
+extern "C" __attribute__((visibility("default"))) uint64_t npu_embedding_forward_rebase_counter(unsigned index)
+{
+    return count(forward, index);
+}
 }  // namespace dynamic_embedding_rebase
