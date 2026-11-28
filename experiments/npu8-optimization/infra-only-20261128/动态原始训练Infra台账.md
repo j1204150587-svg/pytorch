@@ -118,3 +118,5 @@ Addmm 两步各有 8 个请求、16 次实际提交，逐次算子、流、物�
 数据仅覆盖单 rank、60 个合成形状，batch size 1–4、序列长度 12–32。真实业务频率、长序列与多卡没有在本轮实测。每项训练数值门均使用同一组 8 个有限步，包含 8 次真实权重更新。保留了非有限值算子微测及其适用范围，真实训练 overflow 跳步覆盖数为 0。
 
 板 4、chip 0 出现外部占用时，runner 在前置或后置检查拦截。受干扰的整对已剔除，重新从首腿运行。另有一条原装库诊断因容器 overlayfs 的设备号与映射号不同被剔除，修正宿主的映射校验后整对重跑。正式统计以通过原始工作区、加载库和卡况核对的两腿为准。[复现命令](复现与证据.md) · [原始 CSV、trace 路径和 SHA-256](evidence/原始数据索引.json) · [剩余空档及 70% 差距](剩余空档.md)
+
+本轮实测代码、六组单开关对照、原装对照及复算数据位于独立分支 `codex/npu8-infra-only-20261128`，实测归档提交 `dd8f8f9751ae128258ab9faa9901f595b880236a`。完整原始 profiler 树保存在每条索引记录的宿主目录，本地 evidence/raw 中保留压缩 trace 和原始 CSV。[不可变归档](https://github.com/j1204150587-svg/pytorch/tree/dd8f8f9751ae128258ab9faa9901f595b880236a/experiments/npu8-optimization/infra-only-20261128) · [实验分支](https://github.com/j1204150587-svg/pytorch/tree/codex/npu8-infra-only-20261128)
