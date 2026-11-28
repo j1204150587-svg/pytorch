@@ -1,0 +1,146 @@
+{
+  "source_commit": "0b4af8a31c75a1f1f43638a8f75b9e3c6182e031",
+  "archive": "61aaa5e45afcad2430ff631285e7ca904416334db6ce3932ab6b5f1d970df1a8  source.tar.gz",
+  "image_id": "sha256:c342a038f6476c794fb364d96479286ebd456021e86dba0d3b715ce4cb983e33",
+  "image_tags": [
+    "recsys-gr-deepspeed:host88-ds0.19.0-torch2.10.0"
+  ],
+  "cmake_cache": {
+    "ASCEND_INSTALL_PATH:UNINITIALIZED": "/usr/local/Ascend/cann",
+    "ASCEND_PROTOBUF_SHARED_INCLUDE:PATH": "ASCEND_PROTOBUF_SHARED_INCLUDE-NOTFOUND",
+    "ASCEND_PROTOBUF_SHARED_LIB:FILEPATH": "/usr/local/Ascend/cann-9.1.0/lib64/libascend_protobuf.so",
+    "ASCEND_PROTOBUF_STATIC_INCLUDE:PATH": "ASCEND_PROTOBUF_STATIC_INCLUDE-NOTFOUND",
+    "ASCEND_PROTOBUF_STATIC_LIB:FILEPATH": "ASCEND_PROTOBUF_STATIC_LIB-NOTFOUND",
+    "CMAKE_BUILD_TYPE:STRING": "Release",
+    "CMAKE_CXX_COMPILER:FILEPATH": "/usr/bin/c++",
+    "CMAKE_CXX_COMPILER_AR:FILEPATH": "/usr/bin/gcc-ar-11",
+    "CMAKE_CXX_COMPILER_RANLIB:FILEPATH": "/usr/bin/gcc-ranlib-11",
+    "CMAKE_CXX_FLAGS:STRING": "",
+    "CMAKE_CXX_FLAGS_DEBUG:STRING": "-g",
+    "CMAKE_CXX_FLAGS_MINSIZEREL:STRING": "-Os -DNDEBUG",
+    "CMAKE_CXX_FLAGS_RELEASE:STRING": "-O3 -DNDEBUG",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING": "-O2 -g -DNDEBUG",
+    "CMAKE_C_COMPILER:FILEPATH": "/usr/bin/cc",
+    "CMAKE_C_COMPILER_AR:FILEPATH": "/usr/bin/gcc-ar-11",
+    "CMAKE_C_COMPILER_RANLIB:FILEPATH": "/usr/bin/gcc-ranlib-11",
+    "CMAKE_INSTALL_PREFIX:PATH": "/study/output",
+    "CMAKE_MAKE_PROGRAM:FILEPATH": "/usr/bin/gmake",
+    "ENABLE_BUILD_DEVICE:UNINITIALIZED": "OFF",
+    "ENABLE_CCACHE:BOOL": "ON",
+    "ENABLE_OPEN_SRC:UNINITIALIZED": "True",
+    "ENABLE_SIGN:UNINITIALIZED": "OFF",
+    "ENABLE_UT:UNINITIALIZED": "OFF",
+    "RUNTIME_DIR:PATH": "/study/source",
+    "RUNTIME_PYTHON:PATH": "python3",
+    "CMAKE_CXX_COMPILER-ADVANCED:INTERNAL": "1",
+    "CMAKE_CXX_COMPILER_AR-ADVANCED:INTERNAL": "1",
+    "CMAKE_CXX_COMPILER_RANLIB-ADVANCED:INTERNAL": "1",
+    "CMAKE_CXX_FLAGS-ADVANCED:INTERNAL": "1",
+    "CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL": "1",
+    "CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL": "1",
+    "CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL": "1",
+    "CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL": "1",
+    "CMAKE_C_COMPILER-ADVANCED:INTERNAL": "1",
+    "CMAKE_C_COMPILER_AR-ADVANCED:INTERNAL": "1",
+    "CMAKE_C_COMPILER_RANLIB-ADVANCED:INTERNAL": "1",
+    "CMAKE_GENERATOR:INTERNAL": "Unix Makefiles",
+    "CMAKE_GENERATOR_INSTANCE:INTERNAL": "",
+    "CMAKE_GENERATOR_PLATFORM:INTERNAL": "",
+    "CMAKE_GENERATOR_TOOLSET:INTERNAL": "",
+    "CMAKE_MAKE_PROGRAM-ADVANCED:INTERNAL": "1"
+  },
+  "commands": {
+    "cann-pending-pristine2": {
+      "image_id": "sha256:c342a038f6476c794fb364d96479286ebd456021e86dba0d3b715ce4cb983e33",
+      "args": [
+        "bash",
+        "-c",
+        "test ! -e /dev/davinci_manager && cd /study && cmake --build build --target runtime_v100 -j6 > build-pristine2.log 2>&1; rc=$?; echo \"$rc\" > /study/pristine2.exit; exit \"$rc\""
+      ],
+      "runtime": "runc",
+      "cpus": 6.0,
+      "network": "default",
+      "binds": [
+        "/mnt/paas/recsys-gr-ds019-host88-archive/dispatch-study-20261119-npu8/infra-only-followup70/analysis/cann-runtime-host:/study"
+      ],
+      "exit": 0
+    },
+    "cann-pending-objv2": {
+      "image_id": "sha256:c342a038f6476c794fb364d96479286ebd456021e86dba0d3b715ce4cb983e33",
+      "args": [
+        "bash",
+        "-c",
+        "cd /output && python3 -B build.py compile --stage /output/source-v2 > object2.log 2>&1; rc=$?; echo \"$rc\" > /output/object2.exit; exit \"$rc\""
+      ],
+      "runtime": "runc",
+      "cpus": 2.0,
+      "network": "none",
+      "binds": [
+        "/mnt/paas/recsys-gr-ds019-host88-archive/dispatch-study-20261119-npu8/infra-only-followup70/analysis/cann-runtime-host:/study:ro",
+        "/data/recsys-gr-ds019-host88/artifacts/infra-only-20261128/followup70/cann-pending:/output"
+      ],
+      "exit": 0
+    },
+    "cann-pending-linkv2": {
+      "image_id": "sha256:c342a038f6476c794fb364d96479286ebd456021e86dba0d3b715ce4cb983e33",
+      "args": [
+        "bash",
+        "-c",
+        "cd /output && python3 -B build.py link --stage /output/source-v2"
+      ],
+      "runtime": "runc",
+      "cpus": 2.0,
+      "network": "none",
+      "binds": [
+        "/mnt/paas/recsys-gr-ds019-host88-archive/dispatch-study-20261119-npu8/infra-only-followup70/analysis/cann-runtime-host:/study:ro",
+        "/data/recsys-gr-ds019-host88/artifacts/infra-only-20261128/followup70/cann-pending:/output"
+      ],
+      "exit": 0
+    },
+    "cann-pending-probe1": {
+      "image_id": "sha256:c342a038f6476c794fb364d96479286ebd456021e86dba0d3b715ce4cb983e33",
+      "args": [
+        "bash",
+        "-c",
+        "cd /output && test ! -e /dev/davinci_manager && root=/usr/local/Ascend/cann-9.1.0/aarch64-linux && c++ -std=c++17 -O2 -fPIC -shared -Wl,-z,defs -I\"$root/include\" launch_probe.cc -L\"$root/lib64\" -lopapi -lnnopbase -lascendcl -o launch_probe.so > probe-build.log 2>&1; rc=$?; echo \"$rc\" > /output/probe-build.exit; exit \"$rc\""
+      ],
+      "runtime": "runc",
+      "cpus": 2.0,
+      "network": "none",
+      "binds": [
+        "/data/recsys-gr-ds019-host88/artifacts/infra-only-20261128/followup70/cann-pending:/output"
+      ],
+      "exit": 0
+    },
+    "cann-pending-atomic": {
+      "image_id": "sha256:c342a038f6476c794fb364d96479286ebd456021e86dba0d3b715ce4cb983e33",
+      "args": [
+        "bash",
+        "-c",
+        "cd /output && test ! -e /dev/davinci_manager && c++ -O2 -std=c++17 -pthread atomic_test.cc -o atomic_test && NPU_CANN_PENDING_COUNT=1 NPU_CANN_PENDING_LSE=0 ./atomic_test > atomic-A.json && NPU_CANN_PENDING_COUNT=1 NPU_CANN_PENDING_LSE=1 ./atomic_test > atomic-B.json"
+      ],
+      "runtime": "runc",
+      "cpus": 2.0,
+      "network": "none",
+      "binds": [
+        "/data/recsys-gr-ds019-host88/artifacts/infra-only-20261128/followup70/cann-pending:/output"
+      ],
+      "exit": 0
+    },
+    "pending.inc": {
+      "sha256": "24df7b8bdf95f10a95d6111b855c691c31dfb646977540d548e9ff8f981ed8fe"
+    },
+    "build.py": {
+      "sha256": "09ac516fe0f53ce7b8edb2234f92d7b51ce9d1eff612e1b77ed4bb39eae778f3"
+    },
+    "launch_probe.cc": {
+      "sha256": "9b4fbec4ac33caf0a7b981f6bdae0a58feb0cb6ac2d2b169e5fe83fab772e233"
+    },
+    "micro.py": {
+      "sha256": "48771ec20cef1c47ec1617edf4216987470539bad2dcebdac12d1d4ff037607e"
+    },
+    "launch_probe.so": {
+      "sha256": "b31d2bd8ded498bd4f889a78e807e2149efea8f6cb62a8d4d7b7a51f592760b6"
+    }
+  }
+}

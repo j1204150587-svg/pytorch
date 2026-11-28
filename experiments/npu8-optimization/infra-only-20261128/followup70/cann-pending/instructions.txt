@@ -1,0 +1,78 @@
+shipping
+
+/usr/local/Ascend/cann-9.1.0/aarch64-linux/lib64/libruntime_v100.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000002f5d14 <_ZNSt6vectorItSaItEE17_M_realloc_insertIJtEEEvN9__gnu_cxx17__normal_iteratorIPtS1_EEDpOT_@@Base+0x14dc>:
+  2f5d14:	940145cb 	bl	347440 <_ZNSt8_Rb_treeI19rtRandomNumDataTypeS0_St9_IdentityIS0_ESt4lessIS0_ESaIS0_EEC1ERKS6_@@Base+0x8b10>
+  2f5d18:	2a0003f9 	mov	w25, w0
+  2f5d1c:	7100101f 	cmp	w0, #0x4
+  2f5d20:	54004be8 	b.hi	2f669c <_ZNSt6vectorItSaItEE17_M_realloc_insertIJtEEEvN9__gnu_cxx17__normal_iteratorIPtS1_EEDpOT_@@Base+0x1e64>  // b.pmore
+  2f5d24:	913d3260 	add	x0, x19, #0xf4c
+  2f5d28:	f9004ba0 	str	x0, [x29, #144]
+  2f5d2c:	885ffc01 	ldaxr	w1, [x0]
+  2f5d30:	11000421 	add	w1, w1, #0x1
+  2f5d34:	8802fc01 	stlxr	w2, w1, [x0]
+  2f5d38:	35ffffa2 	cbnz	w2, 2f5d2c <_ZNSt6vectorItSaItEE17_M_realloc_insertIJtEEEvN9__gnu_cxx17__normal_iteratorIPtS1_EEDpOT_@@Base+0x14f4>
+  2f5d3c:	f9409a75 	ldr	x21, [x19, #304]
+  2f5d40:	91048274 	add	x20, x19, #0x120
+candidate (common branch / LL-SC)
+
+/artifacts/infra-only-20261128/followup70/cann-pending/source-v2/libruntime_v100.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000002d47e8 <npu_cann_pending_profile_select@@Base+0x1fe8>:
+  2d47e8:	540038e8 	b.hi	2d4f04 <npu_cann_pending_profile_select@@Base+0x2704>  // b.pmore
+  2d47ec:	913d3262 	add	x2, x19, #0xf4c
+  2d47f0:	b0001c80 	adrp	x0, 665000 <_ZTIPFmPKvmRKSt6vectorImSaImEERSsbE@@Base+0xa208>
+  2d47f4:	91164001 	add	x1, x0, #0x590
+  2d47f8:	f9004be2 	str	x2, [sp, #144]
+  2d47fc:	91002021 	add	x1, x1, #0x8
+  2d4800:	b9400022 	ldr	w2, [x1]
+  2d4804:	7100045f 	cmp	w2, #0x1
+  2d4808:	54003100 	b.eq	2d4e28 <npu_cann_pending_profile_select@@Base+0x2628>  // b.none
+  2d480c:	913d3264 	add	x4, x19, #0xf4c
+  2d4810:	885ffc81 	ldaxr	w1, [x4]
+  2d4814:	11000421 	add	w1, w1, #0x1
+  2d4818:	8803fc81 	stlxr	w3, w1, [x4]
+  2d481c:	35ffffa3 	cbnz	w3, 2d4810 <npu_cann_pending_profile_select@@Base+0x2010>
+  2d4820:	91164000 	add	x0, x0, #0x590
+  2d4824:	39408401 	ldrb	w1, [x0, #33]
+  2d4828:	350035e1 	cbnz	w1, 2d4ee4 <npu_cann_pending_profile_select@@Base+0x26e4>
+  2d482c:	f9409a75 	ldr	x21, [x19, #304]
+  2d4830:	91048274 	add	x20, x19, #0x120
+  2d4834:	eb15029f 	cmp	x20, x21
+  2d4838:	540002c0 	b.eq	2d4890 <npu_cann_pending_profile_select@@Base+0x2090>  // b.none
+  2d483c:	aa1503e0 	mov	x0, x21
+  2d4840:	14000004 	b	2d4850 <npu_cann_pending_profile_select@@Base+0x2050>
+  2d4844:	97f5b133 	bl	40d10 <_ZSt18_Rb_tree_incrementPKSt18_Rb_tree_node_base@plt>
+  2d4848:	eb00029f 	cmp	x20, x0
+  2d484c:	54000220 	b.eq	2d4890 <npu_cann_pending_profile_select@@Base+0x2090>  // b.none
+  2d4850:	f9401001 	ldr	x1, [x0, #32]
+candidate (LSE)
+
+/artifacts/infra-only-20261128/followup70/cann-pending/source-v2/libruntime_v100.so:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000002d4e28 <npu_cann_pending_profile_select@@Base+0x2628>:
+  2d4e28:	913d3263 	add	x3, x19, #0xf4c
+  2d4e2c:	b8e20061 	ldaddal	w2, w1, [x3]
+  2d4e30:	17fffe7c 	b	2d4820 <npu_cann_pending_profile_select@@Base+0x2020>
+candidate unstripped per-TU match
+0000000000002110 <cce::runtime::AllocTaskAndSendStars(cce::runtime::tagTaskInfoStru*, cce::runtime::Stream*, unsigned int*)>:
+    2ca8:	f9000001 	str	x1, [x0]
+    2cac:	b900101f 	str	wzr, [x0, #16]
+    2cb0:	3900781f 	strb	wzr, [x0, #30]
+    2cb4:	17fffe39 	b	2598 <cce::runtime::AllocTaskAndSendStars(cce::runtime::tagTaskInfoStru*, cce::runtime::Stream*, unsigned int*)+0x488>
+    2cb8:	913d3263 	add	x3, x19, #0xf4c
+    2cbc:	b8e20061 	ldaddal	w2, w1, [x3]
+    2cc0:	17fffe7c 	b	26b0 <cce::runtime::AllocTaskAndSendStars(cce::runtime::tagTaskInfoStru*, cce::runtime::Stream*, unsigned int*)+0x5a0>
+    2cc4:	39400360 	ldrb	w0, [x27]
+    2cc8:	34000600 	cbz	w0, 2d88 <cce::runtime::AllocTaskAndSendStars(cce::runtime::tagTaskInfoStru*, cce::runtime::Stream*, unsigned int*)+0xc78>
+    2ccc:	b85f8260 	ldur	w0, [x19, #-8]
