@@ -1,0 +1,75 @@
+--- a/torch_npu/csrc/aten/common/TensorShape.cpp
++++ b/torch_npu/csrc/aten/common/TensorShape.cpp
+@@ -13,6 +13,50 @@
+ #include <c10/core/ScalarType.h>
+ #include <c10/util/Optional.h>
+ #include <algorithm>
++#include <atomic>
++#include <cinttypes>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++
++namespace {
++bool viewFlag(const char* name)
++{
++    const auto* value = std::getenv(name);
++    return value && std::strcmp(value, "1") == 0;
++}
++
++bool viewInlineDimsEnabled()
++{
++    static const bool enabled = viewFlag("TORCH_NPU_VIEW_INLINE_DIMS");
++    return enabled;
++}
++
++bool viewInlineDimsAudit()
++{
++    static const bool audit = viewFlag("TORCH_NPU_VIEW_INLINE_DIMS_AUDIT");
++    return audit;
++}
++
++std::atomic<uint64_t> inlineDimsCalls{0}, inlineDimsEligible{0}, inlineDimsUsed{0};
++
++void reportInlineDims()
++{
++    std::fprintf(stderr, "PTA_VIEW_INLINE_DIMS enabled=%d calls=%" PRIu64
++        " eligible=%" PRIu64 " used=%" PRIu64 "\n", static_cast<int>(viewInlineDimsEnabled()),
++        inlineDimsCalls.load(), inlineDimsEligible.load(), inlineDimsUsed.load());
++}
++
++void recordInlineDims(bool active, bool eligible)
++{
++    static const int registered = std::atexit(reportInlineDims);
++    (void)registered;
++    inlineDimsCalls.fetch_add(1, std::memory_order_relaxed);
++    if (eligible) inlineDimsEligible.fetch_add(1, std::memory_order_relaxed);
++    if (active) inlineDimsUsed.fetch_add(1, std::memory_order_relaxed);
++}
++} // namespace
++
+ #include <cstdint>
+ #include <vector>
+ 
+@@ -111,6 +155,21 @@
+ 
+ at::Tensor NPUNativeFunctions::view(const at::Tensor& self, c10::IntArrayRef size)
+ {
++    const bool eligible = size.size() <= c10::kDimVectorStaticSize && !self.is_quantized();
++    const bool active = viewInlineDimsEnabled() && eligible;
++    if (viewInlineDimsAudit()) {
++        recordInlineDims(active, eligible);
++    }
++    if (active) {
++        const auto inferred_size = at::infer_size_dv(size, self.numel());
++        const auto stride = at::detail::computeStride(self.sizes(), self.strides(), inferred_size);
++        TORCH_CHECK(
++            stride.has_value(),
++            "view size is "
++            "not compatible with input tensor's size and stride (at least one dimension"
++            " spans across two contiguous subspaces). Use .reshape(...) instead.", OPS_ERROR(ErrCode::PARAM));
++        return alias_with_sizes_and_strides_npu(self, inferred_size, *stride);
++    }
+     auto inferred_size = at::infer_size(size, self.numel());
+     auto stride = at::detail::computeStride(self.sizes(), self.strides(), inferred_size);
+     TORCH_CHECK(
